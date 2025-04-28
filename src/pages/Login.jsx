@@ -1,33 +1,37 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Импортируем useNavigate
 import "../styles/auth.css";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  
+  const navigate = useNavigate(); // Инициализируем useNavigate
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
 
     try {
-      const response = await fetch("http://localhost:8080/api/v1/user/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
+      // const response = await fetch("http://localhost:8080/api/v1/user/login", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ username, password }),
+      // });
       
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.detail || "Ошибка входа");
-      }
+      // if (!response.ok) {
+      //   const err = await response.json();
+      //   throw new Error(err.detail || "Ошибка входа");
+      // }
       
-      const data = await response.json();
+      // const data = await response.json();
       // Сохраняем token для дальнейших запросов
-      localStorage.setItem("access_token", data.access_token);
+      // localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("access_token", "хуй"); // Temp mock
       alert("Вход выполнен успешно!");
-      // здесь можно перенаправить на защищенный раздел приложения
-      
+      // Перенаправляем на страницу профиля
+      navigate("/profile"); // Редирект на страницу профиля
+
     } catch (err) {
       setError(err.message);
     }
@@ -58,7 +62,7 @@ const Login = () => {
           <span>Пароль</span>
           <i></i>
         </div>
-        {error && <p style={{color: "red", textAlign: "center"}}>{error}</p>}
+        {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
         <button type="submit" id="submit_button_my">Войти</button>
       </form>
     </div>

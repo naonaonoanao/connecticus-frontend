@@ -1,0 +1,19 @@
+/* /styles/header.css */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    color: white;
+  }
+  
+  .notification {
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .notification svg {
+    color: #00e5ff;
+  }
+  
