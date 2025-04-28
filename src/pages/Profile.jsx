@@ -22,7 +22,7 @@ const Profile = () => {
             <p>Должность: Специалист по ИБ-----</p>
             <p>Отдел: Информационная безопасность</p>
             <p>Email: user@example.com</p>
-            <p>Телефон: +7 999 123 45 67</p>
+            <p>Телефон: +7 997 777 77 77</p>
           </div>
           <div className="profile-actions">
             <button>Редактировать</button>
