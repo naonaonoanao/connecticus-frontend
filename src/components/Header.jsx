@@ -6,7 +6,6 @@ import "../styles/header.css";
 const Header = () => {
   return (
     <div className="header">
-      <h1>С возвращением, User!</h1>
       <div className="notification">
         <FaBell size={24} />
       </div>

@@ -3,13 +3,12 @@
 .header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    color: white;
+    padding: 12px;
+    align-items: right;
   }
   
   .notification {
-    position: relative;
+    position: right;
     cursor: pointer;
   }
   
