@@ -1,0 +1,88 @@
+.structure-page {
+    display: flex;
+    height: 100vh;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    color: #fff;
+  }
+  
+  .main-content {
+    flex: 1;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .graph-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .search-input {
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background-color: #1f1f2e;
+    color: #fff;
+    width: 250px;
+    font-size: 14px;
+  }
+  
+  .filter-panel {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+  
+  .filter-btn {
+    background: transparent;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 12px;
+    border: 2px solid #888;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .filter-btn.active {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .graph-container {
+    height: 70vh;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  
+  .legend {
+    margin-top: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px 15px;
+    border-radius: 12px;
+    width: fit-content;
+  }
+  
+  .legend ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .legend li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    font-size: 14px;
+  }
+  
+  .legend span {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    border-radius: 50%;
+  }
+  
