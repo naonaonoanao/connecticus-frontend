@@ -149,15 +149,16 @@ body
     overflow: hidden;
     pointer-events: none;
     transition: 0.5s;
+    box-shadow: 0 0 8px #fff;
 }
 .box form .inputBox input:valid ~ i,
 .box form .inputBox input:focus ~ i
 {
     height: 44px;
     background: linear-gradient(120deg, rgba(69, 243, 255, 0.3), rgba(255, 39, 112, 0.3), rgba(69, 243, 255, 0.3));
-    opacity: 0.;
+    opacity: 0.6;
     border: 2px solid #fff;
-
+    box-shadow: 0 0 5px #fff;
 }
 .box form .links
 {
@@ -188,6 +189,7 @@ body
     transition: 0.3s ease;
     width: 40%;
     margin-top: 45px;
+    box-shadow: 0 0 5px #fff;
 }
 
 .box form input[type="submit"]:hover,
