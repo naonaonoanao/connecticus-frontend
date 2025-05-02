@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import { motion } from "framer-motion";
 import Sidebar from "../components/Sidebar";
-import Header from "../components/Header";
+import Header from "../components/Notification";
 import "../styles/companyStructure.css";
 
 const categories = [

@@ -1,0 +1,44 @@
+.notification-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  padding: 14px;
+}
+
+.notification {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.notification:hover {
+  transform: scale(1.1);
+}
+
+.notification svg {
+  color: #00e5ff !important;
+}
+
+/* Выпадающее меню */
+.notification-dropdown {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  padding: 10px;
+  min-width: 200px;
+  z-index: 1000;
+}
+
+.notification-dropdown p {
+  margin: 0;
+  padding: 6px 10px;
+  font-size: 14px;
+  cursor: default;
+}
+
+.notification-dropdown p + p {
+  border-top: 1px solid #eee;
+}
