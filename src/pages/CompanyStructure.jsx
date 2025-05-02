@@ -20,7 +20,7 @@ const CompanyStructure = () => {
   const [search, setSearch] = useState("");
 
   const graphRef = useRef();
-  const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const [dimensions, setDimensions] = useState({ width: 800, height: 900 });
 
   const fetchGraph = async (category) => {
     try {
@@ -52,6 +52,17 @@ const CompanyStructure = () => {
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
+  useEffect(() => {
+    if (graphRef.current) {
+      const fg = graphRef.current;
+      if (fg.d3Force) {
+        fg.d3Force("link").distance(400);
+        fg.d3Force("charge").strength(-100);
+      }
+    }
+  }, [graphData]);
+
+  
   return (
     <div className="structure-page">
       <Sidebar />
@@ -90,8 +101,9 @@ const CompanyStructure = () => {
           ))}
         </motion.div>
 
-        <div className="graph-container" ref={graphRef}>
+        <div className="graph-container">
         <ForceGraph2D
+            ref={graphRef}
             width={dimensions.width}
             height={dimensions.height}
             graphData={graphData}
@@ -99,13 +111,14 @@ const CompanyStructure = () => {
             nodeAutoColorBy="group"
             linkDirectionalParticles={3}
             linkDirectionalParticleSpeed={0.005}
+            linkColor={() => "#ffffff"}
             onNodeClick={(node) =>
                 alert(`Сотрудник: ${node.name}\nРоль: ${node.role || node.group}`)
             }
             nodeCanvasObject={(node, ctx, globalScale) => {
                 const label = `${node.name}`;
                 const fontSize = 15 / globalScale;
-                const radius = 10;
+                const radius = 15;
 
                 // Draw node
                 ctx.beginPath();
@@ -124,7 +137,7 @@ const CompanyStructure = () => {
                 ctx.fillText(label, node.x, node.y + radius + 2);
             }}
             nodePointerAreaPaint={(node, color, ctx) => {
-                const radius = 10;
+                const radius = 15;
                 ctx.fillStyle = color;
                 ctx.beginPath();
                 ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
