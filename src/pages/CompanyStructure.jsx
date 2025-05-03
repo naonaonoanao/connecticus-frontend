@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Notification";
 import "../styles/companyStructure.css";
+import * as d3 from 'd3';
 
 const categories = [
   { key: "departments", label: "По отделам", color: "#00f5ff" },
@@ -56,8 +57,10 @@ const CompanyStructure = () => {
     if (graphRef.current) {
       const fg = graphRef.current;
       if (fg.d3Force) {
-        fg.d3Force("link").distance(400);
+        fg.d3Force("link").distance(300);
         fg.d3Force("charge").strength(-100);
+        fg.d3Force("collide", d3.forceCollide(50));
+
       }
     }
   }, [graphData]);
@@ -111,7 +114,10 @@ const CompanyStructure = () => {
             nodeAutoColorBy="group"
             linkDirectionalParticles={3}
             linkDirectionalParticleSpeed={0.005}
-            linkColor={() => "#ffffff"}
+            linkColor={(link) => {
+              const sourceNode = graphData.nodes.find(n => n.id === link.source);
+              return sourceNode ? sourceNode.color : '#999';
+            }}
             onNodeClick={(node) =>
                 alert(`Сотрудник: ${node.name}\nРоль: ${node.role || node.group}`)
             }
@@ -137,7 +143,7 @@ const CompanyStructure = () => {
                 ctx.fillText(label, node.x, node.y + radius + 2);
             }}
             nodePointerAreaPaint={(node, color, ctx) => {
-                const radius = 15;
+                const radius = 20;
                 ctx.fillStyle = color;
                 ctx.beginPath();
                 ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
