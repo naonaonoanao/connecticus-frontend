@@ -171,20 +171,16 @@ const CompanyStructure = () => {
             nodeCanvasObject={(node, ctx, globalScale) => {
               const label = `${node.name}`;
               const fontSize = 15 / globalScale;
+              const isEmployee = !node.isCategory;
               const radius = 15;
 
               ctx.beginPath();
               ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
-
-              // Заливка
-              const isEmployee = !node.isCategory && node.role;
-              if (isEmployee) {
-                ctx.fillStyle = "rgba(100, 150, 255, 0.5)"; // единый прозрачный цвет
-              } else {
-                ctx.fillStyle = getGroupColor(node.groupId || node.id); // категории
-              }
-
+              ctx.fillStyle = isEmployee
+                ? "rgba(89, 99, 120, 0.9)" // ЕДИНЫЙ цвет сотрудников
+                : getGroupColor(node.groupId || node.id); // Категории — индивидуальный
               ctx.fill();
+
               // Определим входящие связи
               const incomingLinks = graphData.links.filter(
                 link => typeof link.target === "object" ? link.target.id === node.id : link.target === node.id
@@ -200,6 +196,7 @@ const CompanyStructure = () => {
                 const sourceNode = typeof incomingLinks[0].source === "object"
                   ? incomingLinks[0].source
                   : graphData.nodes.find(n => n.id === incomingLinks[0].source);
+
                 ctx.strokeStyle = getGroupColor(sourceNode.groupId || sourceNode.id);
                 ctx.lineWidth = 4;
                 ctx.stroke();
@@ -220,6 +217,7 @@ const CompanyStructure = () => {
               ctx.arc(node.x, node.y, radius + 4, 0, 2 * Math.PI);
               ctx.strokeStyle = gradient;
               ctx.lineWidth = 4;
+              
               ctx.stroke();
             }
               ctx.font = `${fontSize}px Sans-Serif`;
