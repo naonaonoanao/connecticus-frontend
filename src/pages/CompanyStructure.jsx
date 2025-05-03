@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Notification";
 import "../styles/companyStructure.css";
-import * as d3 from 'd3';
+import * as d3 from "d3";
 
 const categories = [
   { key: "departments", label: "По отделам", color: "#00f5ff" },
@@ -19,7 +19,6 @@ const CompanyStructure = () => {
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const [activeFilter, setActiveFilter] = useState("departments");
   const [search, setSearch] = useState("");
-
   const graphRef = useRef();
   const [dimensions, setDimensions] = useState({ width: 800, height: 900 });
 
@@ -27,14 +26,21 @@ const CompanyStructure = () => {
     try {
       const res = await fetch(`http://localhost:8080/api/v1/graph/${category}`);
       const data = await res.json();
+  
+      // Удаляем дубликаты узлов по id
+      const uniqueNodes = Array.from(
+        new Map(data.nodes.map((node) => [node.id, node])).values()
+      );
+  
       setGraphData({
-        nodes: data.nodes || [],
+        nodes: uniqueNodes,
         links: data.links || [],
       });
     } catch (e) {
       console.error("Ошибка загрузки графа:", e);
     }
   };
+  
 
   useEffect(() => {
     fetchGraph(activeFilter);
@@ -47,7 +53,6 @@ const CompanyStructure = () => {
         setDimensions({ width: offsetWidth, height: offsetHeight });
       }
     };
-
     updateSize();
     window.addEventListener("resize", updateSize);
     return () => window.removeEventListener("resize", updateSize);
@@ -61,17 +66,59 @@ const CompanyStructure = () => {
         fg.d3Force("charge").strength(-100);
         fg.d3Force("collide", d3.forceCollide(50));
 
+        fg.d3Force("group-attraction", () => {
+          return (alpha) => {
+            graphData.nodes.forEach(node => {
+              if (!node.isCategory && node.groupId) {
+                const target = graphData.nodes.find(n => n.id === node.groupId);
+                if (target) {
+                  node.vx += (target.x - node.x) * 0.01 * alpha;
+                  node.vy += (target.y - node.y) * 0.01 * alpha;
+                }
+              }
+            });
+          };
+        });
+
+        fg.d3ReheatSimulation();
       }
     }
   }, [graphData]);
 
-  
+  useEffect(() => {
+    const categories = graphData.nodes.filter(n => n.isCategory);
+    const angleStep = (2 * Math.PI) / categories.length;
+    const radius = 300;
+
+    categories.forEach((node, i) => {
+      node.fx = radius * Math.cos(i * angleStep);
+      node.fy = radius * Math.sin(i * angleStep);
+    });
+
+    setGraphData((prev) => ({ ...prev, nodes: [...prev.nodes] }));
+  }, [graphData.nodes.length]);
+
+  const getColor = (groupId) => {
+    const str = String(groupId || ""); // безопасно приводим к строке
+    const hash = [...str].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return `hsl(${hash % 360}, 70%, 60%)`;
+  };
+
+  const groupColorMap = useRef({});
+
+  const getGroupColor = (groupId) => {
+    if (!groupColorMap.current[groupId]) {
+      const hash = [...String(groupId)].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      groupColorMap.current[groupId] = `hsl(${hash % 360}, 70%, 60%)`;
+    }
+    return groupColorMap.current[groupId];
+  };
+
   return (
     <div className="structure-page">
       <Sidebar />
       <div className="main-content">
         <Header />
-
         <motion.div
           className="graph-header"
           initial={{ y: -20, opacity: 0 }}
@@ -105,51 +152,91 @@ const CompanyStructure = () => {
         </motion.div>
 
         <div className="graph-container">
-        <ForceGraph2D
+          <ForceGraph2D
             ref={graphRef}
             width={dimensions.width}
             height={dimensions.height}
             graphData={graphData}
             nodeLabel={(node) => `${node.name} (${node.role || node.group || ""})`}
-            nodeAutoColorBy="group"
             linkDirectionalParticles={3}
             linkDirectionalParticleSpeed={0.005}
             linkColor={(link) => {
-              const sourceNode = graphData.nodes.find(n => n.id === link.source);
-              return sourceNode ? sourceNode.color : '#999';
+              const sourceNode = typeof link.source === "object" ? link.source : graphData.nodes.find(n => n.id === link.source);
+              return getGroupColor(sourceNode.groupId || sourceNode.id);
             }}
+            
             onNodeClick={(node) =>
-                alert(`Сотрудник: ${node.name}\nРоль: ${node.role || node.group}`)
+              alert(`Сотрудник: ${node.name}\nРоль: ${node.role || node.group}`)
             }
             nodeCanvasObject={(node, ctx, globalScale) => {
-                const label = `${node.name}`;
-                const fontSize = 15 / globalScale;
-                const radius = 15;
+              const label = `${node.name}`;
+              const fontSize = 15 / globalScale;
+              const radius = 15;
 
-                // Draw node
-                ctx.beginPath();
-                ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
-                ctx.fillStyle = node.color || "#00f";
-                ctx.fill();
-                ctx.strokeStyle = "#fff";
-                ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+
+              // Заливка
+              const isEmployee = !node.isCategory && node.role;
+              if (isEmployee) {
+                ctx.fillStyle = "rgba(100, 150, 255, 0.5)"; // единый прозрачный цвет
+              } else {
+                ctx.fillStyle = getGroupColor(node.groupId || node.id); // категории
+              }
+
+              ctx.fill();
+              // Определим входящие связи
+              const incomingLinks = graphData.links.filter(
+                link => typeof link.target === "object" ? link.target.id === node.id : link.target === node.id
+              );
+
+              // Если узел категории — просто белая обводка
+              if (node.isCategory || incomingLinks.length === 0) {
+                ctx.strokeStyle = "#ffffff";
+                ctx.lineWidth = 2;
                 ctx.stroke();
+              } else if (incomingLinks.length === 1) {
+                // Один входящий линк — простая обводка по цвету
+                const sourceNode = typeof incomingLinks[0].source === "object"
+                  ? incomingLinks[0].source
+                  : graphData.nodes.find(n => n.id === incomingLinks[0].source);
+                ctx.strokeStyle = getGroupColor(sourceNode.groupId || sourceNode.id);
+                ctx.lineWidth = 4;
+                ctx.stroke();
+              } else {
+                // Многоцветная обводка — секторами
+                const gradient = ctx.createRadialGradient(node.x, node.y, radius, node.x, node.y, radius + 6);
 
-                // Draw text
-                ctx.font = `${fontSize}px Sans-Serif`;
-                ctx.fillStyle = "white";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "top";
-                ctx.fillText(label, node.x, node.y + radius + 2);
+                incomingLinks.forEach((link, index) => {
+                  const sourceNode = typeof link.source === "object"
+                    ? link.source
+                    : graphData.nodes.find(n => n.id === link.source);
+                  const color = getGroupColor(sourceNode.groupId || sourceNode.id);
+                  const stop = index / (incomingLinks.length - 1 || 1);
+                  gradient.addColorStop(stop, color);
+              });
+            
+              ctx.beginPath();
+              ctx.arc(node.x, node.y, radius + 4, 0, 2 * Math.PI);
+              ctx.strokeStyle = gradient;
+              ctx.lineWidth = 4;
+              ctx.stroke();
+            }
+              ctx.font = `${fontSize}px Sans-Serif`;
+              ctx.fillStyle = "white";
+              ctx.textAlign = "center";
+              ctx.textBaseline = "top";
+              ctx.fillText(label, node.x, node.y + radius + 2);
             }}
+
             nodePointerAreaPaint={(node, color, ctx) => {
-                const radius = 20;
-                ctx.fillStyle = color;
-                ctx.beginPath();
-                ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
-                ctx.fill();
+              const radius = 20;
+              ctx.fillStyle = color;
+              ctx.beginPath();
+              ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+              ctx.fill();
             }}
-            />
+          />
         </div>
       </div>
     </div>
