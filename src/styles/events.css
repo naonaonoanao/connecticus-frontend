@@ -1,0 +1,358 @@
+.event-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.events-page {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    color: #fff;
+}
+
+.events-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.events-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+.events-title {
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.create-event-btn {
+    background: linear-gradient(90deg, #3a86ff, #4cc9f0);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: transform 0.2s ease;
+}
+
+.filter-panel {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.search-bar {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    align-content: flex-start;
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-top: 10px;
+}
+
+.no-events {
+    text-align: center;
+    padding: 40px;
+    color: rgba(255, 255, 255, 0.5);
+    grid-column: 1 / -1;
+}
+
+.event-category {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: linear-gradient(90deg, #ff6b6b, #ffa3a3);
+}
+
+.event-category.training {
+    background: linear-gradient(90deg, #4ecdc4, #88dac8);
+}
+
+.event-category.meeting {
+    background: linear-gradient(90deg, #74b9ff, #a5d8ff);
+}
+
+.event-category.party {
+    background: linear-gradient(90deg, #a29bfe, #d6a2e8);
+}
+
+.event-details {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.event-detail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.event-icon {
+    font-size: 1.1rem;
+}
+
+.event-participants {
+    margin-top: 15px;
+}
+
+.participants-title {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 8px;
+}
+
+.participants-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.participant {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+
+.event-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.action-btn {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.8rem;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.action-btn.primary {
+    background: #3a86ff;
+    border-color: #3a86ff;
+}
+
+.action-btn.primary:hover {
+    background: #2667cc;
+}
+
+.event-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.event-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+.event-category {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: linear-gradient(90deg, #ff6b6b, #ffa3a3);
+}
+
+.event-category.training {
+    background: linear-gradient(90deg, #4ecdc4, #88dac8);
+}
+
+.event-category.meeting {
+    background: linear-gradient(90deg, #74b9ff, #a5d8ff);
+}
+
+.event-category.party {
+    background: linear-gradient(90deg, #a29bfe, #d6a2e8);
+}
+
+.event-details {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.event-detail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.event-icon {
+    font-size: 1.1rem;
+}
+
+.event-participants {
+    margin-top: 15px;
+}
+
+.participants-title {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 8px;
+}
+
+.participants-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.participant {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+
+.event-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.action-btn {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.8rem;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.action-btn.primary {
+    background: #3a86ff;
+    border-color: #3a86ff;
+}
+
+.action-btn.primary:hover {
+    background: #2667cc;
+}
+
+/* Стили для кнопки "Мои мероприятия" */
+.my-events-btn {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 15px;
+}
+
+.my-events-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.my-events-btn.active {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #4cc9f0;
+}
+
+.header-buttons {
+    display: flex;
+    align-items: center;
+}
+
+/* Стили для отметки текущего пользователя */
+.organizer-badge {
+    color: #4cc9f0;
+    font-size: 0.8em;
+    margin-left: 5px;
+}
+
+.participant.current-user {
+    color: #4cc9f0;
+    font-weight: 500;
+}
+
+/* Стиль для кнопки отмены записи */
+.action-btn.danger {
+    background: #ff4d4f;
+    border-color: #ff4d4f;
+}
+
+.action-btn.danger:hover {
+    background: #d9363e;
+}
