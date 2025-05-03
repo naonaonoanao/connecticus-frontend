@@ -19,7 +19,7 @@ const Sidebar = () => {
           <FaSitemap className="menu-icon" />
           <span className="menu-item-text">Структура компании</span>
         </li>
-        <li>
+        <li onClick={() => navigate("/events")}>
           <FaCalendarAlt className="menu-icon" />
           <span className="menu-item-text">Мероприятия</span>
         </li>
