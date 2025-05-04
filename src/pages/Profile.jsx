@@ -3,17 +3,66 @@ import React, { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Notification";
 import { motion } from "framer-motion";
-import { FaEnvelope, FaPhone, FaTelegram, FaBirthdayCake, FaMapMarkerAlt, FaCode, FaProjectDiagram } from "react-icons/fa";
+import { 
+  FaEnvelope, 
+  FaPhone, 
+  FaTelegram, 
+  FaBirthdayCake, 
+  FaMapMarkerAlt, 
+  FaCode, 
+  FaProjectDiagram, 
+  FaUserEdit, 
+  FaUserTie 
+} from "react-icons/fa";
 import "../styles/profile.css";
 
 const Profile = () => {
   const [hoveredProject, setHoveredProject] = useState(null);
-  
-  const projects = [
-    { name: "Внедрение SIEM системы", role: "Архитектор решений" },
-    { name: "Разработка политик ИБ", role: "Технический писатель" },
-    { name: "Проведение аудитов", role: "Старший аудитор" }
-  ];
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: "Иванов Иван Иванович",
+    position: "Специалист по информационной безопасности",
+    city: "Москва",
+    birthDate: "15.05.1990",
+    department: "Информационная безопасность",
+    email: "user@company.com",
+    phone: "+7 (999) 123-45-67",
+    telegram: "@username",
+    technologies: ["Кибербезопасность", "React", "Node.js"],
+    interests: ["Фотография", "Путешествия"],
+    projects: [
+      { name: "Внедрение SIEM системы", role: "Архитектор решений" },
+      { name: "Разработка политик ИБ", role: "Технический писатель" }
+    ]
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleArrayChange = (field, index, value) => {
+    setProfileData(prev => {
+      const newArray = [...prev[field]];
+      newArray[index] = value;
+      return { ...prev, [field]: newArray };
+    });
+  };
+
+  const addArrayItem = (field) => {
+    setProfileData(prev => ({
+      ...prev,
+      [field]: [...prev[field], ""]
+    }));
+  };
+
+  const removeArrayItem = (field, index) => {
+    if (profileData[field].length <= 1) return;
+    setProfileData(prev => ({
+      ...prev,
+      [field]: prev[field].filter((_, i) => i !== index)
+    }));
+  };
 
   return (
     <div className="profile-page">
@@ -26,23 +75,34 @@ const Profile = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          {/* Левая часть - аватар и контакты */}
+          {/* Левая часть - аватар, интересы и контакты */}
           <div className="profile-left">
-            <div className="avatar-placeholder"></div>
+            <div className="avatar-placeholder">
+              <FaUserTie className="avatar-icon" />
+            </div>
+            
+            <div className="interests-section">
+              <h3><FaCode className="icon"/> Интересы</h3>
+              <div className="tags">
+                {profileData.interests.map((interest, index) => (
+                  <span key={index} className="tag">{interest}</span>
+                ))}
+              </div>
+            </div>
             
             <div className="contact-section">
               <h3><FaEnvelope className="icon"/> Контакты</h3>
               <div className="contact-item">
                 <FaEnvelope className="icon"/>
-                <span>user@company.com</span>
+                <span>{profileData.email}</span>
               </div>
               <div className="contact-item">
                 <FaPhone className="icon"/>
-                <span>+7 (999) 123-45-67</span>
+                <span>{profileData.phone}</span>
               </div>
               <div className="contact-item">
                 <FaTelegram className="icon"/>
-                <span>@username</span>
+                <span>{profileData.telegram}</span>
               </div>
             </div>
           </div>
@@ -50,8 +110,8 @@ const Profile = () => {
           {/* Правая часть - основная информация */}
           <div className="profile-right">
             <div className="profile-header">
-              <h2>Иванов Иван Иванович</h2>
-              <p className="position">Специалист по информационной безопасности</p>
+              <h2>{profileData.name}</h2>
+              <p className="position">{profileData.position}</p>
             </div>
             
             <div className="info-grid compact">
@@ -59,34 +119,31 @@ const Profile = () => {
                 <h3><FaMapMarkerAlt className="icon"/> Основная информация</h3>
                 <div className="info-item compact">
                   <span>Город:</span>
-                  <p>Москва</p>
+                  <p>{profileData.city}</p>
                 </div>
                 <div className="info-item compact">
                   <span><FaBirthdayCake className="icon"/> Дата рождения:</span>
-                  <p>15.05.1990</p>
+                  <p>{profileData.birthDate}</p>
                 </div>
                 <div className="info-item compact">
                   <span>Отдел:</span>
-                  <p>Информационная безопасность</p>
+                  <p>{profileData.department}</p>
                 </div>
               </div>
               
               <div className="info-section compact">
-                <h3><FaCode className="icon"/> Технологии и интересы</h3>
+                <h3><FaCode className="icon"/> Технологии</h3>
                 <div className="tags compact">
-                  <span className="tag">Кибербезопасность</span>
-                  <span className="tag">React</span>
-                  <span className="tag">Node.js</span>
-                  <span className="tag">Docker</span>
-                  <span className="tag">Kubernetes</span>
-                  <span className="tag">AWS</span>
+                  {profileData.technologies.map((tech, index) => (
+                    <span key={index} className="tag">{tech}</span>
+                  ))}
                 </div>
               </div>
               
               <div className="info-section projects-section compact">
                 <h3><FaProjectDiagram className="icon"/> Участие в проектах</h3>
                 <ul className="projects-list compact">
-                  {projects.map((project, index) => (
+                  {profileData.projects.map((project, index) => (
                     <li 
                       key={index}
                       onMouseEnter={() => setHoveredProject(index)}
@@ -105,11 +162,181 @@ const Profile = () => {
             </div>
             
             <div className="profile-actions compact">
-              <button>Редактировать профиль</button>
-              <button className="secondary">Поделиться профилем</button>
+              <button onClick={() => setIsEditing(true)}>
+                <FaUserEdit className="button-icon"/> Редактировать профиль
+              </button>
             </div>
           </div>
         </motion.div>
+
+        {/* Модальное окно редактирования */}
+        {isEditing && (
+          <div className="modal-overlay">
+            <motion.div 
+              className="edit-modal"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              <h3>Редактирование профиля</h3>
+              
+              <div className="form-group">
+                <label>ФИО</label>
+                <input 
+                  type="text" 
+                  name="name" 
+                  value={profileData.name}
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Должность</label>
+                <input 
+                  type="text" 
+                  name="position" 
+                  value={profileData.position}
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="form-columns">
+                <div className="form-group">
+                  <label>Город</label>
+                  <input 
+                    type="text" 
+                    name="city" 
+                    value={profileData.city}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Дата рождения</label>
+                  <input 
+                    type="text" 
+                    name="birthDate" 
+                    value={profileData.birthDate}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label>Отдел</label>
+                <input 
+                  type="text" 
+                  name="department" 
+                  value={profileData.department}
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="form-section">
+                <div className="section-header">
+                  <h4>Технологии</h4>
+                  <button 
+                    type="button" 
+                    className="add-btn"
+                    onClick={() => addArrayItem('technologies')}
+                  >
+                    +
+                  </button>
+                </div>
+                {profileData.technologies.map((tech, index) => (
+                  <div key={index} className="array-item">
+                    <input
+                      type="text"
+                      value={tech}
+                      onChange={(e) => handleArrayChange('technologies', index, e.target.value)}
+                      placeholder="Введите технологию"
+                    />
+                    {profileData.technologies.length > 1 && (
+                      <button
+                        type="button"
+                        className="remove-btn"
+                        onClick={() => removeArrayItem('technologies', index)}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="form-section">
+                <div className="section-header">
+                  <h4>Интересы</h4>
+                  <button 
+                    type="button" 
+                    className="add-btn"
+                    onClick={() => addArrayItem('interests')}
+                  >
+                    +
+                  </button>
+                </div>
+                {profileData.interests.map((interest, index) => (
+                  <div key={index} className="array-item">
+                    <input
+                      type="text"
+                      value={interest}
+                      onChange={(e) => handleArrayChange('interests', index, e.target.value)}
+                      placeholder="Введите интерес"
+                    />
+                    {profileData.interests.length > 1 && (
+                      <button
+                        type="button"
+                        className="remove-btn"
+                        onClick={() => removeArrayItem('interests', index)}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="form-group">
+                <label>Email</label>
+                <input 
+                  type="email" 
+                  name="email" 
+                  value={profileData.email}
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Телефон</label>
+                <input 
+                  type="tel" 
+                  name="phone" 
+                  value={profileData.phone}
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Telegram</label>
+                <input 
+                  type="text" 
+                  name="telegram" 
+                  value={profileData.telegram}
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="modal-actions">
+                <button className="save-btn" onClick={() => setIsEditing(false)}>
+                  Сохранить
+                </button>
+                <button className="cancel-btn" onClick={() => setIsEditing(false)}>
+                  Отмена
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </div>
     </div>
   );
