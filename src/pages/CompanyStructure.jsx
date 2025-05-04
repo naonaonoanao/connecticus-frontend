@@ -5,6 +5,7 @@ import Sidebar from "../components/Sidebar";
 import Header from "../components/Notification";
 import "../styles/companyStructure.css";
 import * as d3 from "d3";
+import { PiAlignCenterHorizontalSimpleLight } from "react-icons/pi";
 
 const categories = [
   { key: "departments", label: "По отделам", color: "#00f5ff" },
@@ -61,8 +62,8 @@ const CompanyStructure = () => {
     if (graphRef.current) {
       const fg = graphRef.current;
       if (fg.d3Force) {
-        fg.d3Force("link").distance(300);
-        fg.d3Force("charge").strength(-100);
+        fg.d3Force("link").distance(500);
+        fg.d3Force("charge").strength(-50);
         fg.d3Force("collide", d3.forceCollide(50));
 
         fg.d3Force("group-attraction", () => {
@@ -118,6 +119,26 @@ const CompanyStructure = () => {
           animate={{ y: 0, opacity: 1 }}
         >
           <h2>Структура компании</h2>
+        </motion.div>
+
+        <motion.div
+          className="filter-bar"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+        >
+          <div className="filter-panel">
+            {categories.map((cat) => (
+              <button
+                key={cat.key}
+                className={`filter-btn ${activeFilter === cat.key ? "active" : ""}`}
+                style={{ borderColor: cat.color }}
+                onClick={() => setActiveFilter(cat.key)}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
           <input
             type="text"
             className="search-input"
@@ -126,22 +147,8 @@ const CompanyStructure = () => {
             onChange={(e) => setSearch(e.target.value)}
           />
         </motion.div>
-        <motion.div
-          className="filter-panel"
-          initial={{ x: -50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-        >
-          {categories.map((cat) => (
-            <button
-              key={cat.key}
-              className={`filter-btn ${activeFilter === cat.key ? "active" : ""}`}
-              style={{ borderColor: cat.color }}
-              onClick={() => setActiveFilter(cat.key)}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </motion.div>
+
+        
         <div className="graph-container">
           <ForceGraph2D
             ref={graphRef}
@@ -162,7 +169,7 @@ const CompanyStructure = () => {
               const label = `${node.name}`;
               const fontSize = 15 / globalScale;
               const isEmployee = !node.isCategory;
-              const radius = 15;
+              const radius = 20;
               ctx.beginPath();
               ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
               ctx.globalAlpha = 1.0;
@@ -177,6 +184,8 @@ const CompanyStructure = () => {
               // Если узел категории — обводка по цвету
               if (node.isCategory || incomingLinks.length === 0) {
                 const groupColor = getGroupColor(node.groupId || node.id);
+                const radius = 35;
+                ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
                 ctx.strokeStyle = groupColor;
                 ctx.fillStyle = groupColor;
                 ctx.lineWidth = 2;
