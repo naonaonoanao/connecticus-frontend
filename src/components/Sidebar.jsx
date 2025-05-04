@@ -23,7 +23,7 @@ const Sidebar = () => {
           <FaCalendarAlt className="menu-icon" />
           <span className="menu-item-text">Мероприятия</span>
         </li>
-        <li>
+        <li onClick={() => navigate("/search")}>
           <FaSearch className="menu-icon" />
           <span className="menu-item-text">Поиск сотрудников</span>
         </li>
