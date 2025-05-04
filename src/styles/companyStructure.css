@@ -18,22 +18,31 @@
     align-items: center;
     margin-bottom: 20px;
   }
-  
+
+  .filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 16px 0;
+    gap: 570px;
+    flex-wrap: nowrap;
+  }
+
   .search-input {
     padding: 10px;
     border-radius: 10px;
     border: none;
     background-color: #1f1f2e;
     color: #fff;
-    width: 250px;
+    width: 200px;
     font-size: 14px;
   }
   
   .filter-panel {
     display: flex;
-    gap: 15px;
-    margin-bottom: 17px;
     flex-wrap: wrap;
+    gap: 8px;
+    max-width: 70%; /* чтобы не занимало всю ширину */
   }
   
   .filter-btn {
