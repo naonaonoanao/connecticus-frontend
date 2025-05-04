@@ -16,10 +16,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
   }
 
   .filter-bar {
+    height: 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -29,30 +30,48 @@
   }
 
   .search-input {
-    padding: 10px;
+    height: 40px;
+    padding: 0px 14px;
     border-radius: 10px;
     border: none;
     background-color: #1f1f2e;
     color: #fff;
     width: 200px;
-    font-size: 14px;
+    font-size: 16px;
+    display: block;
+    line-height: 1;
+    line-height: 40px;
   }
+
+  .search-wrapper {
+    padding: 0px 14px;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    justify-content: center;
+  }  
   
   .filter-panel {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    max-width: 70%; /* чтобы не занимало всю ширину */
+    gap: 10px;
+    max-width: 70%;
   }
   
   .filter-btn {
+    height: 40px;
+    line-height: 40px;
+    display: flex;
     background: transparent;
+    justify-content: center;
     color: #fff;
-    padding: 8px 14px;
+    padding: 0px 14px;
     border-radius: 12px;
     border: 2px solid #888;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
+    align-items: center;
+
   }
   
   .filter-btn.active {

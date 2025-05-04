@@ -5,7 +5,6 @@ import Sidebar from "../components/Sidebar";
 import Header from "../components/Notification";
 import "../styles/companyStructure.css";
 import * as d3 from "d3";
-import { PiAlignCenterHorizontalSimpleLight } from "react-icons/pi";
 
 const categories = [
   { key: "departments", label: "По отделам", color: "#00f5ff" },
@@ -64,39 +63,43 @@ const CompanyStructure = () => {
       if (fg.d3Force) {
         fg.d3Force("link").distance(500);
         fg.d3Force("charge").strength(-50);
-        fg.d3Force("collide", d3.forceCollide(50));
-
-        fg.d3Force("group-attraction", () => {
-          return (alpha) => {
-            graphData.nodes.forEach(node => {
-              if (!node.isCategory && node.groupId) {
-                const target = graphData.nodes.find(n => n.id === node.groupId);
-                if (target) {
-                  node.vx += (target.x - node.x) * 0.01 * alpha;
-                  node.vy += (target.y - node.y) * 0.01 * alpha;
-                }
-              }
-            });
-          };
-        });
-
-        fg.d3ReheatSimulation();
+        fg.d3Force("collide", d3.forceCollide(50)); 
       }
     }
   }, [graphData]);
 
   useEffect(() => {
     const categories = graphData.nodes.filter(n => n.isCategory);
-    const angleStep = (2 * Math.PI) / categories.length;
-    const radius = 300;
+    const spacing = 850; // Расстояние между узлами по оси X и Y
 
+    // Распределяем категории на большом расстоянии
     categories.forEach((node, i) => {
-      node.fx = radius * Math.cos(i * angleStep);
-      node.fy = radius * Math.sin(i * angleStep);
+      const angle = (i / categories.length) * 2 * Math.PI;
+      node.x = Math.cos(angle) * spacing * 2; // x позиция с отступом
+      node.y = Math.sin(angle) * spacing * 2; // y позиция с отступом
     });
 
-    setGraphData((prev) => ({ ...prev, nodes: [...prev.nodes] }));
-  }, [graphData.nodes.length]);
+    // Располагаем сотрудников вокруг каждой категории
+    graphData.nodes.forEach((node) => {
+      if (!node.isCategory) {
+        const category = graphData.nodes.find(n => n.id === node.groupId && n.isCategory);
+        if (category) {
+          const numEmployees = graphData.nodes.filter(n => n.groupId === category.id && !n.isCategory).length;
+          const radius = 200; // Расстояние сотрудников от категории
+          const angleIncrement = (2 * Math.PI) / numEmployees; // Угол для равномерного распределения
+
+           // Вычисляем позицию для сотрудника вокруг категории
+          const index = graphData.nodes.indexOf(node);
+          const angle = angleIncrement * index;
+
+          node.x = category.x + Math.cos(angle) * radius;
+          node.y = category.y + Math.sin(angle) * radius;
+        }
+      }
+    });
+
+    setGraphData(prev => ({ ...prev, nodes: [...prev.nodes] }));
+}, [graphData.nodes.length]);
 
   const groupColorMap = useRef({});
 
@@ -138,16 +141,16 @@ const CompanyStructure = () => {
               </button>
             ))}
           </div>
-
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Поиск..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          <div className="search-wrapper">
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Поиск..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </motion.div>
-
         
         <div className="graph-container">
           <ForceGraph2D
