@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaCalendarAlt, FaMapMarkerAlt, FaUser, FaUsers, FaSearch, FaPlus, FaUserCircle } from "react-icons/fa";
+import { FaCalendarAlt, FaMapMarkerAlt, FaUser, FaUsers, FaSearch, FaPlus, FaUserCircle, FaTimes } from "react-icons/fa";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Notification";
 import "../styles/events.css";
@@ -11,7 +11,6 @@ const eventCategories = [
     { key: "party", label: "Корпоративы" }
 ];
 
-// Текущий пользователь (в реальном приложении нужно получать из контекста/авторизации)
 const currentUser = "Иван Петров";
 
 const mockEvents = [
@@ -22,7 +21,7 @@ const mockEvents = [
         date: "2023-06-15T10:00:00",
         location: "Конференц-зал 3",
         organizer: "Иван Петров",
-        description: "Продвинутый курс по React с hooks и context API",
+        description: "Продвинутый курс по React с hooks и context API. На тренинге будут рассмотрены продвинутые техники работы с React, включая оптимизацию производительности, работу с контекстом и создание кастомных хуков.",
         participants: ["Алексей Смирнов", "Мария Иванова", "Дмитрий Кузнецов"]
     },
     {
@@ -32,7 +31,7 @@ const mockEvents = [
         date: "2023-06-20T14:00:00",
         location: "Зал заседаний",
         organizer: "Ольга Сидорова",
-        description: "Обсуждение результатов квартала и планов на следующий период",
+        description: "Обсуждение результатов квартала и планов на следующий период. Будут представлены отчеты по ключевым показателям эффективности, обсуждены текущие проекты и поставлены задачи на следующий квартал.",
         participants: ["Все сотрудники отдела", "Иван Петров"]
     },
     {
@@ -42,7 +41,7 @@ const mockEvents = [
         date: "2023-07-10T18:00:00",
         location: "Ресторан 'У моря'",
         organizer: "HR отдел",
-        description: "Ежегодное летнее мероприятие для всех сотрудников",
+        description: "Ежегодное летнее мероприятие для всех сотрудников компании. В программе: ужин, развлекательная программа, награждение лучших сотрудников и танцы до утра!",
         participants: ["Все сотрудники компании", "Иван Петров"]
     }
 ];
@@ -51,26 +50,29 @@ const Events = () => {
     const [activeCategory, setActiveCategory] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
     const [showMyEvents, setShowMyEvents] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
 
     const filteredEvents = mockEvents.filter(event => {
-        // Фильтрация по категории
         const matchesCategory = activeCategory === "all" || event.category === activeCategory;
-        
-        // Фильтрация по поисковому запросу
         const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             event.description.toLowerCase().includes(searchQuery.toLowerCase());
-        
-        // Фильтрация по "Мои мероприятия"
         const matchesMyEvents = !showMyEvents || 
                               event.organizer === currentUser || 
                               event.participants.includes(currentUser);
-        
         return matchesCategory && matchesSearch && matchesMyEvents;
     });
 
     const formatDate = (dateString) => {
         const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
         return new Date(dateString).toLocaleDateString('ru-RU', options);
+    };
+
+    const handleDetailsClick = (event) => {
+        setSelectedEvent(event);
+    };
+
+    const closeModal = () => {
+        setSelectedEvent(null);
     };
 
     return (
@@ -148,7 +150,7 @@ const Events = () => {
                                     </div>
                                 </div>
                                 
-                                <p>{event.description}</p>
+                                <p className="event-description">{event.description}</p>
                                 
                                 <div className="event-participants">
                                     <div className="participants-title">
@@ -168,7 +170,12 @@ const Events = () => {
                                 </div>
                                 
                                 <div className="event-actions">
-                                    <button className="action-btn">Подробнее</button>
+                                    <button 
+                                        className="action-btn" 
+                                        onClick={() => handleDetailsClick(event)}
+                                    >
+                                        Подробнее
+                                    </button>
                                     {!event.participants.includes(currentUser) ? (
                                         <button className="action-btn primary">Записаться</button>
                                     ) : (
@@ -185,6 +192,77 @@ const Events = () => {
                     )}
                 </div>
             </div>
+
+            {/* Упрощенное модальное окно */}
+            {selectedEvent && (
+                <div className="event-modal-overlay">
+                    <div className="event-modal">
+                        <button className="modal-close-btn" onClick={closeModal}>
+                            <FaTimes />
+                        </button>
+                        
+                        <div className="modal-header">
+                            <h2>{selectedEvent.title}</h2>
+                            <span className={`event-category ${selectedEvent.category}`}>
+                                {eventCategories.find(c => c.key === selectedEvent.category)?.label}
+                            </span>
+                        </div>
+                        
+                        <div className="modal-content">
+                            <div className="modal-section">
+                                <div className="modal-details">
+                                    <div className="modal-detail">
+                                        <FaCalendarAlt className="modal-icon" />
+                                        <span><strong>Дата и время:</strong> {formatDate(selectedEvent.date)}</span>
+                                    </div>
+                                    <div className="modal-detail">
+                                        <FaMapMarkerAlt className="modal-icon" />
+                                        <span><strong>Место:</strong> {selectedEvent.location}</span>
+                                    </div>
+                                    <div className="modal-detail">
+                                        <FaUser className="modal-icon" />
+                                        <span><strong>Организатор:</strong> {selectedEvent.organizer}</span>
+                                        {selectedEvent.organizer === currentUser && (
+                                            <span className="organizer-badge">(Вы)</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="modal-section">
+                                <h3>Описание</h3>
+                                <p className="modal-description">{selectedEvent.description}</p>
+                            </div>
+                            
+                            <div className="modal-section">
+                                <h3>Участники ({selectedEvent.participants.length})</h3>
+                                <div className="modal-participants">
+                                    {selectedEvent.participants.map((participant, index) => (
+                                        <div 
+                                            key={index} 
+                                            className={`participant ${participant === currentUser ? "current-user" : ""}`}
+                                        >
+                                            {participant}
+                                            {participant === currentUser && " (Вы)"}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="modal-actions">
+                            <button className="action-btn" onClick={closeModal}>
+                                Закрыть
+                            </button>
+                            {!selectedEvent.participants.includes(currentUser) ? (
+                                <button className="action-btn primary">Записаться</button>
+                            ) : (
+                                <button className="action-btn danger">Отменить запись</button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
