@@ -7,14 +7,12 @@ const NotificationIcon = () => {
 
   const toggleDropdown = () => setOpen((prev) => !prev);
 
-  // Закрытие меню при клике вне элемента
   const closeDropdown = (e) => {
     if (!e.target.closest('.notification')) {
       setOpen(false);
     }
   };
 
-  // Слушаем клики на всей странице, чтобы закрывать меню при клике вне
   React.useEffect(() => {
     document.addEventListener('click', closeDropdown);
     return () => document.removeEventListener('click', closeDropdown);

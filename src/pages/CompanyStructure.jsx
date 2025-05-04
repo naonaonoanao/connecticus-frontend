@@ -41,7 +41,6 @@ const CompanyStructure = () => {
     }
   };
   
-
   useEffect(() => {
     fetchGraph(activeFilter);
   }, [activeFilter]);
@@ -98,18 +97,12 @@ const CompanyStructure = () => {
     setGraphData((prev) => ({ ...prev, nodes: [...prev.nodes] }));
   }, [graphData.nodes.length]);
 
-  const getColor = (groupId) => {
-    const str = String(groupId || ""); // безопасно приводим к строке
-    const hash = [...str].reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return `hsl(${hash % 360}, 70%, 60%)`;
-  };
-
   const groupColorMap = useRef({});
 
   const getGroupColor = (groupId) => {
     if (!groupColorMap.current[groupId]) {
       const hash = [...String(groupId)].reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      groupColorMap.current[groupId] = `hsl(${hash % 360}, 70%, 60%)`;
+      groupColorMap.current[groupId] = `hsla(${hash % 360}, 70%, 60%, 1)`;
     }
     return groupColorMap.current[groupId];
   };
@@ -133,7 +126,6 @@ const CompanyStructure = () => {
             onChange={(e) => setSearch(e.target.value)}
           />
         </motion.div>
-
         <motion.div
           className="filter-panel"
           initial={{ x: -50, opacity: 0 }}
@@ -150,7 +142,6 @@ const CompanyStructure = () => {
             </button>
           ))}
         </motion.div>
-
         <div className="graph-container">
           <ForceGraph2D
             ref={graphRef}
@@ -164,7 +155,6 @@ const CompanyStructure = () => {
               const sourceNode = typeof link.source === "object" ? link.source : graphData.nodes.find(n => n.id === link.source);
               return getGroupColor(sourceNode.groupId || sourceNode.id);
             }}
-            
             onNodeClick={(node) =>
               alert(`Сотрудник: ${node.name}\nРоль: ${node.role || node.group}`)
             }
@@ -173,23 +163,24 @@ const CompanyStructure = () => {
               const fontSize = 15 / globalScale;
               const isEmployee = !node.isCategory;
               const radius = 15;
-
               ctx.beginPath();
               ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+              ctx.globalAlpha = 1.0;
               ctx.fillStyle = isEmployee
                 ? "rgba(89, 99, 120, 0.9)" // ЕДИНЫЙ цвет сотрудников
                 : getGroupColor(node.groupId || node.id); // Категории — индивидуальный
               ctx.fill();
-
               // Определим входящие связи
               const incomingLinks = graphData.links.filter(
                 link => typeof link.target === "object" ? link.target.id === node.id : link.target === node.id
               );
-
-              // Если узел категории — просто белая обводка
+              // Если узел категории — обводка по цвету
               if (node.isCategory || incomingLinks.length === 0) {
-                ctx.strokeStyle = "#ffffff";
+                const groupColor = getGroupColor(node.groupId || node.id);
+                ctx.strokeStyle = groupColor;
+                ctx.fillStyle = groupColor;
                 ctx.lineWidth = 2;
+                ctx.fill();
                 ctx.stroke();
               } else if (incomingLinks.length === 1) {
                 // Один входящий линк — простая обводка по цвету
@@ -201,7 +192,7 @@ const CompanyStructure = () => {
                 ctx.lineWidth = 4;
                 ctx.stroke();
               } else {
-                // Многоцветная обводка — секторами
+                // Многоцветная обводка — градиент
                 const gradient = ctx.createRadialGradient(node.x, node.y, radius, node.x, node.y, radius + 6);
 
                 incomingLinks.forEach((link, index) => {
