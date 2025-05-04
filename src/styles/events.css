@@ -51,6 +51,7 @@
     cursor: pointer;
     font-weight: 500;
     transition: transform 0.2s ease;
+    margin-top: 40px;
 }
 
 .filter-panel {
@@ -319,6 +320,7 @@
     align-items: center;
     gap: 8px;
     margin-right: 15px;
+    margin-top: 40px;
 }
 
 .my-events-btn:hover {
