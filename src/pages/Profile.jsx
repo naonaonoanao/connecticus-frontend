@@ -1,50 +1,81 @@
-// /pages/Profile.jsx
-// commit test
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Notification";
 import { motion } from "framer-motion";
-import { 
-  FaEnvelope, 
-  FaPhone, 
-  FaTelegram, 
-  FaBirthdayCake, 
-  FaMapMarkerAlt, 
-  FaCode, 
-  FaProjectDiagram, 
-  FaUserEdit, 
-  FaUserTie 
+import axios from "axios";
+import {
+  FaEnvelope,
+  FaPhone,
+  FaTelegram,
+  FaBirthdayCake,
+  FaMapMarkerAlt,
+  FaCode,
+  FaProjectDiagram,
+  FaUserEdit,
+  FaUserTie,
 } from "react-icons/fa";
 import "../styles/profile.css";
 
 const Profile = () => {
+  const navigate = useNavigate();
   const [hoveredProject, setHoveredProject] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState({
-    name: "Иванов Иван Иванович",
-    position: "Специалист по информационной безопасности",
-    city: "Москва",
-    birthDate: "15.05.1990",
-    department: "Информационная безопасность",
-    email: "user@company.com",
-    phone: "+7 (999) 123-45-67",
-    telegram: "@username",
-    technologies: ["Кибербезопасность", "React", "Node.js"],
-    interests: ["Фотография", "Путешествия"],
-    projects: [
-      { name: "Внедрение SIEM системы", role: "Архитектор решений" },
-      { name: "Разработка политик ИБ", role: "Технический писатель" }
-    ]
-  });
+  const [profileData, setProfileData] = useState(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      try {
+        const { data } = await axios.get("http://localhost:8080/api/v1/user/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setProfileData({
+          name: `${data.employee.first_name} ${data.employee.middle_name || ''} ${data.employee.last_name}`.trim(),
+          position: data.employee.position?.position_name || "",
+          city: data.employee.city,
+          birthDate: data.employee.date_of_birth,
+          department: data.employee.department?.name_department || "",
+          email: data.employee.email,
+          phone: data.employee.phone_number,
+          telegram: data.employee.telegram_name,
+          technologies: data.employee.technologies.map(
+            (t) => `${t.name_technology} (${t.rank.name_rank})`
+          ),
+          interests: data.employee.interests.map((i) => i.name_interest),
+          projects: data.employee.projects.map((p) => ({
+            name: p.name_project,
+            role: p.role.name_role,
+          })),
+        });
+      } catch (error) {
+        if (error.response && [401, 403].includes(error.response.status)) {
+          localStorage.removeItem("access_token");
+          navigate("/login", { replace: true });
+        } else {
+          console.error("Error fetching profile:", error);
+        }
+      }
+    };
+    fetchProfile();
+  }, [navigate]);
+
+  if (!profileData) {
+    return <div>Загрузка...</div>;
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProfileData(prev => ({ ...prev, [name]: value }));
+    setProfileData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleArrayChange = (field, index, value) => {
-    setProfileData(prev => {
+    setProfileData((prev) => {
       const newArray = [...prev[field]];
       newArray[index] = value;
       return { ...prev, [field]: newArray };
@@ -52,17 +83,17 @@ const Profile = () => {
   };
 
   const addArrayItem = (field) => {
-    setProfileData(prev => ({
+    setProfileData((prev) => ({
       ...prev,
-      [field]: [...prev[field], ""]
+      [field]: [...prev[field], ""],
     }));
   };
 
   const removeArrayItem = (field, index) => {
     if (profileData[field].length <= 1) return;
-    setProfileData(prev => ({
+    setProfileData((prev) => ({
       ...prev,
-      [field]: prev[field].filter((_, i) => i !== index)
+      [field]: prev[field].filter((_, i) => i !== index),
     }));
   };
 

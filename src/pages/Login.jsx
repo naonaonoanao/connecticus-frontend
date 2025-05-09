@@ -13,23 +13,20 @@ const Login = () => {
     setError("");
 
     try {
-      // const response = await fetch("http://localhost:8080/api/v1/user/login", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ username, password }),
-      // });
+      const response = await fetch("http://localhost:8080/api/v1/user/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
       
-      // if (!response.ok) {
-      //   const err = await response.json();
-      //   throw new Error(err.detail || "Ошибка входа");
-      // }
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.detail || "Ошибка входа");
+      }
       
-      // const data = await response.json();
+      const data = await response.json();
       // Сохраняем token для дальнейших запросов
-      // localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("access_token", "хуй"); // Temp mock
-      alert("Вход выполнен успешно!");
-      // Перенаправляем на страницу профиля
+      localStorage.setItem("access_token", data.access_token);
       navigate("/profile"); // Редирект на страницу профиля
 
     } catch (err) {
