@@ -1,18 +1,4 @@
-.event-card {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 20px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.event-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-}
-
+/* Основные стили страницы */
 .events-page {
     display: flex;
     min-height: 100vh;
@@ -26,9 +12,10 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
-
+/* Шапка с заголовком и кнопками */
 .events-header {
     display: flex;
     justify-content: space-between;
@@ -42,41 +29,126 @@
     margin: 0;
 }
 
-.create-event-btn {
-    background: linear-gradient(90deg, #3a86ff, #4cc9f0);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: transform 0.2s ease;
-    margin-top: 40px;
+.header-buttons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
+.my-events-btn {
+    background: transparent;
+    border: 2px solid #00e5ff;
+    border-radius: 10px;
+    padding: 8px 16px;
+    color: #00e5ff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.my-events-btn:hover {
+    background: #00e5ff;
+    color: #000;
+}
+
+.my-events-btn.active {
+    background: rgba(0, 229, 255, 0.1);
+    color: #00e5ff;
+}
+
+.my-events-btn.active:hover {
+    background: #00e5ff;
+    color: #000;
+}
+
+.create-event-btn {
+    background: transparent;
+    border: 2px solid #00e5ff;
+    border-radius: 10px;
+    padding: 8px 16px;
+    color: #00e5ff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.create-event-btn:hover {
+    background: #00e5ff;
+    color: #000;
+}
+
+.my-events-btn svg,
+.create-event-btn svg {
+    margin-right: 8px;
+}
+
+/* Фильтры и поиск */
 .filter-panel {
     display: flex;
     gap: 15px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    flex-shrink: 0;
+    margin-bottom: 25px;
+    flex-wrap: wrap
 }
 
 .search-bar {
     display: flex;
     gap: 15px;
-    margin-bottom: 20px;
-    flex-shrink: 0;
 }
 
+.search-input-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #4cc9f0;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Сетка мероприятий */
 .events-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, 350px);
+    justify-content: left;
     gap: 20px;
     align-content: flex-start;
     flex-grow: 1;
     overflow-y: auto;
     padding-top: 10px;
+    min-width: 0;
 }
 
 .no-events {
@@ -86,115 +158,20 @@
     grid-column: 1 / -1;
 }
 
-.event-category {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    background: linear-gradient(90deg, #ff6b6b, #ffa3a3);
-}
-
-.event-category.training {
-    background: linear-gradient(90deg, #4ecdc4, #88dac8);
-}
-
-.event-category.meeting {
-    background: linear-gradient(90deg, #74b9ff, #a5d8ff);
-}
-
-.event-category.party {
-    background: linear-gradient(90deg, #a29bfe, #d6a2e8);
-}
-
-.event-details {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-}
-
-.event-detail {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-}
-
-.event-icon {
-    font-size: 1.1rem;
-}
-
-.event-participants {
-    margin-top: 15px;
-}
-
-.participants-title {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 8px;
-}
-
-.participants-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.participant {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-}
-
-.event-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.action-btn {
-    background: transparent;
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 6px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 0.8rem;
-}
-
-.action-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.action-btn.primary {
-    background: #3a86ff;
-    border-color: #3a86ff;
-}
-
-.action-btn.primary:hover {
-    background: #2667cc;
-}
-
+/* Карточка мероприятия */
 .event-card {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     padding: 20px;
-    margin-bottom: 20px;
+    border: 2px solid #00e5ff;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.event-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    padding-bottom: 60px;
+    width: 350px;
+    min-width: 350px;
+    max-width: 350px;
+    box-sizing: border-box;
 }
 
 .event-header {
@@ -202,6 +179,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
+    min-width: 0;
 }
 
 .event-title {
@@ -209,9 +187,26 @@
     font-weight: 600;
     color: #fff;
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+  }
+
+.event-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+    margin: 10px 0;
 }
 
+/* Категории мероприятий */
 .event-category {
+    flex-shrink: 0;
+    margin-left: 10px;
     display: inline-block;
     padding: 4px 12px;
     border-radius: 20px;
@@ -232,11 +227,12 @@
     background: linear-gradient(90deg, #a29bfe, #d6a2e8);
 }
 
+/* Детали мероприятия */
 .event-details {
     display: flex;
-    gap: 15px;
+    flex-direction: column;
+    gap: 8px;
     margin-bottom: 15px;
-    flex-wrap: wrap;
 }
 
 .event-detail {
@@ -250,6 +246,7 @@
     font-size: 1.1rem;
 }
 
+/* Участники */
 .event-participants {
     margin-top: 15px;
 }
@@ -264,7 +261,9 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-}
+    max-height: 32px; /* Примерно 2 строки участников */
+    overflow: hidden;
+  }
 
 .participant {
     display: flex;
@@ -276,22 +275,35 @@
     font-size: 0.8rem;
 }
 
+.participant.current-user {
+    color: #4cc9f0;
+    font-weight: 500;
+}
+
+.organizer-badge {
+    color: #4cc9f0;
+    font-size: 0.8em;
+    margin-left: 5px;
+}
+
+/* Кнопки действий */
 .event-actions {
+    position: absolute;
+    right: 15px;
+    bottom: 15px;
+    width: calc(100% - 40px);
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    margin-top: 15px;
 }
 
 .action-btn {
     background: transparent;
     color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 6px 12px;
+    padding: 8px 16px;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: 0.8rem;
 }
 
 .action-btn:hover {
@@ -299,57 +311,15 @@
 }
 
 .action-btn.primary {
-    background: #3a86ff;
-    border-color: #3a86ff;
+    background: #00e5ff;
+    border-color: #00e5ff;
+    color: #000;
 }
 
 .action-btn.primary:hover {
-    background: #2667cc;
+    background: #00bcd4;
 }
 
-/* Стили для кнопки "Мои мероприятия" */
-.my-events-btn {
-    background: transparent;
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 8px 16px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-right: 15px;
-    margin-top: 40px;
-}
-
-.my-events-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.my-events-btn.active {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: #4cc9f0;
-}
-
-.header-buttons {
-    display: flex;
-    align-items: center;
-}
-
-/* Стили для отметки текущего пользователя */
-.organizer-badge {
-    color: #4cc9f0;
-    font-size: 0.8em;
-    margin-left: 5px;
-}
-
-.participant.current-user {
-    color: #4cc9f0;
-    font-weight: 500;
-}
-
-/* Стиль для кнопки отмены записи */
 .action-btn.danger {
     background: #ff4d4f;
     border-color: #ff4d4f;
@@ -359,7 +329,7 @@
     background: #d9363e;
 }
 
-/* Стили для модального окна */
+/* Модальное окно */
 .event-modal-overlay {
     position: fixed;
     top: 0;
@@ -385,18 +355,22 @@
     position: relative;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: modalFadeIn 0.3s ease-out forwards;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .modal-close-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-size: 1.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    display: none;
 }
 
 .modal-close-btn:hover {
@@ -412,7 +386,7 @@
 
 .modal-header h2 {
     margin: 0;
-    color: #fff;
+    color: #00e5ff;
     font-size: 1.8rem;
 }
 
@@ -473,23 +447,7 @@
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Анимация для модального окна */
-@keyframes modalFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.event-modal {
-    animation: modalFadeIn 0.3s ease-out forwards;
-}
-
-/* Стили для формы создания мероприятия */
+/* Форма создания мероприятия */
 .form-group {
     margin-bottom: 20px;
 }
@@ -518,13 +476,41 @@
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #4cc9f0;
+    border-color: #00e5ff;
     background: rgba(255, 255, 255, 0.15);
 }
 
 .form-group textarea {
     resize: vertical;
     min-height: 100px;
+}
+
+.form-group select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234cc9f0'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+    padding-right: 30px;
+}
+
+.form-group select option {
+    background-color: #1a1a2e;
+    color: #fff;
+}
+
+@-moz-document url-prefix() {
+    .form-group select {
+        color: #fff !important;
+        text-shadow: 0 0 0 #fff;
+    }
+}
+
+.form-group select::-ms-expand {
+    display: none;
 }
 
 .form-row {
@@ -544,12 +530,6 @@
 
 .participant-input input {
     flex: 1;
-}
-
-.participants-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
 }
 
 .participant-tag {
@@ -577,85 +557,21 @@
     color: #ff4d4f;
 }
 
-/* Дополнительные стили для модального окна */
-.modal-content {
+.filters-search-container {
+    margin-top: 15px;
+    margin-bottom: 0px;
+}
+
+.modal-footer {
     display: flex;
-    flex-direction: column;
-    gap: 25px;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.modal-section {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 20px;
+.modal-primary-action {
+    margin-left: auto;
 }
 
-.modal-section h3 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    color: #4cc9f0;
-    font-size: 1.2rem;
-}
-
-.form-group select {
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-/* Стили для опций в выпадающем списке */
-.form-group select option {
-    background-color: #1a1a2e;
-    color: #fff;
-}
-
-.form-group select:hover {
-    border-color: #4cc9f0;
-}
-
-@-moz-document url-prefix() {
-    .form-group select {
-        color: #fff !important;
-        text-shadow: 0 0 0 #fff;
-    }
-}
-
-.form-group select::-ms-expand {
-    display: none;
-}
-
-.form-group select:focus {
-    box-shadow: 0 0 0 2px rgba(76, 201, 240, 0.3);
-}
-
-.search-input-container {
-    position: relative;
-    width: 100%;
-    max-width: 400px; /* Можно регулировать по необходимости */
-}
-
-.search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 1rem;
-    pointer-events: none; /* Чтобы клик по иконке не мешал фокусировке на инпуте */
-}
-
-.search-input {
-    width: 100%;
-    padding: 10px 15px 10px 40px; /* Увеличиваем левый отступ для иконки */
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    color: #fff;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: #4cc9f0;
-    background: rgba(255, 255, 255, 0.15);
-}

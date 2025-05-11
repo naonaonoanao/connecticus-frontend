@@ -150,344 +150,343 @@ const Events = () => {
 
     return (
         <div className="events-page">
-            <Sidebar />
-            <div className="events-content">
-                <Header />
-                
-                <div className="events-header">
-                    <h1 className="events-title">Мероприятия</h1>
-                    <div className="header-buttons">
-                        <button 
-                            className={`my-events-btn ${showMyEvents ? "active" : ""}`}
-                            onClick={() => setShowMyEvents(!showMyEvents)}
-                        >
-                            <FaUserCircle /> Мои мероприятия
-                        </button>
-                        <button 
-                            className="create-event-btn"
-                            onClick={() => setShowCreateModal(true)}
-                        >
-                            <FaPlus /> Создать мероприятие
-                        </button>
+          <Sidebar />
+          <div className="events-content">
+            <Header />
+            
+            <div className="events-header">
+              <h1 className="events-title">Мероприятия</h1>
+              <div className="header-buttons">
+                <button 
+                  className={`my-events-btn ${showMyEvents ? "active" : ""}`}
+                  onClick={() => setShowMyEvents(!showMyEvents)}
+                >
+                  <FaUserCircle /> Мои мероприятия
+                </button>
+                <button 
+                  className="create-event-btn"
+                  onClick={() => setShowCreateModal(true)}
+                >
+                  <FaPlus /> Создать мероприятие
+                </button>
+              </div>
+            </div>
+            
+            {/* Обернули фильтры и поиск в общий контейнер */}
+            <div className="filters-search-container">
+              <div className="filter-panel">
+                {eventCategories.map(category => (
+                  <button
+                    key={category.key}
+                    className={`filter-btn ${activeCategory === category.key ? "active" : ""}`}
+                    onClick={() => setActiveCategory(category.key)}
+                  >
+                    {category.label}
+                  </button>
+                ))}
+              </div>
+              
+              <div className="search-bar">
+                <div className="search-input-container">
+                  <FaSearch className="search-icon" />
+                  <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Поиск мероприятий..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="events-grid">
+              {filteredEvents.length > 0 ? (
+                filteredEvents.map(event => (
+                  <div key={event.id} className="event-card">
+                    <div className="event-header">
+                      <h3 className="event-title">{event.title}</h3>
+                      <span className={`event-category ${event.category}`}>
+                        {eventCategories.find(c => c.key === event.category)?.label}
+                      </span>
                     </div>
-                </div>
-                
-                <div className="filter-panel">
-                    {eventCategories.map(category => (
-                        <button
-                            key={category.key}
-                            className={`filter-btn ${activeCategory === category.key ? "active" : ""}`}
-                            onClick={() => setActiveCategory(category.key)}
-                        >
-                            {category.label}
-                        </button>
-                    ))}
-                </div>
-                
-                <div className="search-bar">
-                    <div className="search-input-container">
-                        <FaSearch className="search-icon" />
-                        <input
-                            type="text"
-                            className="search-input"
-                            placeholder="Поиск мероприятий..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
+                    
+                    <div className="event-details">
+                      <div className="event-detail">
+                        <FaCalendarAlt className="event-icon" />
+                        <span>{formatDate(event.date)}</span>
+                      </div>
+                      <div className="event-detail">
+                        <FaMapMarkerAlt className="event-icon" />
+                        <span>{event.location}</span>
+                      </div>
+                      <div className="event-detail">
+                        <FaUser className="event-icon" />
+                        <span>{event.organizer}</span>
+                        {event.organizer === currentUser && (
+                          <span className="organizer-badge">(Вы)</span>
+                        )}
+                      </div>
                     </div>
+                    
+                    <p className="event-description">{event.description}</p>
+                    
+                    <div className="event-participants">
+                      <div className="participants-title">
+                        <FaUsers /> Участники:
+                      </div>
+                      <div className="participants-list">
+                        {event.participants.map((participant, index) => (
+                          <span 
+                            key={index} 
+                            className={`participant ${participant === currentUser ? "current-user" : ""}`}
+                          >
+                            {participant}
+                            {participant === currentUser && " (Вы)"}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="event-actions">
+                      <button 
+                        className="action-btn" 
+                        onClick={() => handleDetailsClick(event)}
+                      >
+                        Подробнее
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="no-events">
+                  <h3>Мероприятия не найдены</h3>
+                  <p>Попробуйте изменить параметры поиска</p>
+                </div>
+              )}
+            </div>
+          </div>
+      
+          {/* Модальное окно просмотра мероприятия */}
+          {selectedEvent && (
+            <div className="event-modal-overlay">
+                <div className="event-modal">
+                <div className="modal-header">
+                    <h2>{selectedEvent.title}</h2>
+                    <span className={`event-category ${selectedEvent.category}`}>
+                    {eventCategories.find(c => c.key === selectedEvent.category)?.label}
+                    </span>
                 </div>
                 
-                <div className="events-grid">
-                    {filteredEvents.length > 0 ? (
-                        filteredEvents.map(event => (
-                            <div key={event.id} className="event-card">
-                                <div className="event-header">
-                                    <h3 className="event-title">{event.title}</h3>
-                                    <span className={`event-category ${event.category}`}>
-                                        {eventCategories.find(c => c.key === event.category)?.label}
-                                    </span>
-                                </div>
-                                
-                                <div className="event-details">
-                                    <div className="event-detail">
-                                        <FaCalendarAlt className="event-icon" />
-                                        <span>{formatDate(event.date)}</span>
-                                    </div>
-                                    <div className="event-detail">
-                                        <FaMapMarkerAlt className="event-icon" />
-                                        <span>{event.location}</span>
-                                    </div>
-                                    <div className="event-detail">
-                                        <FaUser className="event-icon" />
-                                        <span>{event.organizer}</span>
-                                        {event.organizer === currentUser && (
-                                            <span className="organizer-badge">(Вы)</span>
-                                        )}
-                                    </div>
-                                </div>
-                                
-                                <p className="event-description">{event.description}</p>
-                                
-                                <div className="event-participants">
-                                    <div className="participants-title">
-                                        <FaUsers /> Участники:
-                                    </div>
-                                    <div className="participants-list">
-                                        {event.participants.map((participant, index) => (
-                                            <span 
-                                                key={index} 
-                                                className={`participant ${participant === currentUser ? "current-user" : ""}`}
-                                            >
-                                                {participant}
-                                                {participant === currentUser && " (Вы)"}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                                
-                                <div className="event-actions">
-                                    <button 
-                                        className="action-btn" 
-                                        onClick={() => handleDetailsClick(event)}
-                                    >
-                                        Подробнее
-                                    </button>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="no-events">
-                            <h3>Мероприятия не найдены</h3>
-                            <p>Попробуйте изменить параметры поиска</p>
+                <div className="modal-content">
+                    <div className="modal-section">
+                    <div className="modal-details">
+                        <div className="modal-detail">
+                        <FaCalendarAlt className="modal-icon" />
+                        <span><strong>Дата и время:</strong> {formatDate(selectedEvent.date)}</span>
                         </div>
+                        <div className="modal-detail">
+                        <FaMapMarkerAlt className="modal-icon" />
+                        <span><strong>Место:</strong> {selectedEvent.location}</span>
+                        </div>
+                        <div className="modal-detail">
+                        <FaUser className="modal-icon" />
+                        <span><strong>Организатор:</strong> {selectedEvent.organizer}</span>
+                        {selectedEvent.organizer === currentUser && (
+                            <span className="organizer-badge">(Вы)</span>
+                        )}
+                        </div>
+                    </div>
+                    </div>
+                    
+                    <div className="modal-section">
+                    <h3>Описание</h3>
+                    <p className="modal-description">{selectedEvent.description}</p>
+                    </div>
+                    
+                    <div className="modal-section">
+                    <h3>Участники ({selectedEvent.participants.length})</h3>
+                    <div className="modal-participants">
+                        {selectedEvent.participants.map((participant, index) => (
+                        <div 
+                            key={index} 
+                            className={`participant ${participant === currentUser ? "current-user" : ""}`}
+                        >
+                            {participant}
+                            {participant === currentUser && " (Вы)"}
+                        </div>
+                        ))}
+                    </div>
+                    </div>
+                </div>
+                
+                <div className="modal-actions">
+                    <div className="primary-action">
+                    {!selectedEvent.participants.includes(currentUser) ? (
+                        <button className="action-btn primary">Записаться</button>
+                    ) : (
+                        <button className="cancel-btn">Отменить запись</button>
                     )}
+                    </div>
+                    <button className="cancel-btn" onClick={closeModal}>
+                    Вернуться
+                    </button>
+                </div>
                 </div>
             </div>
-
-            {/* Модальное окно просмотра мероприятия */}
-            {selectedEvent && (
-                <div className="event-modal-overlay">
-                    <div className="event-modal">
-                        <button className="modal-close-btn" onClick={closeModal}>
-                            <FaTimes />
-                        </button>
-                        
-                        <div className="modal-header">
-                            <h2>{selectedEvent.title}</h2>
-                            <span className={`event-category ${selectedEvent.category}`}>
-                                {eventCategories.find(c => c.key === selectedEvent.category)?.label}
-                            </span>
-                        </div>
-                        
-                        <div className="modal-content">
-                            <div className="modal-section">
-                                <div className="modal-details">
-                                    <div className="modal-detail">
-                                        <FaCalendarAlt className="modal-icon" />
-                                        <span><strong>Дата и время:</strong> {formatDate(selectedEvent.date)}</span>
-                                    </div>
-                                    <div className="modal-detail">
-                                        <FaMapMarkerAlt className="modal-icon" />
-                                        <span><strong>Место:</strong> {selectedEvent.location}</span>
-                                    </div>
-                                    <div className="modal-detail">
-                                        <FaUser className="modal-icon" />
-                                        <span><strong>Организатор:</strong> {selectedEvent.organizer}</span>
-                                        {selectedEvent.organizer === currentUser && (
-                                            <span className="organizer-badge">(Вы)</span>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="modal-section">
-                                <h3>Описание</h3>
-                                <p className="modal-description">{selectedEvent.description}</p>
-                            </div>
-                            
-                            <div className="modal-section">
-                                <h3>Участники ({selectedEvent.participants.length})</h3>
-                                <div className="modal-participants">
-                                    {selectedEvent.participants.map((participant, index) => (
-                                        <div 
-                                            key={index} 
-                                            className={`participant ${participant === currentUser ? "current-user" : ""}`}
-                                        >
-                                            {participant}
-                                            {participant === currentUser && " (Вы)"}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div className="modal-actions">
-                            <button className="action-btn" onClick={closeModal}>
-                                Закрыть
-                            </button>
-                            {!selectedEvent.participants.includes(currentUser) ? (
-                                <button className="action-btn primary">Записаться</button>
-                            ) : (
-                                <button className="action-btn danger">Отменить запись</button>
-                            )}
-                        </div>
-                    </div>
-                </div>
             )}
 
             {/* Модальное окно создания мероприятия */}
             {showCreateModal && (
-                <div className="event-modal-overlay">
-                    <div className="event-modal">
-                        <button className="modal-close-btn" onClick={() => setShowCreateModal(false)}>
-                            <FaTimes />
-                        </button>
-                        
-                        <div className="modal-header">
-                            <h2>Создать мероприятие</h2>
+            <div className="event-modal-overlay">
+                <div className="event-modal">
+                <div className="modal-header">
+                    <h2>Создать мероприятие</h2>
+                </div>
+                
+                <div className="modal-content">
+                    <div className="modal-section">
+                    <div className="form-group">
+                        <label>Название мероприятия</label>
+                        <input
+                        type="text"
+                        name="title"
+                        value={newEvent.title}
+                        onChange={handleNewEventChange}
+                        required
+                        />
+                    </div>
+                    
+                    <div className="form-group">
+                        <label>Тип мероприятия</label>
+                        <select
+                        name="category"
+                        value={newEvent.category}
+                        onChange={handleNewEventChange}
+                        required
+                        >
+                        <option value="training">Тренинг</option>
+                        <option value="meeting">Совещание</option>
+                        <option value="party">Корпоратив</option>
+                        </select>
+                    </div>
+                    </div>
+                    
+                    <div className="modal-section">
+                    <h3>Дата и время</h3>
+                    <div className="form-row">
+                        <div className="form-group">
+                        <label>Дата</label>
+                        <input
+                            type="date"
+                            name="date"
+                            value={newEvent.date}
+                            onChange={handleNewEventChange}
+                            required
+                        />
                         </div>
-                        
-                        <div className="modal-content">
-                            <div className="modal-section">
-                                <div className="form-group">
-                                    <label>Название мероприятия</label>
-                                    <input
-                                        type="text"
-                                        name="title"
-                                        value={newEvent.title}
-                                        onChange={handleNewEventChange}
-                                        required
-                                    />
-                                </div>
-                                
-                                <div className="form-group">
-                                    <label>Тип мероприятия</label>
-                                    <select
-                                        name="category"
-                                        value={newEvent.category}
-                                        onChange={handleNewEventChange}
-                                        required
-                                    >
-                                        <option value="training">Тренинг</option>
-                                        <option value="meeting">Совещание</option>
-                                        <option value="party">Корпоратив</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div className="modal-section">
-                                <h3>Дата и время</h3>
-                                <div className="form-row">
-                                    <div className="form-group">
-                                        <label>Дата</label>
-                                        <input
-                                            type="date"
-                                            name="date"
-                                            value={newEvent.date}
-                                            onChange={handleNewEventChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Время</label>
-                                        <input
-                                            type="time"
-                                            name="time"
-                                            value={newEvent.time}
-                                            onChange={handleNewEventChange}
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="modal-section">
-                                <div className="form-group">
-                                    <label>Место проведения</label>
-                                    <input
-                                        type="text"
-                                        name="location"
-                                        value={newEvent.location}
-                                        onChange={handleNewEventChange}
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            
-                            <div className="modal-section">
-                                <h3>Описание</h3>
-                                <div className="form-group">
-                                    <textarea
-                                        name="description"
-                                        value={newEvent.description}
-                                        onChange={handleNewEventChange}
-                                        rows="4"
-                                    />
-                                </div>
-                            </div>
-                            
-                            <div className="modal-section">
-                                <h3>Участники</h3>
-                                <div className="form-group">
-                                    <div className="participant-input">
-                                        <input
-                                            type="text"
-                                            placeholder="Добавить участника"
-                                            value={newParticipant}
-                                            onChange={(e) => setNewParticipant(e.target.value)}
-                                        />
-                                        <button 
-                                            type="button" 
-                                            className="action-btn primary"
-                                            onClick={handleAddParticipant}
-                                        >
-                                            Добавить
-                                        </button>
-                                    </div>
-                                    
-                                    <div className="participants-list">
-                                        {newEvent.participants.map((participant, index) => (
-                                            <div key={index} className="participant-tag">
-                                                {participant}
-                                                <button 
-                                                    type="button"
-                                                    className="remove-participant"
-                                                    onClick={() => handleRemoveParticipant(participant)}
-                                                >
-                                                    ×
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div className="modal-actions">
-                            <button 
-                                type="button" 
-                                className="action-btn" 
-                                onClick={() => {
-                                    setShowCreateModal(false);
-                                    resetForm();
-                                }}
-                            >
-                                Отмена
-                            </button>
-                            <button 
-                                type="button" 
-                                className="action-btn primary"
-                                onClick={handleCreateEvent}
-                                disabled={!newEvent.title || !newEvent.date || !newEvent.time || !newEvent.location}
-                            >
-                                Создать
-                            </button>
+                        <div className="form-group">
+                        <label>Время</label>
+                        <input
+                            type="time"
+                            name="time"
+                            value={newEvent.time}
+                            onChange={handleNewEventChange}
+                            required
+                        />
                         </div>
                     </div>
+                    </div>
+                    
+                    <div className="modal-section">
+                    <div className="form-group">
+                        <label>Место проведения</label>
+                        <input
+                        type="text"
+                        name="location"
+                        value={newEvent.location}
+                        onChange={handleNewEventChange}
+                        required
+                        />
+                    </div>
+                    </div>
+                    
+                    <div className="modal-section">
+                    <h3>Описание</h3>
+                    <div className="form-group">
+                        <textarea
+                        name="description"
+                        value={newEvent.description}
+                        onChange={handleNewEventChange}
+                        rows="4"
+                        />
+                    </div>
+                    </div>
+                    
+                    <div className="modal-section">
+                    <h3>Участники</h3>
+                    <div className="form-group">
+                        <div className="participant-input">
+                        <input
+                            type="text"
+                            placeholder="Добавить участника"
+                            value={newParticipant}
+                            onChange={(e) => setNewParticipant(e.target.value)}
+                        />
+                        <button 
+                            type="button" 
+                            className="action-btn primary"
+                            onClick={handleAddParticipant}
+                        >
+                            Добавить
+                        </button>
+                        </div>
+                        
+                        <div className="participants-list">
+                        {newEvent.participants.map((participant, index) => (
+                            <div key={index} className="participant-tag">
+                            {participant}
+                            <button 
+                                type="button"
+                                className="remove-participant"
+                                onClick={() => handleRemoveParticipant(participant)}
+                            >
+                                ×
+                            </button>
+                            </div>
+                        ))}
+                        </div>
+                    </div>
+                    </div>
                 </div>
+                
+                <div className="modal-actions">
+                    <div className="primary-action">
+                    <button 
+                        type="button" 
+                        className="action-btn primary"
+                        onClick={handleCreateEvent}
+                        disabled={!newEvent.title || !newEvent.date || !newEvent.time || !newEvent.location}
+                    >
+                        Создать
+                    </button>
+                    </div>
+                    <button 
+                        type="button" 
+                        className="cancel-btn" 
+                        onClick={() => {
+                            setShowCreateModal(false);
+                            resetForm();
+                        }}
+                      >
+                        Отмена
+                        </button>
+                </div>
+                </div>
+            </div>
             )}
         </div>
-    );
+      );
 };
 
 export default Events;
