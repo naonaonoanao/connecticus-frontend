@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaCalendarAlt, FaMapMarkerAlt, FaUser, FaUsers, FaSearch, FaPlus, FaUserCircle, FaTimes } from "react-icons/fa";
+import { FaCalendarAlt, FaMapMarkerAlt, FaUser, FaUsers, FaSearch, FaPlus, FaUserCircle } from "react-icons/fa";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Notification";
 import "../styles/events.css";
@@ -20,47 +20,88 @@ const Events = () => {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [events, setEvents] = useState([
-        {
-            id: 1,
-            title: "React Advanced Training",
-            category: "training",
-            date: "2023-06-15T10:00:00",
-            location: "Конференц-зал 3",
-            organizer: "Иван Петров",
-            description: "Продвинутый курс по React с hooks и context API. На тренинге будут рассмотрены продвинутые техники работы с React, включая оптимизацию производительности, работу с контекстом и создание кастомных хуков.",
-            participants: ["Алексей Смирнов", "Мария Иванова", "Дмитрий Кузнецов"]
-        },
-        {
-            id: 2,
-            title: "Квартальное совещание",
-            category: "meeting",
-            date: "2023-06-20T14:00:00",
-            location: "Зал заседаний",
-            organizer: "Ольга Сидорова",
-            description: "Обсуждение результатов квартала и планов на следующий период. Будут представлены отчеты по ключевым показателям эффективности, обсуждены текущие проекты и поставлены задачи на следующий квартал.",
-            participants: ["Петр Иванов", "Иван Петров"]
-        },
-        {
-            id: 3,
-            title: "Летний корпоратив",
-            category: "party",
-            date: "2023-07-10T18:00:00",
-            location: "Ресторан 'У моря'",
-            organizer: "Анна Петрова",
-            description: "Ежегодное летнее мероприятие для всех сотрудников компании. В программе: ужин, развлекательная программа, награждение лучших сотрудников и танцы до утра!",
-            participants: ["Петр Иванов", "Иван Петров"]
-        },
-        {
-            id: 4,
-            title: "Введение в TypeScript",
-            category: "training",
-            date: "2023-07-05T11:00:00",
-            location: "Онлайн",
-            organizer: "Петр Васильев",
-            description: "Базовый курс по TypeScript для начинающих. Познакомимся с основными концепциями типизации и научимся применять их в реальных проектах.",
-            participants: ["Сергей Иванов", "Анна Петрова"]
-        }
-    ]);
+      {
+          id: 1,
+          title: "React Advanced Training",
+          category: "training",
+          date: "2023-06-15T10:00:00",
+          location: "Конференц-зал 3",
+          organizer: "Иван Петров",
+          description: "Продвинутый курс по React с hooks и context API. На тренинге будут рассмотрены продвинутые техники работы с React, включая оптимизацию производительности, работу с контекстом и создание кастомных хуков.",
+          participants: ["Алексей Смирнов", "Мария Иванова", "Дмитрий Кузнецов"]
+      },
+      {
+          id: 2,
+          title: "Квартальное совещание",
+          category: "meeting",
+          date: "2023-06-20T14:00:00",
+          location: "Зал заседаний",
+          organizer: "Ольга Сидорова",
+          description: "Обсуждение результатов квартала и планов на следующий период. Будут представлены отчеты по ключевым показателям эффективности, обсуждены текущие проекты и поставлены задачи на следующий квартал.",
+          participants: ["Петр Иванов", "Иван Петров"]
+      },
+      {
+          id: 3,
+          title: "Летний корпоратив",
+          category: "party",
+          date: "2023-07-10T18:00:00",
+          location: "Ресторан 'У моря'",
+          organizer: "Анна Петрова",
+          description: "Ежегодное летнее мероприятие для всех сотрудников компании. В программе: ужин, развлекательная программа, награждение лучших сотрудников и танцы до утра!",
+          participants: ["Петр Иванов", "Иван Петров"]
+      },
+      {
+          id: 4,
+          title: "Введение в TypeScript",
+          category: "training",
+          date: "2023-07-05T11:00:00",
+          location: "Онлайн",
+          organizer: "Петр Васильев",
+          description: "Базовый курс по TypeScript для начинающих. Познакомимся с основными концепциями типизации и научимся применять их в реальных проектах.",
+          participants: ["Сергей Иванов", "Анна Петрова"]
+      },
+      // Новые мероприятия
+      {
+          id: 5,
+          title: "Годовой стратегический план",
+          category: "meeting",
+          date: "2023-08-01T09:00:00",
+          location: "Зал переговоров",
+          organizer: "Дмитрий Соколов",
+          description: "Совещание по утверждению годового стратегического плана развития компании с участием всех руководителей отделов.",
+          participants: ["Иван Петров", "Ольга Сидорова", "Анна Петрова", "Петр Васильев", "Сергей Иванов", "Мария Кузнецова", "Алексей Морозов"] // 7 участников
+      },
+      {
+          id: 6,
+          title: "Мастер-класс по презентациям",
+          category: "training",
+          date: "2023-07-15T13:00:00",
+          location: "Конференц-зал 1",
+          organizer: "Елена Ветрова",
+          description: "Практический мастер-класс по созданию эффективных презентаций и публичным выступлениям.",
+          participants: ["Иван Петров", "Анна Петрова", "Дмитрий Кузнецов"]
+      },
+      {
+          id: 7,
+          title: "Новогодний корпоратив",
+          category: "party",
+          date: "2023-12-28T19:00:00",
+          location: "Банкетный зал 'Зимний сад'",
+          organizer: "Анна Петрова",
+          description: "Традиционное новогоднее мероприятие с конкурсами, подарками и праздничным ужином.",
+          participants: ["Иван Петров", "Ольга Сидорова", "Петр Васильев"]
+      },
+      {
+          id: 8,
+          title: "Обучение безопасности",
+          category: "training",
+          date: "2023-09-10T10:00:00",
+          location: "Комната 405",
+          organizer: "Алексей Безопасный",
+          description: "Обязательный тренинг по информационной безопасности и защите персональных данных.",
+          participants: ["Иван Петров", "Дмитрий Кузнецов", "Мария Иванова", "Сергей Иванов"]
+      }
+  ]);
     const [newEvent, setNewEvent] = useState({
         title: "",
         category: "training",
@@ -174,17 +215,18 @@ const Events = () => {
             
             {/* Обернули фильтры и поиск в общий контейнер */}
             <div className="filters-search-container">
-              <div className="filter-panel">
-                {eventCategories.map(category => (
-                  <button
-                    key={category.key}
-                    className={`filter-btn ${activeCategory === category.key ? "active" : ""}`}
-                    onClick={() => setActiveCategory(category.key)}
-                  >
-                    {category.label}
-                  </button>
-                ))}
-              </div>
+            <div className="filter-panel">
+              {eventCategories.map(category => (
+                <button
+                  key={category.key}
+                  className={`filter-btn ${activeCategory === category.key ? "active" : ""}`}
+                  onClick={() => setActiveCategory(category.key)}
+                  data-category={category.key}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
               
               <div className="search-bar">
                 <div className="search-input-container">

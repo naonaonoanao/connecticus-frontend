@@ -207,24 +207,34 @@
 .event-category {
     flex-shrink: 0;
     margin-left: 10px;
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
+    padding: 6px 12px;
+    border-radius: 8px; /* Такое же скругление как у фильтров */
     font-size: 0.8rem;
     font-weight: 500;
-    background: linear-gradient(90deg, #ff6b6b, #ffa3a3);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    border: 2px solid transparent;
+    background: transparent !important; /* Убираем градиентный фон */
 }
 
 .event-category.training {
-    background: linear-gradient(90deg, #4ecdc4, #88dac8);
+    border-color: #1ec455;
+    color: #fff;
+    background: rgba(78, 205, 196, 0.1) !important;
 }
 
 .event-category.meeting {
-    background: linear-gradient(90deg, #74b9ff, #a5d8ff);
+    border-color: #f5f558;
+    color: #fff;
+    background: rgba(116, 185, 255, 0.1) !important;
 }
 
 .event-category.party {
-    background: linear-gradient(90deg, #a29bfe, #d6a2e8);
+    border-color: #f368f8;
+    color: #fff;
+    background: rgba(162, 155, 254, 0.1) !important;
 }
 
 /* Детали мероприятия */
@@ -345,7 +355,7 @@
 }
 
 .event-modal {
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    background: #1a1a2e;
     border-radius: 16px;
     padding: 30px;
     width: 80%;
@@ -356,6 +366,28 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
     animation: modalFadeIn 0.3s ease-out forwards;
+}
+
+/* Стили для скроллбара в модальных окнах */
+.event-modal::-webkit-scrollbar {
+    width: 8px; /* Ширина вертикального скроллбара */
+    height: 8px; /* Высота горизонтального скроллбара */
+}
+
+.event-modal::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05); /* Цвет трека */
+    border-radius: 4px;
+    margin: 5px;
+}
+
+.event-modal::-webkit-scrollbar-thumb {
+    background: #00e5ff; /* Основной цвет ползунка */
+    border-radius: 4px;
+    border: 1px solid rgba(0, 229, 255, 0.3);
+}
+
+.event-modal::-webkit-scrollbar-thumb:hover {
+    background: #00bcd4; /* Цвет при наведении */
 }
 
 @keyframes modalFadeIn {
@@ -575,3 +607,70 @@
     margin-left: auto;
 }
 
+/* Стили для кнопок фильтров (только на странице мероприятий) */
+.events-page .filter-btn {
+    padding: 8px 16px;
+    border-radius: 8px; /* Меньшее скругление углов */
+    border: 2px solid transparent;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px; /* Фиксированная высота */
+    min-width: 120px; /* Минимальная ширина */
+    transition: none; /* Убираем анимацию */
+}
+
+/* Цветные обводки для разных категорий */
+.events-page .filter-btn.active {
+    border-color: #00e5ff;
+    color: #00e5ff;
+    background: rgba(0, 229, 255, 0.1);
+}
+
+/* Разные цвета для разных фильтров */
+.events-page .filter-btn[data-category="all"] {
+    border-color: #00e5ff;
+}
+
+.events-page .filter-btn[data-category="training"] {
+    border-color: #1ec455;
+}
+
+.events-page .filter-btn[data-category="meeting"] {
+    border-color: #f5f558;
+}
+
+.events-page .filter-btn[data-category="party"] {
+    border-color: #f368f8;
+}
+
+
+/* Активные состояния */
+.events-page .filter-btn.active[data-category="all"] {
+    border-color: #00e5ff;
+    color: #fff;
+    background: rgba(0, 229, 255, 0.1);
+}
+
+.events-page .filter-btn.active[data-category="training"] {
+    border-color: #1ec455;
+    color: #fff;
+    background: rgba(78, 205, 196, 0.1);
+}
+
+.events-page .filter-btn.active[data-category="meeting"] {
+    border-color: #f5f558;
+    color: #fff;
+    background: rgba(116, 185, 255, 0.1);
+}
+
+.events-page .filter-btn.active[data-category="party"] {
+    border-color: #f368f8;
+    color: #fff;
+    background: rgba(162, 155, 254, 0.1);
+}
