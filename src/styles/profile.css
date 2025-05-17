@@ -1,25 +1,23 @@
 /* /styles/profile.css */
-/* Commit test */
-
 #root {
     width: 100%;
 }
 
 .profile-page {
     display: flex;
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-    overflow: hidden;
     min-height: 100vh;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    color: white;
 }
 
 .main-content {
     flex: 1;
-    display: flex;
-    flex-direction: column;
     padding: 20px;
+    margin-left: 70px;
+    transition: margin 0.3s ease;
+    min-width: 0;
 }
 
-/* Основные стили карточки */
 .profile-card {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
@@ -27,10 +25,10 @@
     border-radius: 20px;
     margin: 20px auto;
     padding: 30px;
-    width: 95%;
+    width: 100%;
     max-width: 1200px;
+    min-width: 300px;
     min-height: 500px;
-    color: white;
     box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
     display: flex;
     animation: neon-glow 2s infinite alternate;
@@ -50,7 +48,6 @@
     }
 }
 
-/* Левая часть (аватар + интересы + контакты) */
 .profile-left {
     width: 280px;
     padding-right: 25px;
@@ -78,7 +75,6 @@
     color: rgba(0, 229, 255, 0.7);
 }
 
-/* Секция интересов */
 .interests-section {
     width: 100%;
     margin-bottom: 25px;
@@ -94,7 +90,6 @@
     font-size: 16px;
 }
 
-/* Правая часть (основное содержимое) */
 .profile-right {
     flex: 1;
     padding-left: 25px;
@@ -120,7 +115,6 @@
     margin-top: 5px;
 }
 
-/* Сетка информации */
 .info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -171,7 +165,6 @@
     opacity: 0.8;
 }
 
-/* Секция тегов */
 .tags {
     display: flex;
     flex-wrap: wrap;
@@ -187,7 +180,6 @@
     white-space: nowrap;
 }
 
-/* Секция проектов */
 .projects-section {
     grid-column: span 2;
 }
@@ -225,26 +217,45 @@
     position: absolute;
     left: 0;
     top: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 6px 10px;
-    border-radius: 6px;
+    background: rgba(0, 229, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 8px 12px;
+    border-radius: 8px;
     margin-top: 5px;
     font-size: 13px;
     width: 100%;
     z-index: 10;
-    border: 1px solid rgba(0, 229, 255, 0.3);
+    border: 1px solid rgba(0, 229, 255, 0.4);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 229, 255, 0.2);
+    animation: tooltipFadeIn 0.2s ease-out;
 }
 
-/* Секция контактов */
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .contact-section {
     width: 100%;
+    margin-top: 20px;
+}
+
+.contact-section h3 {
+    margin-bottom: 15px;
 }
 
 .contact-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     font-size: 14px;
 }
 
@@ -253,7 +264,6 @@
     min-width: 20px;
 }
 
-/* Кнопки действий */
 .profile-actions {
     display: flex;
     gap: 15px;
@@ -286,7 +296,6 @@
     margin-right: 8px;
 }
 
-/* Модальное окно редактирования */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -311,6 +320,39 @@
     overflow-y: auto;
     border: 1px solid rgba(0, 229, 255, 0.3);
     box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+    animation: modalFadeIn 0.3s ease-out forwards;
+}
+
+.edit-modal::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.edit-modal::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    margin: 5px;
+}
+
+.edit-modal::-webkit-scrollbar-thumb {
+    background: #00e5ff;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 229, 255, 0.3);
+}
+
+.edit-modal::-webkit-scrollbar-thumb:hover {
+    background: #00bcd4;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .edit-modal h3 {
@@ -403,88 +445,14 @@
     background: rgba(255, 82, 82, 0.1);
 }
 
-/* Адаптивность */
-@media (max-width: 1200px) {
-    .profile-card {
-        width: 98%;
-        padding: 20px;
-    }
-}
-
-@media (max-width: 992px) {
-    .profile-card.horizontal {
-        flex-direction: column;
-        min-height: auto;
-    }
-    
-    .profile-left {
-        width: 100%;
-        padding-right: 0;
-        padding-bottom: 20px;
-        margin-bottom: 20px;
-        border-right: none;
-        border-bottom: 1px solid rgba(0, 229, 255, 0.2);
-    }
-    
-    .profile-right {
-        padding-left: 0;
-    }
-}
-
-@media (max-width: 768px) {
-    .info-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .projects-section {
-        grid-column: span 1;
-    }
-    
-    .profile-actions {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .profile-header h2 {
-        font-size: 24px;
-    }
-    
-    .edit-modal {
-        width: 95%;
-        padding: 15px;
-    }
-    
-    .form-columns {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 480px) {
-    .profile-card {
-        padding: 15px;
-    }
-    
-    .info-item {
-        grid-template-columns: 90px 1fr;
-        font-size: 13px;
-    }
-    
-    .edit-modal {
-        width: 100%;
-        border-radius: 0;
-        max-height: 100vh;
-    }
-}
-
-/* Стили для работы с массивами */
 .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
-  }
+}
   
-  .add-btn {
+.add-btn {
     background: #00e5ff;
     color: #000;
     border: none;
@@ -497,25 +465,25 @@
     cursor: pointer;
     font-size: 16px;
     line-height: 1;
-  }
+}
   
-  .add-btn:hover {
+.add-btn:hover {
     background: #00bcd4;
-  }
+}
   
-  .array-item {
+.array-item {
     display: flex;
     gap: 8px;
     margin-bottom: 8px;
     align-items: center;
-  }
+}
   
-  .array-item input {
+.array-item input {
     flex: 1;
     margin-bottom: 0;
-  }
+}
   
-  .remove-btn {
+.remove-btn {
     background: #ff5252;
     color: white;
     border: none;
@@ -528,19 +496,115 @@
     cursor: pointer;
     font-size: 16px;
     line-height: 1;
-  }
+}
   
-  .remove-btn:hover {
+.remove-btn:hover {
     background: #ff0000;
-  }
-  
-  /* Улучшение отображения полей ввода */
-  .form-section input[type="text"] {
-    transition: all 0.3s ease;
-  }
-  
-  .form-section input[type="text"]:focus {
-    border-color: #00e5ff;
-    box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.3);
-    outline: none;
-  }
+}
+
+/* Адаптивные стили */
+@media (max-width: 1600px) {
+    .profile-card {
+        max-width: 1000px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .main-content {
+        margin-left: 70px;
+    }
+    .profile-card.horizontal {
+        flex-direction: column;
+    }
+    .profile-left {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+        padding-right: 0;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+    .profile-right {
+        padding-left: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+    }
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    .profile-card {
+        padding: 15px;
+    }
+}
+
+@media (min-width: 2000px) {
+    .profile-card {
+        max-width: 1400px;
+    }
+}
+
+/* Календарь */
+/* Стили для DatePicker */
+.react-datepicker {
+  font-family: inherit;
+  background: #1a1a2e;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 8px;
+  color: white;
+}
+
+.react-datepicker__header {
+  background: #16213e;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+}
+
+.react-datepicker__current-month,
+.react-datepicker__day-name,
+.react-datepicker__day {
+  color: white;
+}
+
+.react-datepicker__day:hover {
+  background: rgba(0, 229, 255, 0.2);
+}
+
+.react-datepicker__day--selected {
+  background: #00e5ff;
+  color: #000;
+}
+
+.react-datepicker__day--keyboard-selected {
+  background: rgba(0, 229, 255, 0.5);
+  color: white;
+}
+
+.react-datepicker__navigation--previous,
+.react-datepicker__navigation--next {
+  border-color: #00e5ff;
+}
+
+.react-datepicker__navigation--previous:hover,
+.react-datepicker__navigation--next:hover {
+  border-color: #00bcd4;
+}
+
+.date-picker-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.date-picker-input:focus {
+  outline: none;
+  border-color: #00e5ff;
+  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.2);
+}

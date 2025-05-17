@@ -14,7 +14,10 @@ import {
   FaProjectDiagram,
   FaUserEdit,
   FaUserTie,
+  FaBuilding
 } from "react-icons/fa";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import "../styles/profile.css";
 
 const Profile = () => {
@@ -22,6 +25,22 @@ const Profile = () => {
   const [hoveredProject, setHoveredProject] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState(null);
+  const [sidebarWidth, setSidebarWidth] = useState(70);
+  const [birthDate, setBirthDate] = useState(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setSidebarWidth(0);
+      } else {
+        setSidebarWidth(70);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -35,11 +54,15 @@ const Profile = () => {
         const { data } = await axios.get("http://localhost:8080/api/v1/user/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        
+        const date = new Date(data.employee.date_of_birth);
+        setBirthDate(date);
+        
         setProfileData({
           name: `${data.employee.first_name} ${data.employee.middle_name || ''} ${data.employee.last_name}`.trim(),
           position: data.employee.position?.position_name || "",
           city: data.employee.city,
-          birthDate: data.employee.date_of_birth,
+          birthDate: formatDate(data.employee.date_of_birth),
           department: data.employee.department?.name_department || "",
           email: data.employee.email,
           phone: data.employee.phone_number,
@@ -65,13 +88,24 @@ const Profile = () => {
     fetchProfile();
   }, [navigate]);
 
-  if (!profileData) {
-    return <div>Загрузка...</div>;
-  }
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const [year, month, day] = dateString.split("-");
+    return `${day}-${month}-${year}`;
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProfileData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDateChange = (date) => {
+    setBirthDate(date);
+    const formattedDate = date ? formatDate(date.toISOString().split('T')[0]) : "";
+    setProfileData(prev => ({
+      ...prev,
+      birthDate: formattedDate
+    }));
   };
 
   const handleArrayChange = (field, index, value) => {
@@ -97,10 +131,17 @@ const Profile = () => {
     }));
   };
 
+  if (!profileData) {
+    return <div>Загрузка...</div>;
+  }
+
   return (
     <div className="profile-page">
       <Sidebar />
-      <div className="main-content">
+      <div 
+        className="main-content"
+        style={{ marginLeft: `${sidebarWidth}px` }}
+      >
         <Header />
         <motion.div
           className="profile-card horizontal"
@@ -151,7 +192,7 @@ const Profile = () => {
               <div className="info-section">
                 <h3><FaMapMarkerAlt className="icon"/> Основная информация</h3>
                 <div className="info-item compact">
-                  <span>Город:</span>
+                  <span><FaMapMarkerAlt className="icon"/> Город:</span>
                   <p>{profileData.city}</p>
                 </div>
                 <div className="info-item compact">
@@ -159,7 +200,7 @@ const Profile = () => {
                   <p>{profileData.birthDate}</p>
                 </div>
                 <div className="info-item compact">
-                  <span>Отдел:</span>
+                  <span><FaBuilding className="icon"/> Отдел:</span>
                   <p>{profileData.department}</p>
                 </div>
               </div>
@@ -246,11 +287,15 @@ const Profile = () => {
                 
                 <div className="form-group">
                   <label>Дата рождения</label>
-                  <input 
-                    type="text" 
-                    name="birthDate" 
-                    value={profileData.birthDate}
-                    onChange={handleInputChange}
+                  <DatePicker
+                    selected={birthDate}
+                    onChange={handleDateChange}
+                    dateFormat="dd-MM-yyyy"
+                    className="date-picker-input"
+                    placeholderText="Выберите дату"
+                    showYearDropdown
+                    dropdownMode="select"
+                    maxDate={new Date()}
                   />
                 </div>
               </div>
