@@ -1,8 +1,10 @@
-import React, { useState } from "react";
-import { FaCalendarAlt, FaMapMarkerAlt, FaUser, FaUsers, FaSearch, FaPlus, FaUserCircle } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { FaCalendarAlt, FaMapMarkerAlt, FaUser, FaUsers, FaSearch, FaPlus, FaUserCircle, FaClock  } from "react-icons/fa";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Notification";
 import "../styles/events.css";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const eventCategories = [
     { key: "all", label: "Все мероприятия" },
@@ -19,6 +21,22 @@ const Events = () => {
     const [showMyEvents, setShowMyEvents] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [datePickerOpen, setDatePickerOpen] = useState(false);
+
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (datePickerOpen && !event.target.closest('.react-datepicker') && 
+            !event.target.closest('.date-picker-container')) {
+          setDatePickerOpen(false);
+        }
+      };
+    
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, [datePickerOpen]);
+    
     const [events, setEvents] = useState([
       {
           id: 1,
@@ -122,6 +140,15 @@ const Events = () => {
                               event.participants.includes(currentUser);
         return matchesCategory && matchesSearch && matchesMyEvents;
     });
+
+    const handleDateChange = (date) => {
+      const formattedDate = date.toISOString().split('T')[0];
+      setNewEvent(prev => ({
+        ...prev,
+        date: formattedDate
+      }));
+      setDatePickerOpen(false);
+    };
 
     const formatDate = (dateString) => {
         const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
@@ -419,24 +446,45 @@ const Events = () => {
                     <div className="form-row">
                         <div className="form-group">
                         <label>Дата</label>
-                        <input
-                            type="date"
-                            name="date"
-                            value={newEvent.date}
-                            onChange={handleNewEventChange}
-                            required
-                        />
+                          <div className="date-picker-container">
+                            <input
+                              type="text"
+                              className="date-picker-input"
+                              value={newEvent.date}
+                              onClick={() => setDatePickerOpen(!datePickerOpen)}
+                              readOnly
+                              placeholder="Выберите дату"
+                            />
+                            <FaCalendarAlt 
+                              className="date-picker-icon" 
+                              onClick={() => setDatePickerOpen(!datePickerOpen)}
+                            />
+                            {datePickerOpen && (
+                              <DatePicker
+                                selected={newEvent.date ? new Date(newEvent.date) : null}
+                                onChange={handleDateChange}
+                                inline
+                                calendarClassName="custom-calendar"
+                                shouldCloseOnSelect={true}
+                                onCalendarClose={() => setDatePickerOpen(false)}
+                              />
+                            )}
+                          </div>
                         </div>
                         <div className="form-group">
                         <label>Время</label>
-                        <input
+                        <div className="time-picker-container">
+                          <input
                             type="time"
                             name="time"
                             value={newEvent.time}
                             onChange={handleNewEventChange}
                             required
-                        />
+                            className="time-picker-input"
+                          />
+                          <FaClock className="time-picker-icon" />
                         </div>
+                      </div>
                     </div>
                     </div>
                     

@@ -1,39 +1,47 @@
 /* EmployeeSearch.css */
 .employee-search-page {
-  padding: 20px;
-  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  display: flex;
   min-height: 100vh;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
   color: white;
   font-family: 'Arial', sans-serif;
 }
 
+.employee-search-content {
+  flex: 1;
+  padding: 20px;
+  margin-left: 70px;
+  width: calc(100% - 70px);
+}
+
 /* Стили поисковой строки */
 .search-container {
-  max-width: 1200px;
+  width: 100%;
+  max-width: none;
   margin: 0 auto 30px;
-  position: relative;
 }
 
 .search-bar {
   display: flex;
   gap: 15px;
   margin-bottom: 20px;
+  width: 100%;
 }
 
 .search-input-container {
-  flex: 1;
   position: relative;
+  flex: 1;
 }
 
 .search-input-container input {
   width: 100%;
-  padding: 12px 15px 12px 40px;
+  padding: 12px 15px 12px 40px; /* Левый отступ 40px для иконки */
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.05);
   color: white;
   font-size: 16px;
-  transition: all 0.3s;
+  box-sizing: border-box;
 }
 
 .search-input-container input:focus {
@@ -44,10 +52,11 @@
 
 .search-icon {
   position: absolute;
-  left: 15px;
+  left: 15px; /* Отступ от левого края поля ввода */
   top: 50%;
   transform: translateY(-50%);
   color: #cfd8dc;
+  pointer-events: none;
 }
 
 .filter-button {
@@ -76,17 +85,15 @@
 /* Стили модального окна фильтров */
 .filters-modal {
   position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
+  width: 80%;
+  max-width: 1200px;
+  left: 50%;
+  transform: translateX(-50%);
   background: linear-gradient(135deg, #1a1a2e, #16213e);
   border-radius: 15px;
   padding: 20px;
   margin-top: 10px;
   z-index: 100;
-  border: 1px solid rgba(0, 229, 255, 0.2);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  animation: neon-glow 2s infinite alternate;
 }
 
 @keyframes neon-glow {
@@ -127,23 +134,79 @@
 }
 
 .filter-section {
+  width: 100%;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 10px;
   padding: 15px;
-  border: 1px solid rgba(0, 229, 255, 0.1);
+  margin-bottom: 15px;
 }
 
 .filter-section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  padding: 5px 0;
+  margin-bottom: 10px;
 }
 
 .filter-section-header span {
   font-weight: 500;
   color: #00e5ff;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.filter-section-header .fa-chevron-down,
+.filter-section-header .fa-chevron-up {
+  display: none;
+}
+
+.filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-option input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #00e5ff;
+  border-radius: 4px;
+  background: transparent;
+  position: relative;
+  cursor: pointer;
+}
+
+.filter-option input[type="checkbox"]:checked {
+  background: rgba(0, 229, 255, 0.2);
+}
+
+.filter-option input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  color: #00e5ff;
+  font-size: 14px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.filter-option label {
+  cursor: pointer;
+  user-select: none;
+}
+
+.filter-search {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
 }
 
 .filter-section input {
@@ -198,29 +261,32 @@
 
 /* Стили карточек сотрудников */
 .results-container {
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
 }
 
 .employees-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
 }
 
 .employee-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
   padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s;
-  animation: neon-glow 2s infinite alternate;
-}
-
-.employee-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  border: 2px solid #00e5ff;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  position: relative;
+  padding-bottom: 60px;
+  width: 350px;
+  min-width: 350px;
+  max-width: 350px;
+  box-sizing: border-box;
+  min-height: 150px;
+  height: auto;
 }
 
 .employee-header h3 {
@@ -292,6 +358,12 @@
 
 /* Адаптивность */
 @media (max-width: 768px) {
+  .employee-search-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 15px;
+  }
+  
   .search-bar {
     flex-direction: column;
   }
@@ -302,5 +374,18 @@
   
   .employees-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Адаптация для очень больших экранов */
+@media (min-width: 1600px) {
+  .employees-grid {
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  }
+}
+
+@media (min-width: 2000px) {
+  .employees-grid {
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
   }
 }

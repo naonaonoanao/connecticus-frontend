@@ -1,676 +1,741 @@
-/* Основные стили страницы */
 .events-page {
-    display: flex;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-    color: #fff;
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  color: #fff;
 }
 
 .events-content {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
-/* Шапка с заголовком и кнопками */
+/* Header */
 .events-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .events-title {
-    font-size: 1.8rem;
-    margin: 0;
+  font-size: 1.8rem;
+  margin: 0;
 }
 
 .header-buttons {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-.my-events-btn {
-    background: transparent;
-    border: 2px solid #00e5ff;
-    border-radius: 10px;
-    padding: 8px 16px;
-    color: #00e5ff;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 30px;
+/* Buttons */
+.events-page .my-events-btn,
+.events-page .create-event-btn {
+  background: transparent;
+  border: 2px solid #00e5ff;
+  border-radius: 10px;
+  padding: 8px 16px;
+  color: #00e5ff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 30px;
 }
 
-.my-events-btn:hover {
-    background: #00e5ff;
-    color: #000;
+.events-page .my-events-btn:hover,
+.events-page .create-event-btn:hover {
+  background: #00e5ff;
+  color: #000;
 }
 
-.my-events-btn.active {
-    background: rgba(0, 229, 255, 0.1);
-    color: #00e5ff;
+.events-page .my-events-btn.active {
+  background: rgba(0, 229, 255, 0.1);
+  color: #00e5ff;
 }
 
-.my-events-btn.active:hover {
-    background: #00e5ff;
-    color: #000;
+.events-page .my-events-btn.active:hover {
+  background: #00e5ff;
+  color: #000;
 }
 
-.create-event-btn {
-    background: transparent;
-    border: 2px solid #00e5ff;
-    border-radius: 10px;
-    padding: 8px 16px;
-    color: #00e5ff;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 30px;
+.events-page .my-events-btn svg,
+.events-page .create-event-btn svg {
+  margin-right: 8px;
 }
 
-.create-event-btn:hover {
-    background: #00e5ff;
-    color: #000;
+/* Filter Panel */
+.events-page .filter-panel {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
 }
 
-.my-events-btn svg,
-.create-event-btn svg {
-    margin-right: 8px;
+.events-page .search-bar {
+  display: flex;
+  gap: 15px;
 }
 
-/* Фильтры и поиск */
-.filter-panel {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 25px;
-    flex-wrap: wrap
+.events-page .search-input-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
 }
 
-.search-bar {
-    display: flex;
-    gap: 15px;
+.events-page .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  pointer-events: none;
 }
 
-.search-input-container {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
+.events-page .search-input {
+  width: 100%;
+  padding: 10px 15px 10px 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
 }
 
-.search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 1rem;
-    pointer-events: none;
+.events-page .search-input:focus {
+  outline: none;
+  border-color: #4cc9f0;
+  background: rgba(255, 255, 255, 0.15);
 }
 
-.search-input {
-    width: 100%;
-    padding: 10px 15px 10px 40px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    color: #fff;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: #4cc9f0;
-    background: rgba(255, 255, 255, 0.15);
-}
-
-/* Сетка мероприятий */
-.events-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, 350px);
-    justify-content: left;
-    gap: 20px;
-    align-content: flex-start;
-    flex-grow: 1;
-    overflow-y: auto;
-    padding-top: 10px;
-    min-width: 0;
-}
-
-.no-events {
-    text-align: center;
-    padding: 40px;
-    color: rgba(255, 255, 255, 0.5);
-    grid-column: 1 / -1;
-}
-
-/* Карточка мероприятия */
-.event-card {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 20px;
-    border: 2px solid #00e5ff;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-    position: relative;
-    padding-bottom: 60px;
-    width: 350px;
-    min-width: 350px;
-    max-width: 350px;
-    box-sizing: border-box;
-}
-
-.event-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    min-width: 0;
-}
-
-.event-title {
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: #fff;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: 1;
-    min-width: 0;
-  }
-
-.event-description {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    line-height: 1.4;
-    margin: 10px 0;
-}
-
-/* Категории мероприятий */
-.event-category {
-    flex-shrink: 0;
-    margin-left: 10px;
-    padding: 6px 12px;
-    border-radius: 8px; /* Такое же скругление как у фильтров */
-    font-size: 0.8rem;
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 28px;
-    border: 2px solid transparent;
-    background: transparent !important; /* Убираем градиентный фон */
-}
-
-.event-category.training {
-    border-color: #1ec455;
-    color: #fff;
-    background: rgba(78, 205, 196, 0.1) !important;
-}
-
-.event-category.meeting {
-    border-color: #f5f558;
-    color: #fff;
-    background: rgba(116, 185, 255, 0.1) !important;
-}
-
-.event-category.party {
-    border-color: #f368f8;
-    color: #fff;
-    background: rgba(162, 155, 254, 0.1) !important;
-}
-
-/* Детали мероприятия */
-.event-details {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 15px;
-}
-
-.event-detail {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-}
-
-.event-icon {
-    font-size: 1.1rem;
-}
-
-/* Участники */
-.event-participants {
-    margin-top: 15px;
-}
-
-.participants-title {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 8px;
-}
-
-.participants-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    max-height: 32px; /* Примерно 2 строки участников */
-    overflow: hidden;
-  }
-
-.participant {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-}
-
-.participant.current-user {
-    color: #4cc9f0;
-    font-weight: 500;
-}
-
-.organizer-badge {
-    color: #4cc9f0;
-    font-size: 0.8em;
-    margin-left: 5px;
-}
-
-/* Кнопки действий */
-.event-actions {
-    position: absolute;
-    right: 15px;
-    bottom: 15px;
-    width: calc(100% - 40px);
-    display: flex;
-    justify-content: flex-end;
-}
-
-.action-btn {
-    background: transparent;
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.action-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.action-btn.primary {
-    background: #00e5ff;
-    border-color: #00e5ff;
-    color: #000;
-}
-
-.action-btn.primary:hover {
-    background: #00bcd4;
-}
-
-.action-btn.danger {
-    background: #ff4d4f;
-    border-color: #ff4d4f;
-}
-
-.action-btn.danger:hover {
-    background: #d9363e;
-}
-
-/* Модальное окно */
-.event-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    backdrop-filter: blur(5px);
-}
-
-.event-modal {
-    background: #1a1a2e;
-    border-radius: 16px;
-    padding: 30px;
-    width: 80%;
-    max-width: 600px;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    animation: modalFadeIn 0.3s ease-out forwards;
-}
-
-/* Стили для скроллбара в модальных окнах */
-.event-modal::-webkit-scrollbar {
-    width: 8px; /* Ширина вертикального скроллбара */
-    height: 8px; /* Высота горизонтального скроллбара */
-}
-
-.event-modal::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05); /* Цвет трека */
-    border-radius: 4px;
-    margin: 5px;
-}
-
-.event-modal::-webkit-scrollbar-thumb {
-    background: #00e5ff; /* Основной цвет ползунка */
-    border-radius: 4px;
-    border: 1px solid rgba(0, 229, 255, 0.3);
-}
-
-.event-modal::-webkit-scrollbar-thumb:hover {
-    background: #00bcd4; /* Цвет при наведении */
-}
-
-@keyframes modalFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.modal-close-btn {
-    display: none;
-}
-
-.modal-close-btn:hover {
-    color: #ff4d4f;
-    transform: rotate(90deg);
-}
-
-.modal-header {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.modal-header h2 {
-    margin: 0;
-    color: #00e5ff;
-    font-size: 1.8rem;
-}
-
-.modal-content {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-}
-
-.modal-section {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 20px;
-}
-
-.modal-section h3 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    color: #4cc9f0;
-    font-size: 1.2rem;
-}
-
-.modal-details {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.modal-detail {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1rem;
-}
-
-.modal-icon {
-    font-size: 1.1rem;
-    color: #4cc9f0;
-}
-
-.modal-description {
-    line-height: 1.6;
-    margin: 0;
-}
-
-.modal-participants {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Форма создания мероприятия */
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    padding: 10px 15px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    color: #fff;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: #00e5ff;
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.form-group textarea {
-    resize: vertical;
-    min-height: 100px;
-}
-
-.form-group select {
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234cc9f0'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 12px;
-    padding-right: 30px;
-}
-
-.form-group select option {
-    background-color: #1a1a2e;
-    color: #fff;
-}
-
-@-moz-document url-prefix() {
-    .form-group select {
-        color: #fff !important;
-        text-shadow: 0 0 0 #fff;
-    }
-}
-
-.form-group select::-ms-expand {
-    display: none;
-}
-
-.form-row {
-    display: flex;
-    gap: 20px;
-}
-
-.form-row .form-group {
-    flex: 1;
-}
-
-.participant-input {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.participant-input input {
-    flex: 1;
-}
-
-.participant-tag {
-    background: rgba(74, 144, 226, 0.2);
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.remove-participant {
-    background: none;
-    border: none;
-    color: #ff6b6b;
-    cursor: pointer;
-    font-size: 1rem;
-    padding: 0;
-    margin-left: 5px;
-    line-height: 1;
-}
-
-.remove-participant:hover {
-    color: #ff4d4f;
-}
-
-.filters-search-container {
-    margin-top: 15px;
-    margin-bottom: 0px;
-}
-
-.modal-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.modal-primary-action {
-    margin-left: auto;
-}
-
-/* Стили для кнопок фильтров (только на странице мероприятий) */
+/* Filter Buttons */
 .events-page .filter-btn {
-    padding: 8px 16px;
-    border-radius: 8px; /* Меньшее скругление углов */
-    border: 2px solid transparent;
-    background: transparent;
-    color: #fff;
-    cursor: pointer;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 40px; /* Фиксированная высота */
-    min-width: 120px; /* Минимальная ширина */
-    transition: none; /* Убираем анимацию */
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  min-width: 120px;
 }
 
-/* Цветные обводки для разных категорий */
 .events-page .filter-btn.active {
-    border-color: #00e5ff;
-    color: #00e5ff;
-    background: rgba(0, 229, 255, 0.1);
+  border-color: #00e5ff;
+  color: #00e5ff;
+  background: rgba(0, 229, 255, 0.1);
 }
 
-/* Разные цвета для разных фильтров */
 .events-page .filter-btn[data-category="all"] {
-    border-color: #00e5ff;
+  border-color: #00e5ff;
 }
 
 .events-page .filter-btn[data-category="training"] {
-    border-color: #1ec455;
+  border-color: #1ec455;
 }
 
 .events-page .filter-btn[data-category="meeting"] {
-    border-color: #f5f558;
+  border-color: #f5f558;
 }
 
 .events-page .filter-btn[data-category="party"] {
-    border-color: #f368f8;
+  border-color: #f368f8;
 }
 
-
-/* Активные состояния */
 .events-page .filter-btn.active[data-category="all"] {
-    border-color: #00e5ff;
-    color: #fff;
-    background: rgba(0, 229, 255, 0.1);
+  border-color: #00e5ff;
+  color: #fff;
+  background: rgba(0, 229, 255, 0.1);
 }
 
 .events-page .filter-btn.active[data-category="training"] {
-    border-color: #1ec455;
-    color: #fff;
-    background: rgba(78, 205, 196, 0.1);
+  border-color: #1ec455;
+  color: #fff;
+  background: rgba(78, 205, 196, 0.1);
 }
 
 .events-page .filter-btn.active[data-category="meeting"] {
-    border-color: #f5f558;
-    color: #fff;
-    background: rgba(116, 185, 255, 0.1);
+  border-color: #f5f558;
+  color: #fff;
+  background: rgba(116, 185, 255, 0.1);
 }
 
 .events-page .filter-btn.active[data-category="party"] {
-    border-color: #f368f8;
-    color: #fff;
-    background: rgba(162, 155, 254, 0.1);
+  border-color: #f368f8;
+  color: #fff;
+  background: rgba(162, 155, 254, 0.1);
+}
+
+/* Events Grid */
+.events-page .events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 350px);
+  justify-content: left;
+  gap: 20px;
+  align-content: flex-start;
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-top: 10px;
+  min-width: 0;
+}
+
+.events-page .no-events {
+  text-align: center;
+  padding: 40px;
+  color: rgba(255, 255, 255, 0.5);
+  grid-column: 1 / -1;
+}
+
+/* Event Card */
+.events-page .event-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  border: 2px solid #00e5ff;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  position: relative;
+  padding-bottom: 60px;
+  width: 350px;
+  min-width: 350px;
+  max-width: 350px;
+  box-sizing: border-box;
+}
+
+.events-page .event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  min-width: 0;
+}
+
+.events-page .event-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.events-page .event-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+  margin: 10px 0;
+}
+
+/* Categories */
+.events-page .event-category {
+  flex-shrink: 0;
+  margin-left: 10px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  border: 2px solid transparent;
+  background: transparent !important;
+}
+
+.events-page .event-category.training {
+  border-color: #1ec455;
+  color: #fff;
+  background: rgba(78, 205, 196, 0.1) !important;
+}
+
+.events-page .event-category.meeting {
+  border-color: #f5f558;
+  color: #fff;
+  background: rgba(116, 185, 255, 0.1) !important;
+}
+
+.events-page .event-category.party {
+  border-color: #f368f8;
+  color: #fff;
+  background: rgba(162, 155, 254, 0.1) !important;
+}
+
+/* Details */
+.events-page .event-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.events-page .event-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.events-page .event-icon {
+  font-size: 1.1rem;
+}
+
+/* Participants */
+.events-page .event-participants {
+  margin-top: 15px;
+}
+
+.events-page .participants-title {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
+}
+
+.events-page .participants-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 32px;
+  overflow: hidden;
+}
+
+.events-page .participant {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+}
+
+.events-page .participant.current-user {
+  color: #4cc9f0;
+  font-weight: 500;
+}
+
+.events-page .organizer-badge {
+  color: #4cc9f0;
+  font-size: 0.8em;
+  margin-left: 5px;
+}
+
+/* Actions */
+.events-page .event-actions {
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  width: calc(100% - 40px);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.events-page .action-btn {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.events-page .action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.events-page .action-btn.primary {
+  background: #00e5ff;
+  border-color: #00e5ff;
+  color: #000;
+}
+
+.events-page .action-btn.primary:hover {
+  background: #00bcd4;
+}
+
+.events-page .action-btn.danger {
+  background: #ff4d4f;
+  border-color: #ff4d4f;
+}
+
+.events-page .action-btn.danger:hover {
+  background: #d9363e;
+}
+
+/* Modal */
+.events-page .event-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.events-page .event-modal {
+  background: #1a1a2e;
+  border-radius: 16px;
+  padding: 30px;
+  width: 80%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: modalFadeIn 0.3s ease-out forwards;
+}
+
+.events-page .event-modal::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.events-page .event-modal::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  margin: 5px;
+}
+
+.events-page .event-modal::-webkit-scrollbar-thumb {
+  background: #00e5ff;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+}
+
+.events-page .event-modal::-webkit-scrollbar-thumb:hover {
+  background: #00bcd4;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.events-page .modal-header {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.events-page .modal-header h2 {
+  margin: 0;
+  color: #00e5ff;
+  font-size: 1.8rem;
+}
+
+.events-page .modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.events-page .modal-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.events-page .modal-section h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #4cc9f0;
+  font-size: 1.2rem;
+}
+
+.events-page .modal-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.events-page .modal-detail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+}
+
+.events-page .modal-icon {
+  font-size: 1.1rem;
+  color: #4cc9f0;
+}
+
+.events-page .modal-participants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.events-page .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Form */
+.events-page .form-group {
+  margin-bottom: 20px;
+}
+
+.events-page .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.events-page .form-group input,
+.events-page .form-group select,
+.events-page .form-group textarea {
+  width: 100%;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.events-page .form-group input:focus,
+.events-page .form-group select:focus,
+.events-page .form-group textarea:focus {
+  outline: none;
+  border-color: #00e5ff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.events-page .form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.events-page .form-group select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234cc9f0'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  padding-right: 30px;
+}
+
+.events-page .form-group select option {
+  background-color: #1a1a2e;
+  color: #fff;
+}
+
+.events-page .form-row {
+  display: flex;
+  gap: 20px;
+}
+
+.events-page .form-row .form-group {
+  flex: 1;
+}
+
+.events-page .participant-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.events-page .participant-input input {
+  flex: 1;
+}
+
+.events-page .participant-tag {
+  background: rgba(74, 144, 226, 0.2);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.events-page .remove-participant {
+  background: none;
+  border: none;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+  margin-left: 5px;
+  line-height: 1;
+}
+
+.events-page .remove-participant:hover {
+  color: #ff4d4f;
+}
+
+/* Date/Time Pickers */
+.events-page .date-picker-container,
+.events-page .time-picker-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.events-page .date-picker-input,
+.events-page .time-picker-input {
+  width: 100%;
+  padding: 10px 35px 10px 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.events-page .date-picker-input:focus,
+.events-page .time-picker-input:focus {
+  outline: none;
+  border-color: #00e5ff;
+  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.2);
+}
+
+.events-page .date-picker-icon,
+.events-page .time-picker-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+/* React DatePicker */
+.events-page .react-datepicker {
+  font-family: inherit;
+  background: #1a1a2e;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 8px;
+  color: white;
+  position: absolute;
+  z-index: 100;
+  top: 100%;
+  left: 0;
+  margin-top: 5px;
+}
+
+.events-page .react-datepicker__header {
+  background: #16213e;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+}
+
+.events-page .react-datepicker__current-month,
+.events-page .react-datepicker__day-name,
+.events-page .react-datepicker__day {
+  color: white;
+}
+
+.events-page .react-datepicker__day:hover {
+  background: rgba(0, 229, 255, 0.2);
+}
+
+.events-page .react-datepicker__day--selected {
+  background: #00e5ff;
+  color: #000;
+}
+
+.events-page .react-datepicker__day--keyboard-selected {
+  background: rgba(0, 229, 255, 0.5);
+  color: white;
+}
+
+.events-page .react-datepicker__navigation--previous,
+.events-page .react-datepicker__navigation--next {
+  border-color: #00e5ff;
+}
+
+.events-page .react-datepicker__navigation--previous:hover,
+.events-page .react-datepicker__navigation--next:hover {
+  border-color: #00bcd4;
+}
+
+/* Time Picker Dropdown */
+.events-page .time-picker-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #1a1a2e;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 8px;
+  z-index: 100;
+  margin-top: 5px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.events-page .time-option {
+  padding: 8px 15px;
+  color: white;
+  cursor: pointer;
+}
+
+.events-page .time-option:hover {
+  background: rgba(0, 229, 255, 0.2);
+}
+
+.events-page .time-option.selected {
+  background: #00e5ff;
+  color: #000;
+}
+
+/* Убираем стандартную иконку времени в браузере */
+.events-page .time-picker-input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+/* Оставляем только нашу иконку FaClock */
+.events-page .time-picker-container .time-picker-icon {
+  display: block; /* Убедимся, что иконка отображается */
+}
+
+/* Скрываем вторую иконку, если она была добавлена другим способом */
+.events-page .time-picker-container .react-clock-icon {
+  display: none;
 }
