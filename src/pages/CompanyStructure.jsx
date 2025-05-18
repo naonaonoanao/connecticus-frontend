@@ -141,15 +141,7 @@ const CompanyStructure = () => {
               </button>
             ))}
           </div>
-          <div className="search-wrapper">
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Поиск..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+
         </motion.div>
         
         <div className="graph-container">
