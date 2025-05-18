@@ -138,13 +138,15 @@ const Profile = () => {
   return (
     <div className="profile-page">
       <Sidebar />
-      <div 
-        className="main-content"
-        style={{ marginLeft: `${sidebarWidth}px` }}
-      >
+      <div className="main-content">
         <Header />
+        
         <motion.div
           className="profile-card horizontal"
+          style={{
+            marginLeft: '100px',
+            marginTop: '55px'
+          }}
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
