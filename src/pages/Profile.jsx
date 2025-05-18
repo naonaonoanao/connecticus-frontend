@@ -144,8 +144,8 @@ const Profile = () => {
         <motion.div
           className="profile-card horizontal"
           style={{
-            marginLeft: '100px',
-            marginTop: '55px'
+            marginLeft: '190px',
+            marginTop: '70px'
           }}
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
