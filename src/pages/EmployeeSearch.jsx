@@ -227,7 +227,7 @@ const EmployeeSearch = () => {
                       <input
                         type="text"
                         className="filter-search"
-                        placeholder={`Начните вводить ${filter === 'city' ? 'город' : filter === 'technologies' ? 'технологию' : filter}`}
+                        placeholder={`Начните вводить ${filter === 'city' ? 'город' : filter === 'technologies' ? 'технологию' : filter === 'position' ? 'должность' : filter === 'department' ? 'отдел' : filter === 'team' ? 'команду' : filter === 'interests' ? 'интересы' : filter} `}
                         value={filters[filter].searchQuery}
                         onChange={(e) => handleFilterSearchChange(filter, e.target.value)}
                       />
