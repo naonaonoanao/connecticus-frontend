@@ -10,8 +10,8 @@
 .employee-search-content {
   flex: 1;
   padding: 20px;
-  margin-left: 70px;
-  width: calc(100% - 70px);
+  margin-left: 20px;
+  width: calc(100% - 20px);
 }
 
 /* Стили поисковой строки */
@@ -468,4 +468,50 @@
 
 .filter-options::-webkit-scrollbar-thumb:hover {
   background: #00bcd4;
+}
+
+/* Стили для блока контактов */
+.employee-contacts {
+  margin: 15px 0;
+  padding: 15px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.employee-contacts h4 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  color: #00e5ff;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.contact-item .icon {
+  margin-right: 8px;
+  color: #00e5ff;
+  min-width: 20px;
+}
+
+.contact-item a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.contact-item a:hover {
+  color: #00e5ff;
+  text-decoration: underline;
+}
+
+/* Увеличиваем минимальную высоту карточки */
+.employee-card {
+  min-height: 250px;
+  /* остальные стили карточки */
 }

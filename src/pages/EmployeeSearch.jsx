@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaSearch, FaFilter, FaTimes, FaMapMarkerAlt, FaCode, FaProjectDiagram } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaTimes, FaMapMarkerAlt, FaCode, FaProjectDiagram,FaEnvelope,FaPhone,FaTelegram } from 'react-icons/fa';
 import '../styles/EmployeeSearch.css';
 import Sidebar from "../components/Sidebar";
 
@@ -25,7 +25,10 @@ const EmployeeSearch = () => {
       city: 'Москва',
       technologies: ['React', 'JavaScript', 'TypeScript'],
       interests: ['Фотография', 'Путешествия'],
-      team: 'Web Team'
+      team: 'Web Team',
+      email: 'ivanov@example.com',
+      phone: '+7 (123) 456-78-90',
+      telegram: '@ivanov'
     },
     {
       id: 2,
@@ -35,7 +38,10 @@ const EmployeeSearch = () => {
       city: 'Санкт-Петербург',
       technologies: ['Figma', 'Photoshop'],
       interests: ['Рисование', 'Музыка'],
-      team: 'Design Team'
+      team: 'Design Team',
+      email: 'petrova@example.com',
+      phone: '+7 (987) 654-32-10',
+      telegram: '@petrova'
     },
     {
       id: 3,
@@ -45,7 +51,10 @@ const EmployeeSearch = () => {
       city: 'Новосибирск',
       technologies: ['Node.js', 'Python', 'Docker'],
       interests: ['Спорт', 'Кино'],
-      team: 'API Team'
+      team: 'API Team',
+      email: 'sidorov@example.com',
+      phone: '+7 (555) 123-45-67',
+      telegram: '@sidorov'
     }
   ];
 
@@ -143,6 +152,25 @@ const EmployeeSearch = () => {
         <div className="info-item">
           <span>Команда:</span>
           <span>{employee.team}</span>
+        </div>
+      </div>
+      
+      {/* Добавленный блок с контактами */}
+      <div className="employee-contacts">
+        <h4>Контакты</h4>
+        <div className="contact-item">
+          <FaEnvelope className="icon" />
+          <a href={`mailto:${employee.email}`}>{employee.email}</a>
+        </div>
+        <div className="contact-item">
+          <FaPhone className="icon" />
+          <a href={`tel:${employee.phone.replace(/\D/g, '')}`}>{employee.phone}</a>
+        </div>
+        <div className="contact-item">
+          <FaTelegram className="icon" />
+          <a href={`https://t.me/${employee.telegram.replace('@', '')}`} target="_blank" rel="noopener noreferrer">
+            {employee.telegram}
+          </a>
         </div>
       </div>
       
