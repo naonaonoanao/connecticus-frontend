@@ -543,7 +543,8 @@
 
 @media (min-width: 2000px) {
     .profile-card {
-        max-width: 1400px;
+        max-width: 2250px;
+        min-height: 550px;
     }
 }
 

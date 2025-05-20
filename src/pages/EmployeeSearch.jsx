@@ -69,6 +69,106 @@ const EmployeeSearch = () => {
       interests: ['Фотография', 'Путешествия'],
       team: 'Web Team'
     },
+    {
+      id: 6,
+      name: 'Иванов Иван Иванович',
+      position: 'Frontend разработчик',
+      department: 'Разработка',
+      city: 'Москва',
+      technologies: ['React', 'JavaScript', 'TypeScript'],
+      interests: ['Фотография', 'Путешествия'],
+      team: 'Web Team'
+    },
+    {
+      id: 7,
+      name: 'Иванов Иван Иванович',
+      position: 'Frontend разработчик',
+      department: 'Разработка',
+      city: 'Москва',
+      technologies: ['React', 'JavaScript', 'TypeScript'],
+      interests: ['Фотография', 'Путешествия'],
+      team: 'Web Team'
+    },
+    {
+      id: 8,
+      name: 'Иванов Иван Иванович',
+      position: 'Frontend разработчик',
+      department: 'Разработка',
+      city: 'Москва',
+      technologies: ['React', 'JavaScript', 'TypeScript'],
+      interests: ['Фотография', 'Путешествия'],
+      team: 'Web Team'
+    },
+    {
+      id: 9,
+      name: 'Иванов Иван Иванович',
+      position: 'Frontend разработчик',
+      department: 'Разработка',
+      city: 'Москва',
+      technologies: ['React', 'JavaScript', 'TypeScript'],
+      interests: ['Фотография', 'Путешествия'],
+      team: 'Web Team'
+    },
+    {
+      id: 10,
+      name: 'Иванов Иван Иванович',
+      position: 'Frontend разработчик',
+      department: 'Разработка',
+      city: 'Москва',
+      technologies: ['React', 'JavaScript', 'TypeScript'],
+      interests: ['Фотография', 'Путешествия'],
+      team: 'Web Team'
+    },
+    {
+      id: 11,
+      name: 'Иванов Иван Иванович',
+      position: 'Frontend разработчик',
+      department: 'Разработка',
+      city: 'Москва',
+      technologies: ['React', 'JavaScript', 'TypeScript'],
+      interests: ['Фотография', 'Путешествия'],
+      team: 'Web Team'
+    },
+    {
+      id: 12,
+      name: 'Иванов Иван Иванович',
+      position: 'Frontend разработчик',
+      department: 'Разработка',
+      city: 'Москва',
+      technologies: ['React', 'JavaScript', 'TypeScript'],
+      interests: ['Фотография', 'Путешествия'],
+      team: 'Web Team'
+    },
+    {
+      id: 13,
+      name: 'Иванов Иван Иванович',
+      position: 'Frontend разработчик',
+      department: 'Разработка',
+      city: 'Москва',
+      technologies: ['React', 'JavaScript', 'TypeScript'],
+      interests: ['Фотография', 'Путешествия'],
+      team: 'Web Team'
+    },
+    {
+      id: 14,
+      name: 'Иванов Иван Иванович',
+      position: 'Frontend разработчик',
+      department: 'Разработка',
+      city: 'Москва',
+      technologies: ['React', 'JavaScript', 'TypeScript'],
+      interests: ['Фотография', 'Путешествия'],
+      team: 'Web Team'
+    },
+    {
+      id: 15,
+      name: 'Иванов Иван Иванович',
+      position: 'Frontend разработчик',
+      department: 'Разработка',
+      city: 'Москва',
+      technologies: ['React', 'JavaScript', 'TypeScript'],
+      interests: ['Фотография', 'Путешествия'],
+      team: 'Web Team'
+    },
   ];
 
   // Функция для получения вариантов фильтрации
