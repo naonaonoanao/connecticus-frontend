@@ -448,3 +448,24 @@
     grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
   }
 }
+
+.filter-options::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.filter-options::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  margin: 5px;
+}
+
+.filter-options::-webkit-scrollbar-thumb {
+  background: #00e5ff;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+}
+
+.filter-options::-webkit-scrollbar-thumb:hover {
+  background: #00bcd4;
+}
