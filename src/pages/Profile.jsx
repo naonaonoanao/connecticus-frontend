@@ -1,3 +1,5 @@
+//actual version of Profile.jsx
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
@@ -144,7 +146,7 @@ const Profile = () => {
         <motion.div
           className="profile-card horizontal"
           style={{
-            marginLeft: '190px',
+            marginLeft: '90px',
             marginTop: '70px'
           }}
           initial={{ opacity: 0, x: -50 }}

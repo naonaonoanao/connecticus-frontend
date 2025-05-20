@@ -1,3 +1,6 @@
+/* actual version of Profile.css */
+
+/* /styles/profile.css */
 #root {
     width: 100%;
 }
@@ -23,9 +26,9 @@
     border-radius: 20px;
     padding: 30px;
     width: 100%;
-    max-width: 1800px;
-    min-width: 700px;
-    min-height: 500px;
+    max-width: 1500px;
+    min-width: 1150px;
+    min-height: 550px;
     box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
     display: flex;
     animation: neon-glow 2s infinite alternate;
@@ -49,6 +52,7 @@
 
 .profile-left {
     width: 280px;
+    height: 465px;
     padding-right: 25px;
     border-right: 1px solid rgba(0, 229, 255, 0.2);
     display: flex;
@@ -284,6 +288,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 20px;
 }
 
 .profile-actions button:hover {
