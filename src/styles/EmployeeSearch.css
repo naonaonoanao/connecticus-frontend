@@ -10,8 +10,8 @@
 .employee-search-content {
   flex: 1;
   padding: 20px;
-  margin-left: 70px;
-  width: calc(100% - 70px);
+  margin-left: 20px;
+  width: calc(100% - 20px);
 }
 
 /* Стили поисковой строки */
