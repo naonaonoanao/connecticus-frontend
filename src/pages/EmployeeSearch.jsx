@@ -5,7 +5,6 @@ import '../styles/EmployeeSearch.css';
 import Sidebar from "../components/Sidebar";
 
 const EmployeeSearch = () => {
-  // Состояния для поиска и фильтров
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
@@ -17,7 +16,6 @@ const EmployeeSearch = () => {
     interests: { selected: [], searchQuery: '' }
   });
 
-  // Моковые данные сотрудников
   const employees = [
     {
       id: 1,
@@ -41,137 +39,16 @@ const EmployeeSearch = () => {
     },
     {
       id: 3,
-      name: 'Иванов Иван Иванович',
-      position: 'Frontend разработчик',
+      name: 'Сидоров Алексей Владимирович',
+      position: 'Backend разработчик',
       department: 'Разработка',
-      city: 'Москва',
-      technologies: ['React', 'JavaScript', 'TypeScript'],
-      interests: ['Фотография', 'Путешествия'],
-      team: 'Web Team'
-    },
-    {
-      id: 4,
-      name: 'Иванов Иван Иванович',
-      position: 'Frontend разработчик',
-      department: 'Разработка',
-      city: 'Москва',
-      technologies: ['React', 'JavaScript', 'TypeScript'],
-      interests: ['Фотография', 'Путешествия'],
-      team: 'Web Team'
-    },
-    {
-      id: 5,
-      name: 'Иванов Иван Иванович',
-      position: 'Frontend разработчик',
-      department: 'Разработка',
-      city: 'Москва',
-      technologies: ['React', 'JavaScript', 'TypeScript'],
-      interests: ['Фотография', 'Путешествия'],
-      team: 'Web Team'
-    },
-    {
-      id: 6,
-      name: 'Иванов Иван Иванович',
-      position: 'Frontend разработчик',
-      department: 'Разработка',
-      city: 'Москва',
-      technologies: ['React', 'JavaScript', 'TypeScript'],
-      interests: ['Фотография', 'Путешествия'],
-      team: 'Web Team'
-    },
-    {
-      id: 7,
-      name: 'Иванов Иван Иванович',
-      position: 'Frontend разработчик',
-      department: 'Разработка',
-      city: 'Москва',
-      technologies: ['React', 'JavaScript', 'TypeScript'],
-      interests: ['Фотография', 'Путешествия'],
-      team: 'Web Team'
-    },
-    {
-      id: 8,
-      name: 'Иванов Иван Иванович',
-      position: 'Frontend разработчик',
-      department: 'Разработка',
-      city: 'Москва',
-      technologies: ['React', 'JavaScript', 'TypeScript'],
-      interests: ['Фотография', 'Путешествия'],
-      team: 'Web Team'
-    },
-    {
-      id: 9,
-      name: 'Иванов Иван Иванович',
-      position: 'Frontend разработчик',
-      department: 'Разработка',
-      city: 'Москва',
-      technologies: ['React', 'JavaScript', 'TypeScript'],
-      interests: ['Фотография', 'Путешествия'],
-      team: 'Web Team'
-    },
-    {
-      id: 10,
-      name: 'Иванов Иван Иванович',
-      position: 'Frontend разработчик',
-      department: 'Разработка',
-      city: 'Москва',
-      technologies: ['React', 'JavaScript', 'TypeScript'],
-      interests: ['Фотография', 'Путешествия'],
-      team: 'Web Team'
-    },
-    {
-      id: 11,
-      name: 'Иванов Иван Иванович',
-      position: 'Frontend разработчик',
-      department: 'Разработка',
-      city: 'Москва',
-      technologies: ['React', 'JavaScript', 'TypeScript'],
-      interests: ['Фотография', 'Путешествия'],
-      team: 'Web Team'
-    },
-    {
-      id: 12,
-      name: 'Иванов Иван Иванович',
-      position: 'Frontend разработчик',
-      department: 'Разработка',
-      city: 'Москва',
-      technologies: ['React', 'JavaScript', 'TypeScript'],
-      interests: ['Фотография', 'Путешествия'],
-      team: 'Web Team'
-    },
-    {
-      id: 13,
-      name: 'Иванов Иван Иванович',
-      position: 'Frontend разработчик',
-      department: 'Разработка',
-      city: 'Москва',
-      technologies: ['React', 'JavaScript', 'TypeScript'],
-      interests: ['Фотография', 'Путешествия'],
-      team: 'Web Team'
-    },
-    {
-      id: 14,
-      name: 'Иванов Иван Иванович',
-      position: 'Frontend разработчик',
-      department: 'Разработка',
-      city: 'Москва',
-      technologies: ['React', 'JavaScript', 'TypeScript'],
-      interests: ['Фотография', 'Путешествия'],
-      team: 'Web Team'
-    },
-    {
-      id: 15,
-      name: 'Иванов Иван Иванович',
-      position: 'Frontend разработчик',
-      department: 'Разработка',
-      city: 'Москва',
-      technologies: ['React', 'JavaScript', 'TypeScript'],
-      interests: ['Фотография', 'Путешествия'],
-      team: 'Web Team'
-    },
+      city: 'Новосибирск',
+      technologies: ['Node.js', 'Python', 'Docker'],
+      interests: ['Спорт', 'Кино'],
+      team: 'API Team'
+    }
   ];
 
-  // Функция для получения вариантов фильтрации
   const getFilterOptions = (filterType) => {
     const allOptions = new Set();
     
@@ -189,7 +66,6 @@ const EmployeeSearch = () => {
       .sort();
   };
 
-  // Функция фильтрации
   const filteredEmployees = employees.filter(employee => {
     const matchesSearch = employee.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilters = Object.entries(filters).every(([key, filter]) => {
@@ -206,7 +82,6 @@ const EmployeeSearch = () => {
     return matchesSearch && matchesFilters;
   });
 
-  // Обработчик изменения поиска в фильтре
   const handleFilterSearchChange = (filterType, value) => {
     setFilters(prev => ({
       ...prev,
@@ -217,7 +92,6 @@ const EmployeeSearch = () => {
     }));
   };
 
-  // Обработчик выбора опции фильтра
   const handleFilterOptionChange = (filterType, option) => {
     setFilters(prev => {
       const selected = prev[filterType].selected.includes(option)
@@ -234,7 +108,6 @@ const EmployeeSearch = () => {
     });
   };
 
-  // Сброс фильтров
   const resetFilters = () => {
     setFilters({
       city: { selected: [], searchQuery: '' },
@@ -246,9 +119,13 @@ const EmployeeSearch = () => {
     });
   };
 
-  // Рендер карточки сотрудника
   const renderEmployeeCard = (employee) => (
-    <div className="employee-card" key={employee.id}>
+    <motion.div 
+      className="employee-card" 
+      key={employee.id}
+      whileHover={{ scale: 1.02 }}
+      transition={{ duration: 0.2 }}
+    >
       <div className="employee-header">
         <h3>{employee.name}</h3>
         <p className="position">{employee.position}</p>
@@ -286,16 +163,19 @@ const EmployeeSearch = () => {
           ))}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 
   return (
     <div className="employee-search-page">
       <Sidebar />
       <div className="employee-search-content">
-        {/* Поисковая строка и фильтры */}
         <div className="search-container">
-          <motion.div className="search-bar" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+          <motion.div 
+            className="search-bar" 
+            initial={{ opacity: 0, y: -20 }} 
+            animate={{ opacity: 1, y: 0 }}
+          >
             <div className="search-input-container">
               <FaSearch className="search-icon" />
               <input
@@ -310,12 +190,21 @@ const EmployeeSearch = () => {
               onClick={() => setShowFilters(!showFilters)}
             >
               <FaFilter /> Фильтры
+              {Object.values(filters).some(f => f.selected.length > 0) && (
+                <span className="filter-count">
+                  {Object.values(filters).reduce((acc, f) => acc + f.selected.length, 0)}
+                </span>
+              )}
             </button>
           </motion.div>
   
-          {/* Модальное окно фильтров */}
           {showFilters && (
-            <motion.div className="filters-modal" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <motion.div 
+              className="filters-modal"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+            >
               <div className="filters-header">
                 <h3>Фильтры</h3>
                 <button className="close-button" onClick={() => setShowFilters(false)}>
@@ -338,42 +227,74 @@ const EmployeeSearch = () => {
                       <input
                         type="text"
                         className="filter-search"
-                        placeholder={`Поиск по ${filter === 'city' ? 'городам' : filter === 'technologies' ? 'технологиям' : filter}`}
-                        value={filters[filter].searchQuery || ''}
+                        placeholder={`Начните вводить ${filter === 'city' ? 'город' : filter === 'technologies' ? 'технологию' : filter}`}
+                        value={filters[filter].searchQuery}
                         onChange={(e) => handleFilterSearchChange(filter, e.target.value)}
                       />
                     </div>
-                    <div className="filter-options">
-                      {getFilterOptions(filter).map((option) => (
-                        <div key={option} className="filter-option">
-                          <input
-                            type="checkbox"
-                            id={`${filter}-${option}`}
-                            checked={filters[filter].selected?.includes(option) || false}
-                            onChange={() => handleFilterOptionChange(filter, option)}
-                          />
-                          <label htmlFor={`${filter}-${option}`}>{option}</label>
-                        </div>
-                      ))}
-                    </div>
+                    {filters[filter].searchQuery && (
+                      <div className="filter-options">
+                        {getFilterOptions(filter).length > 0 ? (
+                          getFilterOptions(filter).map((option) => (
+                            <div key={option} className="filter-option">
+                              <input
+                                type="checkbox"
+                                id={`${filter}-${option}`}
+                                checked={filters[filter].selected.includes(option)}
+                                onChange={() => handleFilterOptionChange(filter, option)}
+                              />
+                              <label htmlFor={`${filter}-${option}`}>{option}</label>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="no-options">Ничего не найдено</div>
+                        )}
+                      </div>
+                    )}
+                    {filters[filter].selected.length > 0 && (
+                      <div className="selected-tags">
+                        {filters[filter].selected.map(selected => (
+                          <span key={selected} className="selected-tag">
+                            {selected}
+                            <button 
+                              onClick={() => handleFilterOptionChange(filter, selected)}
+                              className="remove-tag"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
               
               <div className="filters-actions">
-                <button className="reset-button" onClick={resetFilters}>Сбросить все</button>
-                <button className="apply-button" onClick={() => setShowFilters(false)}>Применить</button>
+                <button className="reset-button" onClick={resetFilters}>
+                  Сбросить все
+                </button>
+                <button 
+                  className="apply-button" 
+                  onClick={() => setShowFilters(false)}
+                >
+                  Применить
+                </button>
               </div>
             </motion.div>
           )}
         </div>
   
-        {/* Результаты поиска */}
         <div className="results-container">
           {filteredEmployees.length > 0 ? (
-            <div className="employees-grid">
+            <motion.div 
+              className="employees-grid"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ staggerChildren: 0.1 }}
+            >
               {filteredEmployees.map(renderEmployeeCard)}
-            </div>
+            </motion.div>
           ) : (
             <div className="no-results">
               <p>Сотрудники не найдены. Попробуйте изменить параметры поиска.</p>
