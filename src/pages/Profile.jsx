@@ -1,6 +1,4 @@
-//actual version of Profile.jsx
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Notification";
@@ -16,7 +14,8 @@ import {
   FaProjectDiagram,
   FaUserEdit,
   FaUserTie,
-  FaBuilding
+  FaBuilding,
+  FaChevronDown
 } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -29,6 +28,9 @@ const Profile = () => {
   const [profileData, setProfileData] = useState(null);
   const [sidebarWidth, setSidebarWidth] = useState(70);
   const [birthDate, setBirthDate] = useState(null);
+  const [techLevels, setTechLevels] = useState({});
+  const [showTechLevelDropdown, setShowTechLevelDropdown] = useState(null);
+  const dropdownRefs = useRef([]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -43,6 +45,22 @@ const Profile = () => {
     handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showTechLevelDropdown !== null) {
+        const dropdownRef = dropdownRefs.current[showTechLevelDropdown];
+        if (dropdownRef && !dropdownRef.contains(event.target)) {
+          setShowTechLevelDropdown(null);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showTechLevelDropdown]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -60,8 +78,17 @@ const Profile = () => {
         const date = new Date(data.employee.date_of_birth);
         setBirthDate(date);
         
+        // Инициализируем techLevels
+        const levels = {};
+        data.employee.technologies.forEach((tech, index) => {
+          levels[index] = tech.rank.name_rank;
+        });
+        setTechLevels(levels);
+        
         setProfileData({
-          name: `${data.employee.first_name} ${data.employee.middle_name || ''} ${data.employee.last_name}`.trim(),
+          firstName: data.employee.first_name,
+          lastName: data.employee.last_name,
+          middleName: data.employee.middle_name || '',
           position: data.employee.position?.position_name || "",
           city: data.employee.city,
           birthDate: formatDate(data.employee.date_of_birth),
@@ -69,9 +96,7 @@ const Profile = () => {
           email: data.employee.email,
           phone: data.employee.phone_number,
           telegram: data.employee.telegram_name,
-          technologies: data.employee.technologies.map(
-            (t) => `${t.name_technology} (${t.rank.name_rank})`
-          ),
+          technologies: data.employee.technologies.map(t => t.name_technology),
           interests: data.employee.interests.map((i) => i.name_interest),
           projects: data.employee.projects.map((p) => ({
             name: p.name_project,
@@ -118,11 +143,25 @@ const Profile = () => {
     });
   };
 
+  const handleTechLevelChange = (index, level) => {
+    setTechLevels(prev => ({
+      ...prev,
+      [index]: level
+    }));
+    setShowTechLevelDropdown(null);
+  };
+
   const addArrayItem = (field) => {
     setProfileData((prev) => ({
       ...prev,
       [field]: [...prev[field], ""],
     }));
+    if (field === 'technologies') {
+      setTechLevels(prev => ({
+        ...prev,
+        [profileData.technologies.length]: 'Junior' // Устанавливаем уровень по умолчанию
+      }));
+    }
   };
 
   const removeArrayItem = (field, index) => {
@@ -131,11 +170,26 @@ const Profile = () => {
       ...prev,
       [field]: prev[field].filter((_, i) => i !== index),
     }));
+    if (field === 'technologies') {
+      const newTechLevels = {...techLevels};
+      delete newTechLevels[index];
+      setTechLevels(newTechLevels);
+    }
+  };
+
+  const validateEmail = (email) => {
+    return email.includes('@') && email.includes('.');
+  };
+
+  const validatePhone = (phone) => {
+    return /^[\d\s+\-()]{10,20}$/.test(phone);
   };
 
   if (!profileData) {
     return <div>Загрузка...</div>;
   }
+
+  const fullName = `${profileData.lastName} ${profileData.firstName} ${profileData.middleName}`.trim();
 
   return (
     <div className="profile-page">
@@ -188,7 +242,7 @@ const Profile = () => {
           {/* Правая часть - основная информация */}
           <div className="profile-right">
             <div className="profile-header">
-              <h2>{profileData.name}</h2>
+              <h2>{fullName}</h2>
               <p className="position">{profileData.position}</p>
             </div>
             
@@ -213,7 +267,9 @@ const Profile = () => {
                 <h3><FaCode className="icon"/> Технологии</h3>
                 <div className="tags compact">
                   {profileData.technologies.map((tech, index) => (
-                    <span key={index} className="tag">{tech}</span>
+                    <span key={index} className="tag">
+                      {tech} ({techLevels[index] || 'Junior'})
+                    </span>
                   ))}
                 </div>
               </div>
@@ -258,14 +314,36 @@ const Profile = () => {
             >
               <h3>Редактирование профиля</h3>
               
-              <div className="form-group">
-                <label>ФИО</label>
-                <input 
-                  type="text" 
-                  name="name" 
-                  value={profileData.name}
-                  onChange={handleInputChange}
-                />
+              <div className="form-columns">
+                <div className="form-group">
+                  <label>Фамилия</label>
+                  <input 
+                    type="text" 
+                    name="lastName" 
+                    value={profileData.lastName}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Имя</label>
+                  <input 
+                    type="text" 
+                    name="firstName" 
+                    value={profileData.firstName}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Отчество</label>
+                  <input 
+                    type="text" 
+                    name="middleName" 
+                    value={profileData.middleName}
+                    onChange={handleInputChange}
+                  />
+                </div>
               </div>
               
               <div className="form-group">
@@ -327,12 +405,38 @@ const Profile = () => {
                 </div>
                 {profileData.technologies.map((tech, index) => (
                   <div key={index} className="array-item">
-                    <input
-                      type="text"
-                      value={tech}
-                      onChange={(e) => handleArrayChange('technologies', index, e.target.value)}
-                      placeholder="Введите технологию"
-                    />
+                    <div className="tech-input-wrapper">
+                      <input
+                        type="text"
+                        value={tech}
+                        onChange={(e) => handleArrayChange('technologies', index, e.target.value)}
+                        placeholder="Введите технологию"
+                      />
+                      <div 
+                        className="tech-level-dropdown"
+                        ref={el => dropdownRefs.current[index] = el}
+                      >
+                        <button 
+                          className="tech-level-toggle"
+                          onClick={() => setShowTechLevelDropdown(showTechLevelDropdown === index ? null : index)}
+                        >
+                          {techLevels[index] || 'Выберите уровень'} <FaChevronDown />
+                        </button>
+                        {showTechLevelDropdown === index && (
+                          <div className="tech-level-options">
+                            {['Junior', 'Middle', 'Senior'].map(level => (
+                              <div 
+                                key={level}
+                                className="tech-level-option"
+                                onClick={() => handleTechLevelChange(index, level)}
+                              >
+                                {level}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                     {profileData.technologies.length > 1 && (
                       <button
                         type="button"
@@ -385,7 +489,11 @@ const Profile = () => {
                   name="email" 
                   value={profileData.email}
                   onChange={handleInputChange}
+                  className={!validateEmail(profileData.email) ? 'invalid-input' : ''}
                 />
+                {!validateEmail(profileData.email) && (
+                  <span className="validation-error">Введите корректный email (должен содержать @ и .)</span>
+                )}
               </div>
               
               <div className="form-group">
@@ -395,7 +503,11 @@ const Profile = () => {
                   name="phone" 
                   value={profileData.phone}
                   onChange={handleInputChange}
+                  className={!validatePhone(profileData.phone) ? 'invalid-input' : ''}
                 />
+                {!validatePhone(profileData.phone) && (
+                  <span className="validation-error">Введите корректный номер телефона (10-20 цифр)</span>
+                )}
               </div>
               
               <div className="form-group">

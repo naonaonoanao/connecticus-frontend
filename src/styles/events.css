@@ -740,3 +740,183 @@
 .events-page .time-picker-container .react-clock-icon {
   display: none;
 }
+
+/* Стили для выпадающего списка типа мероприятия */
+.event-type-dropdown-container {
+  position: relative;
+}
+
+.event-type-toggle {
+  width: 100%;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.event-type-toggle:hover {
+  border-color: #00e5ff;
+}
+
+.event-type-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #1a1a2e;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 8px;
+  z-index: 100;
+  margin-top: 5px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.event-type-option {
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.event-type-option:hover {
+  background: rgba(0, 229, 255, 0.2);
+}
+
+/* Запрет выбора прошедших дат в календаре */
+.react-datepicker__day--disabled {
+  color: #ccc !important;
+  cursor: not-allowed;
+}
+
+.react-datepicker__day--disabled:hover {
+  background: transparent !important;
+}
+
+/* Стили для добавления участников */
+.participant-search-container {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.participant-search-input {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-size: 14px;
+}
+
+.participant-search-input:focus {
+  outline: none;
+  border-color: #00e5ff;
+  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.2);
+}
+
+.participants-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #1a1a2e;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 8px;
+  z-index: 100;
+  margin-top: 5px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.participant-option {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.participant-option:hover {
+  background: rgba(0, 229, 255, 0.1);
+}
+
+.participant-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #00e5ff;
+  border-radius: 4px;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 229, 255, 0.1);
+}
+
+.check-icon {
+  color: #00e5ff;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.participant-option:hover .check-icon {
+  opacity: 1;
+}
+
+.no-participants {
+  padding: 10px;
+  text-align: center;
+  color: #cfd8dc;
+  font-size: 14px;
+}
+
+.selected-participants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.selected-participant-tag {
+  background: rgba(0, 229, 255, 0.1);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  display: flex;
+  align-items: center;
+}
+
+.remove-participant {
+  background: none;
+  border: none;
+  color: #ff5252;
+  margin-left: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.remove-participant:hover {
+  color: #ff4d4f;
+}

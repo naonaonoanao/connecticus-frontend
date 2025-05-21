@@ -608,3 +608,82 @@
   border-color: #00e5ff;
   box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.2);
 }
+
+/* Добавленные стили для новых элементов */
+.form-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.tech-input-wrapper {
+    display: flex;
+    flex: 1;
+    position: relative;
+}
+
+.tech-level-dropdown {
+    position: relative;
+    margin-left: 8px;
+    min-width: 120px;
+}
+
+.tech-level-toggle {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    font-size: 14px;
+}
+
+.tech-level-toggle:hover {
+    border-color: #00e5ff;
+}
+
+.tech-level-toggle svg {
+    margin-left: 8px;
+    transition: transform 0.2s;
+}
+
+.tech-level-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #1a1a2e;
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    border-radius: 8px;
+    z-index: 10;
+    margin-top: 5px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.tech-level-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.tech-level-option:hover {
+    background: rgba(0, 229, 255, 0.2);
+}
+
+.invalid-input {
+    border-color: #ff5252 !important;
+}
+
+.validation-error {
+    color: #ff5252;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+}

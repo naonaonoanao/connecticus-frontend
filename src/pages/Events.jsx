@@ -1,5 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { FaCalendarAlt, FaMapMarkerAlt, FaUser, FaUsers, FaSearch, FaPlus, FaUserCircle, FaClock  } from "react-icons/fa";
+import React, { useState, useEffect, useRef } from "react";
+import { 
+  FaCalendarAlt, 
+  FaMapMarkerAlt, 
+  FaUser, 
+  FaUsers, 
+  FaSearch, 
+  FaPlus, 
+  FaUserCircle, 
+  FaClock,
+  FaChevronDown,
+  FaCheck
+} from "react-icons/fa";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Notification";
 import "../styles/events.css";
@@ -15,27 +26,71 @@ const eventCategories = [
 
 const currentUser = "Иван Петров";
 
+const eventTypes = [
+  { value: "training", label: "Тренинг" },
+  { value: "meeting", label: "Совещание" },
+  { value: "party", label: "Корпоратив" }
+];
+
+const allParticipants = [
+  "Иван Петров",
+  "Алексей Смирнов",
+  "Мария Иванова",
+  "Дмитрий Кузнецов",
+  "Ольга Сидорова",
+  "Анна Петрова",
+  "Петр Васильев",
+  "Сергей Иванов",
+  "Мария Кузнецова",
+  "Алексей Морозов",
+  "Дмитрий Соколов",
+  "Елена Ветрова",
+  "Алексей Безопасный"
+];
+
 const Events = () => {
-    const [activeCategory, setActiveCategory] = useState("all");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [showMyEvents, setShowMyEvents] = useState(false);
-    const [selectedEvent, setSelectedEvent] = useState(null);
-    const [showCreateModal, setShowCreateModal] = useState(false);
-    const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showMyEvents, setShowMyEvents] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [showEventTypeDropdown, setShowEventTypeDropdown] = useState(false);
+  const [showParticipantsDropdown, setShowParticipantsDropdown] = useState(false);
+  const [participantSearch, setParticipantSearch] = useState("");
+  const dropdownRef = useRef(null);
+  const eventTypeButtonRef = useRef(null);
+  const participantsDropdownRef = useRef(null);
+  const participantInputRef = useRef(null);
 
     useEffect(() => {
       const handleClickOutside = (event) => {
+        // Для date picker
         if (datePickerOpen && !event.target.closest('.react-datepicker') && 
             !event.target.closest('.date-picker-container')) {
           setDatePickerOpen(false);
         }
+        
+        // Для event type dropdown
+        if (showEventTypeDropdown && 
+            !event.target.closest('.event-type-dropdown') && 
+            !event.target.closest('.event-type-toggle')) {
+          setShowEventTypeDropdown(false);
+        }
+        
+        // Для participants dropdown
+        if (showParticipantsDropdown && 
+            !event.target.closest('.participants-dropdown') && 
+            !event.target.closest('.participant-search-input')) {
+          setShowParticipantsDropdown(false);
+        }
       };
-    
+
       document.addEventListener('mousedown', handleClickOutside);
       return () => {
         document.removeEventListener('mousedown', handleClickOutside);
       };
-    }, [datePickerOpen]);
+    }, [datePickerOpen, showEventTypeDropdown, showParticipantsDropdown]);
     
     const [events, setEvents] = useState([
       {
@@ -131,6 +186,11 @@ const Events = () => {
     });
     const [newParticipant, setNewParticipant] = useState("");
 
+    const filteredParticipants = allParticipants.filter(participant => 
+      participant.toLowerCase().includes(participantSearch.toLowerCase()) &&
+      !newEvent.participants.includes(participant)
+    );
+
     const filteredEvents = events.filter(event => {
         const matchesCategory = activeCategory === "all" || event.category === activeCategory;
         const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -142,18 +202,26 @@ const Events = () => {
     });
 
     const handleDateChange = (date) => {
-      const formattedDate = date.toISOString().split('T')[0];
-      setNewEvent(prev => ({
-        ...prev,
-        date: formattedDate
-      }));
-      setDatePickerOpen(false);
+        const formattedDate = date.toISOString().split('T')[0];
+        setNewEvent(prev => ({
+            ...prev,
+            date: formattedDate
+        }));
+        setDatePickerOpen(false);
     };
 
     const formatDate = (dateString) => {
         const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
         return new Date(dateString).toLocaleDateString('ru-RU', options);
     };
+
+  const handleEventTypeSelect = (type) => {
+      setNewEvent(prev => ({
+          ...prev,
+          category: type
+      }));
+      setShowEventTypeDropdown(false);
+  };
 
     const handleDetailsClick = (event) => {
         setSelectedEvent(event);
@@ -207,6 +275,27 @@ const Events = () => {
             }));
             setNewParticipant("");
         }
+    };
+
+    const handleParticipantSelect = (participant) => {
+      if (!newEvent.participants.includes(participant)) {
+        setNewEvent(prev => ({
+          ...prev,
+          participants: [...prev.participants, participant]
+        }));
+      }
+      setParticipantSearch("");
+      setShowParticipantsDropdown(false);
+      participantInputRef.current?.focus();
+    };
+
+    const handleParticipantSearchChange = (e) => {
+      setParticipantSearch(e.target.value);
+      if (e.target.value.length > 0) {
+        setShowParticipantsDropdown(true);
+      } else {
+        setShowParticipantsDropdown(false);
+      }
     };
 
     const handleRemoveParticipant = (participant) => {
@@ -407,86 +496,103 @@ const Events = () => {
 
             {/* Модальное окно создания мероприятия */}
             {showCreateModal && (
-            <div className="event-modal-overlay">
-                <div className="event-modal">
-                <div className="modal-header">
-                    <h2>Создать мероприятие</h2>
-                </div>
-                
-                <div className="modal-content">
-                    <div className="modal-section">
-                    <div className="form-group">
-                        <label>Название мероприятия</label>
-                        <input
-                        type="text"
-                        name="title"
-                        value={newEvent.title}
-                        onChange={handleNewEventChange}
-                        required
-                        />
-                    </div>
-                    
-                    <div className="form-group">
-                        <label>Тип мероприятия</label>
-                        <select
-                        name="category"
-                        value={newEvent.category}
-                        onChange={handleNewEventChange}
-                        required
-                        >
-                        <option value="training">Тренинг</option>
-                        <option value="meeting">Совещание</option>
-                        <option value="party">Корпоратив</option>
-                        </select>
-                    </div>
-                    </div>
-                    
-                    <div className="modal-section">
-                    <h3>Дата и время</h3>
-                    <div className="form-row">
-                        <div className="form-group">
-                        <label>Дата</label>
-                          <div className="date-picker-container">
-                            <input
-                              type="text"
-                              className="date-picker-input"
-                              value={newEvent.date}
-                              onClick={() => setDatePickerOpen(!datePickerOpen)}
-                              readOnly
-                              placeholder="Выберите дату"
-                            />
-                            <FaCalendarAlt 
-                              className="date-picker-icon" 
-                              onClick={() => setDatePickerOpen(!datePickerOpen)}
-                            />
-                            {datePickerOpen && (
-                              <DatePicker
-                                selected={newEvent.date ? new Date(newEvent.date) : null}
-                                onChange={handleDateChange}
-                                inline
-                                calendarClassName="custom-calendar"
-                                shouldCloseOnSelect={true}
-                                onCalendarClose={() => setDatePickerOpen(false)}
-                              />
-                            )}
-                          </div>
+                <div className="event-modal-overlay">
+                    <div className="event-modal">
+                        <div className="modal-header">
+                            <h2>Создать мероприятие</h2>
                         </div>
-                        <div className="form-group">
-                        <label>Время</label>
-                        <div className="time-picker-container">
-                          <input
-                            type="time"
-                            name="time"
-                            value={newEvent.time}
-                            onChange={handleNewEventChange}
-                            required
-                            className="time-picker-input"
-                          />
-                          <FaClock className="time-picker-icon" />
-                        </div>
-                      </div>
-                    </div>
-                    </div>
+                        
+                        <div className="modal-content">
+                            <div className="modal-section">
+                                <div className="form-group">
+                                    <label>Название мероприятия</label>
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        value={newEvent.title}
+                                        onChange={handleNewEventChange}
+                                        required
+                                    />
+                                </div>
+                                
+                                <div className="form-group">
+                                    <label>Тип мероприятия</label>
+                                    <div className="event-type-dropdown-container">
+                                        <button 
+                                            ref={eventTypeButtonRef}
+                                            className="event-type-toggle"
+                                            onClick={() => setShowEventTypeDropdown(!showEventTypeDropdown)}
+                                        >
+                                            {eventTypes.find(t => t.value === newEvent.category)?.label}
+                                            <FaChevronDown />
+                                        </button>
+                                        {showEventTypeDropdown && (
+                                            <div 
+                                                ref={dropdownRef}
+                                                className="event-type-dropdown"
+                                            >
+                                                {eventTypes.map(type => (
+                                                    <div 
+                                                        key={type.value}
+                                                        className="event-type-option"
+                                                        onClick={() => handleEventTypeSelect(type.value)}
+                                                    >
+                                                        {type.label}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="modal-section">
+                                <h3>Дата и время</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Дата</label>
+                                        <div className="date-picker-container">
+                                            <input
+                                                type="text"
+                                                className="date-picker-input"
+                                                value={newEvent.date}
+                                                onClick={() => setDatePickerOpen(!datePickerOpen)}
+                                                readOnly
+                                                placeholder="Выберите дату"
+                                            />
+                                            <FaCalendarAlt 
+                                                className="date-picker-icon" 
+                                                onClick={() => setDatePickerOpen(!datePickerOpen)}
+                                            />
+                                            {datePickerOpen && (
+                                                <DatePicker
+                                                    selected={newEvent.date ? new Date(newEvent.date) : null}
+                                                    onChange={handleDateChange}
+                                                    inline
+                                                    calendarClassName="custom-calendar"
+                                                    minDate={new Date()}
+                                                    shouldCloseOnSelect={true}
+                                                    onCalendarClose={() => setDatePickerOpen(false)}
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Время</label>
+                                        <div className="time-picker-container">
+                                            <input
+                                                type="time"
+                                                name="time"
+                                                value={newEvent.time}
+                                                onChange={handleNewEventChange}
+                                                required
+                                                className="time-picker-input"
+                                            />
+                                            <FaClock className="time-picker-icon" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                     
                     <div className="modal-section">
                     <div className="form-group">
@@ -514,69 +620,94 @@ const Events = () => {
                     </div>
                     
                     <div className="modal-section">
-                    <h3>Участники</h3>
-                    <div className="form-group">
-                        <div className="participant-input">
-                        <input
-                            type="text"
-                            placeholder="Добавить участника"
-                            value={newParticipant}
-                            onChange={(e) => setNewParticipant(e.target.value)}
-                        />
-                        <button 
-                            type="button" 
-                            className="action-btn primary"
-                            onClick={handleAddParticipant}
-                        >
-                            Добавить
-                        </button>
-                        </div>
-                        
-                        <div className="participants-list">
-                        {newEvent.participants.map((participant, index) => (
-                            <div key={index} className="participant-tag">
-                            {participant}
-                            <button 
-                                type="button"
-                                className="remove-participant"
-                                onClick={() => handleRemoveParticipant(participant)}
-                            >
-                                ×
-                            </button>
-                            </div>
-                        ))}
-                        </div>
-                    </div>
-                    </div>
-                </div>
-                
-                <div className="modal-actions">
-                    <div className="primary-action">
-                    <button 
-                        type="button" 
-                        className="action-btn primary"
-                        onClick={handleCreateEvent}
-                        disabled={!newEvent.title || !newEvent.date || !newEvent.time || !newEvent.location}
-                    >
-                        Создать
-                    </button>
-                    </div>
-                    <button 
-                        type="button" 
-                        className="cancel-btn" 
-                        onClick={() => {
-                            setShowCreateModal(false);
-                            resetForm();
-                        }}
+                <h3>Участники</h3>
+                <div className="form-group">
+                  <div className="participant-search-container">
+                    <input
+                      ref={participantInputRef}
+                      type="text"
+                      className="participant-search-input"
+                      placeholder="Добавить участника..."
+                      value={participantSearch}
+                      onChange={handleParticipantSearchChange}
+                      onFocus={() => {
+                        if (participantSearch.length > 0) {
+                          setShowParticipantsDropdown(true);
+                        }
+                      }}
+                    />
+                    {showParticipantsDropdown && (
+                      <div 
+                        ref={participantsDropdownRef}
+                        className="participants-dropdown"
                       >
-                        Отмена
+                        {filteredParticipants.length > 0 ? (
+                          filteredParticipants.map(participant => (
+                            <div 
+                              key={participant}
+                              className="participant-option"
+                              onClick={() => handleParticipantSelect(participant)}
+                            >
+                              <div className="participant-checkbox">
+                                <FaCheck className="check-icon" />
+                              </div>
+                              <span>{participant}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="no-participants">
+                            Участники не найдены
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="selected-participants">
+                    {newEvent.participants.map(participant => (
+                      <div key={participant} className="selected-participant-tag">
+                        {participant}
+                        <button 
+                          type="button"
+                          className="remove-participant"
+                          onClick={() => handleRemoveParticipant(participant)}
+                        >
+                          ×
                         </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                </div>
+              </div>
             </div>
-            )}
+            
+            <div className="modal-actions">
+              <div className="primary-action">
+                <button 
+                  type="button" 
+                  className="action-btn primary"
+                  onClick={handleCreateEvent}
+                  disabled={!newEvent.title || !newEvent.date || !newEvent.time || !newEvent.location}
+                >
+                  Создать
+                </button>
+              </div>
+              <button 
+                type="button" 
+                className="cancel-btn" 
+                onClick={() => {
+                  setShowCreateModal(false);
+                  resetForm();
+                }}
+              >
+                Отмена
+              </button>
+            </div>
+          </div>
         </div>
-      );
+      )}
+    </div>
+  );
 };
 
 export default Events;
