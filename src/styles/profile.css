@@ -12,6 +12,20 @@
     color: white;
 }
 
+/* По умолчанию отступ под узкий сайдбар */
+.profile-page .main-content {
+  margin-left: 70px;               /* узкая ширина сайдбара */
+  width: calc(100% - 70px);
+  transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+/* При наведении на сайдбар расширяем и сдвигаем контент */
+.profile-page .sidebar:hover + .main-content {
+  margin-left: 180px;              /* раскрытая ширина сайдбара */
+  width: calc(100% - 180px);
+}
+
+
 .main-content {
     flex: 1;
     padding: 20px;
