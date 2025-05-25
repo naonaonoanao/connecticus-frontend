@@ -15,6 +15,19 @@
   margin-left: 20px;
 }
 
+/* Отступ и анимация для events-content */
+.events-page .events-content {
+  transition: margin-left 0.3s ease, width 0.3s ease;
+  margin-left: 70px;               /* узкая ширина сайдбара */
+  width: calc(100% - 70px);
+}
+
+/* При наведении на sidebar сдвигаем events-content */
+.events-page .sidebar:hover + .events-content {
+  margin-left: 240px;              /* раскрытая ширина сайдбара */
+  width: calc(100% - 240px);
+}
+
 .main-content {
   flex: 1;
   padding: 20px;
@@ -27,7 +40,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   flex-shrink: 0;
 }
 
