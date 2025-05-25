@@ -12,6 +12,20 @@
   }
 }
 
+/* 2. Отступ и transition для main-content */
+.structure-page .main-content {
+  transition: margin-left 0.3s ease, width 0.3s ease;
+  margin-left: 70px;                  /* узкий сайдбар */
+  width: calc(100% - 70px);
+  overflow-y: auto;                   /* отдельный скролл */
+}
+
+/* 3. При hover на sidebar — сдвиг main-content */
+.structure-page .sidebar:hover + .main-content {
+  margin-left: 240px;                
+  width: calc(100% - 240px);
+}
+
 .main-content {
   flex: 1;
   padding: 20px;
