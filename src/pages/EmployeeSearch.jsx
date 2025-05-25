@@ -6,7 +6,6 @@ import {
   FaMapMarkerAlt, FaCode, FaProjectDiagram,
   FaEnvelope, FaPhone, FaTelegram
 } from 'react-icons/fa';
-import debounce from 'lodash.debounce';
 import '../styles/EmployeeSearch.css';
 import Sidebar from "../components/Sidebar";
 
@@ -202,25 +201,6 @@ const EmployeeSearch = () => {
     </motion.div>
   );
 
-  // Handlers
-
-  // Исправленный рендер выбранных фильтров
-  const renderSelectedTags = (ft) => {
-    return filters[ft].selected.map(val => {
-      const label = ft === 'city' 
-        ? val 
-        : options[OPTION_KEY[ft]]?.find(x => 
-          x[ID_FIELD[ft]] === val
-        )?.[LABEL_FIELD[ft]];
-      
-      return (
-        <span key={val} className="selected-tag">
-          {label || 'Unknown'}
-          <button className="remove-tag" onClick={() => handleFilterToggle(ft, val)}>×</button>
-        </span>
-      );
-    });
-  };
 
   const handleFilterSearchChange = useCallback((ft, value) => {
     setFilters(prev => ({
@@ -351,7 +331,7 @@ const EmployeeSearch = () => {
                       <input
                         type="text"
                         className="filter-search"
-                        placeholder={`Поиск ${ft}`}
+                        placeholder={`Поиск...`}
                         value={filters[ft].searchQuery}
                         onChange={e => handleFilterSearchChange(ft, e.target.value)}
                       />

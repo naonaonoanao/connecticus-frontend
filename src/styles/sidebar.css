@@ -1,17 +1,21 @@
 /* /styles/sidebar.css */
 
 .sidebar {
-    width: 70px;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(10px);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 40px;
-    transition: width 0.3s ease;
-    overflow: hidden;
-  }
+  position: fixed; /* фиксируем */
+  top: 0;
+  left: 0;
+  width: 70px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 40px;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  z-index: 1000; /* чтобы быть поверх */
+}
   
   .menu-item-text {
     display: none;
