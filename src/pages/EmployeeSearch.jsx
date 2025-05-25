@@ -145,10 +145,6 @@ const EmployeeSearch = () => {
     filters.interests.selected
   ]);
   
-
-  
-
-
   // Загрузка сотрудников
   useEffect(() => {
     const controller = new AbortController();
@@ -220,19 +216,19 @@ const EmployeeSearch = () => {
       return (
         <span key={val} className="selected-tag">
           {label || 'Unknown'}
-          <button onClick={() => handleFilterToggle(ft, val)}>×</button>
+          <button className="remove-tag" onClick={() => handleFilterToggle(ft, val)}>×</button>
         </span>
       );
     });
   };
 
   const handleFilterSearchChange = useCallback((ft, value) => {
-  setFilters(prev => ({
-    ...prev,
-    [ft]: { ...prev[ft], searchQuery: value }
-  }));
-}, []);
-  
+    setFilters(prev => ({
+      ...prev,
+      [ft]: { ...prev[ft], searchQuery: value }
+    }));
+  }, []);
+    
   const handleFilterToggle = useCallback((ft, idOrName) => {
     setFilters(prev => {
       const selected = prev[ft].selected.includes(idOrName)
@@ -339,7 +335,9 @@ const EmployeeSearch = () => {
             <motion.div className="filters-modal" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
               <div className="filters-header">
                 <h3>Фильтры</h3>
-                <button onClick={() => setShowFilters(false)}><FaTimes /></button>
+                <button className="close-modal-button" onClick={() => setShowFilters(false)}>
+                  <FaTimes />
+                </button>
               </div>
               <div className="filters-content">
                 {['city','position','department','team','technologies','interests'].map(ft => (
@@ -391,7 +389,7 @@ const EmployeeSearch = () => {
                           return (
                             <span key={val} className="selected-tag">
                               {label}
-                              <button onClick={() => handleFilterToggle(ft, val)}>×</button>
+                              <button className="remove-tag" onClick={() => handleFilterToggle(ft, val)}>×</button>
                             </span>
                           );
                         })}
@@ -401,8 +399,8 @@ const EmployeeSearch = () => {
                 ))}
               </div>
               <div className="filters-actions">
-                <button onClick={resetFilters}>Сбросить все</button>
-                <button onClick={() => setShowFilters(false)}>Применить</button>
+                <button className="reset-button" onClick={resetFilters}>Сбросить все</button>
+                <button className="apply-button" onClick={() => setShowFilters(false)}>Применить</button>
               </div>
             </motion.div>
           )}

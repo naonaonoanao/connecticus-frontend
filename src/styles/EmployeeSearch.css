@@ -236,7 +236,7 @@
   background: rgba(0, 229, 255, 0.1);
   padding: 4px 10px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 14px;
   border: 1px solid rgba(0, 229, 255, 0.3);
   display: flex;
   align-items: center;
@@ -522,3 +522,66 @@
   min-height: 250px;
   /* остальные стили карточки */
 }
+
+/* Стили для кнопок в модальном окне фильтров */
+.filters-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 20px;
+}
+
+.reset-button {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid #ff5252;
+  color: #ff5252;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.reset-button:hover {
+  background: rgba(255, 82, 82, 0.1);
+}
+
+.apply-button {
+  padding: 10px 20px;
+  background: #00e5ff;
+  border: none;
+  color: #000;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.apply-button:hover {
+  background: #00bcd4;
+  transform: translateY(-1px);
+}
+
+/* Стили для крестика закрытия модального окна */
+.close-modal-button {
+  background: transparent;
+  border: none;
+  color: #cfd8dc;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.close-modal-button:hover {
+  color: #ff5252;
+  background: rgba(255, 82, 82, 0.1);
+}
+
