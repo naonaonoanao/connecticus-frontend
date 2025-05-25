@@ -103,17 +103,37 @@ const EmployeeSearch = () => {
 
   // Построение параметров запроса
   // Исправленные параметры запроса
-  const buildParams = useCallback(() => ({
-    skip: meta.skip,
-    limit: meta.limit,
-    ...(searchTerm && { str_to_find: searchTerm }),
-    ...(filters.city.selected.length && { city: filters.city.selected }),
-    ...(filters.position.selected.length && { id_position: filters.position.selected }),
-    ...(filters.department.selected.length && { id_department: filters.department.selected }),
-    ...(filters.team.selected.length && { id_project: filters.team.selected }),
-    ...(filters.technologies.selected.length && { id_technology: filters.technologies.selected }),
-    ...(filters.interests.selected.length && { id_interest: filters.interests.selected }),
-  }), [
+  const buildParams = useCallback(() => {
+    const params = {
+      skip: meta.skip,
+      limit: meta.limit,
+    };
+  
+    if (searchTerm) {
+      params.str_to_find = searchTerm;
+    }
+  
+    if (filters.city.selected.length) {
+      params.city = filters.city.selected;  // массив
+    }
+    if (filters.position.selected.length) {
+      params.id_position = filters.position.selected;  // массив
+    }
+    if (filters.department.selected.length) {
+      params.id_department = filters.department.selected;  // массив
+    }
+    if (filters.team.selected.length) {
+      params.id_project = filters.team.selected;  // массив
+    }
+    if (filters.technologies.selected.length) {
+      params.id_technology = filters.technologies.selected;  // массив
+    }
+    if (filters.interests.selected.length) {
+      params.id_interest = filters.interests.selected;  // массив
+    }
+  
+    return params;
+  }, [
     meta.skip,
     meta.limit,
     searchTerm,
@@ -124,6 +144,10 @@ const EmployeeSearch = () => {
     filters.technologies.selected,
     filters.interests.selected
   ]);
+  
+
+  
+
 
   // Загрузка сотрудников
   useEffect(() => {
@@ -134,6 +158,17 @@ const EmployeeSearch = () => {
       try {
         const { data } = await axios.get(`${BASE}/employee/employees`, {
           params: buildParams(),
+          paramsSerializer: params => {
+            const searchParams = new URLSearchParams();
+            Object.entries(params).forEach(([key, value]) => {
+              if (Array.isArray(value)) {
+                value.forEach(v => searchParams.append(key, v));
+              } else {
+                searchParams.append(key, value);
+              }
+            });
+            return searchParams.toString();
+          },
           signal: controller.signal
         });
 
