@@ -206,14 +206,9 @@
 /* Events Grid */
 .events-page .events-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, 350px);
-  justify-content: left;
-  gap: 20px;
-  align-content: flex-start;
-  flex-grow: 1;
-  overflow-y: auto;
-  padding-top: 10px;
-  min-width: 0;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
 }
 
 .events-page .no-events {
