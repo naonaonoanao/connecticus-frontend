@@ -30,13 +30,14 @@ const EmployeeSearch = () => {
 
   const [employees, setEmployees] = useState([]);
   const [meta, setMeta] = useState({ 
-    total_count: 0, 
+    total_count: 1, 
     total_pages: 1, 
     skip: 0, 
     limit: 6 
   });
 
   const [loading, setLoading] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   // Маппинг ключей фильтров → ключи options и поля для id/label
   const OPTION_KEY = {
@@ -147,7 +148,7 @@ const EmployeeSearch = () => {
   // Загрузка сотрудников
   useEffect(() => {
     const controller = new AbortController();
-    
+  
     const loadEmployees = async () => {
       setLoading(true);
       try {
@@ -166,15 +167,9 @@ const EmployeeSearch = () => {
           },
           signal: controller.signal
         });
-
-        // Исправлен доступ к данным согласно структуре ответа
-      setEmployees(data.data || []);
-      setMeta(prev => ({
-        ...prev,
-        total_count: data.meta?.total_count || 0,
-        total_pages: data.meta?.total_pages || 1
-      }));
-
+  
+        setEmployees(data.data || []);
+        setMeta(data.meta || meta);
       } catch (error) {
         if (!axios.isCancel(error)) {
           console.error('Ошибка:', error);
@@ -182,12 +177,15 @@ const EmployeeSearch = () => {
         }
       } finally {
         setLoading(false);
+        setHasLoadedOnce(true); // Только после полной загрузки
       }
     };
-
+  
     loadEmployees();
     return () => controller.abort();
   }, [buildParams]);
+  
+  
 
   // Красивый индикатор загрузки
   const renderLoader = () => (
@@ -387,20 +385,35 @@ const EmployeeSearch = () => {
         </div>
         {/* Results */}
         <div className="results-container">
-          {loading
-            ? <p>Загрузка…</p>
-            : employees.length > 0
-              ? <motion.div className="employees-grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ staggerChildren: 0.1 }}>
-                  {employees.map(renderEmployeeCard)}
-                </motion.div>
-              : <p>Сотрудники не найдены.</p>
-          }
-        </div>
+        {loading && !hasLoadedOnce ? (
+          renderLoader()
+        ) : !loading && hasLoadedOnce && !employees.length && meta.total_count == 0 ? (
+          <p>Сотрудники не найдены.</p>
+        ) : (
+          <motion.div
+            className="employees-grid"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ staggerChildren: 0.1 }}
+          >
+            {employees.map(renderEmployeeCard)}
+          </motion.div>
+        )}
+      </div>
+
+
+
+
         {/* Pagination */}
         <div className="pagination">
-          <button disabled={meta.skip === 0} onClick={() => changePage(meta.skip - meta.limit)}>← Prev</button>
-          <span>Стр. {meta.skip / meta.limit + 1} из {meta.total_pages}</span>
-          <button disabled={meta.skip + meta.limit >= meta.total_count} onClick={() => changePage(meta.skip + meta.limit)}>Next →</button>
+          <button disabled={meta.skip === 0} onClick={() => changePage(meta.skip - meta.limit)}>← Назад</button>
+          <span>Страница {meta.skip / meta.limit + 1}</span>
+          <button 
+            disabled={employees.length < meta.limit} 
+            onClick={() => changePage(meta.skip + meta.limit)}
+          >
+            Вперед →
+          </button>
         </div>
       </div>
     </div>

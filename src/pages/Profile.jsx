@@ -186,7 +186,7 @@ const Profile = () => {
   };
 
   if (!profileData) {
-    return <div>Загрузка...</div>;
+    return <div className="loader"></div>;
   }
 
   const fullName = `${profileData.lastName} ${profileData.firstName} ${profileData.middleName}`.trim();
