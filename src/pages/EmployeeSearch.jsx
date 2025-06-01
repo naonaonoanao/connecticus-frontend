@@ -406,15 +406,23 @@ const EmployeeSearch = () => {
 
         {/* Pagination */}
         <div className="pagination">
-          <button disabled={meta.skip === 0} onClick={() => changePage(meta.skip - meta.limit)}>← Назад</button>
-          <span>Страница {meta.skip / meta.limit + 1}</span>
           <button 
-            disabled={employees.length < meta.limit} 
+            disabled={meta.skip === 0 || loading} 
+            onClick={() => changePage(meta.skip - meta.limit)}
+          >
+            ← Назад
+          </button>
+
+          <span>Страница {meta.skip / meta.limit + 1}</span>
+
+          <button 
+            disabled={employees.length < meta.limit || loading} 
             onClick={() => changePage(meta.skip + meta.limit)}
           >
             Вперед →
           </button>
         </div>
+
       </div>
     </div>
   );
