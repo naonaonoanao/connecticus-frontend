@@ -23,23 +23,29 @@ const CompanyStructure = () => {
   const [dimensions, setDimensions] = useState({ width: 800, height: 900 });
 
   const fetchGraph = async (category) => {
-    try {
-      const res = await fetch(`http://localhost:8080/api/v1/graph/${category}`);
-      const data = await res.json();
-  
-      // Удаляем дубликаты узлов по id
-      const uniqueNodes = Array.from(
-        new Map(data.nodes.map((node) => [node.id, node])).values()
-      );
-  
-      setGraphData({
-        nodes: uniqueNodes,
-        links: data.links || [],
-      });
-    } catch (e) {
-      console.error("Ошибка загрузки графа:", e);
-    }
-  };
+  try {
+    const res = await fetch(`http://localhost:8080/api/v1/graph/${category}`);
+    const data = await res.json();
+
+    const uniqueNodes = Array.from(
+      new Map(data.nodes.map(node => [node.id, node])).values()
+    );
+
+    // Инициализируем координаты
+    const nodesWithCoords = uniqueNodes.map(node => ({
+      ...node,
+      x: node.x || 0,
+      y: node.y || 0
+    }));
+
+    setGraphData({
+      nodes: nodesWithCoords,
+      links: data.links || [],
+    });
+  } catch (e) {
+    console.error("Ошибка загрузки графа:", e);
+  }
+};
   
   useEffect(() => {
     fetchGraph(activeFilter);
@@ -69,36 +75,48 @@ const CompanyStructure = () => {
   }, [graphData]);
 
   useEffect(() => {
-    const categories = graphData.nodes.filter(n => n.isCategory);
-    const spacing = 850; // Расстояние между узлами по оси X и Y
+  if (graphData.nodes.length === 0) return;
+  
+  // Создаем копию узлов для иммутабельности
+  const updatedNodes = [...graphData.nodes];
+  
+  const categories = updatedNodes.filter(n => n.isCategory);
+  const spacing = 850;
 
-    // Распределяем категории на большом расстоянии
-    categories.forEach((node, i) => {
-      const angle = (i / categories.length) * 2 * Math.PI;
-      node.x = Math.cos(angle) * spacing * 2; // x позиция с отступом
-      node.y = Math.sin(angle) * spacing * 2; // y позиция с отступом
-    });
+  categories.forEach((category, i) => {
+    const angle = (i / categories.length) * 2 * Math.PI;
+    category.x = Math.cos(angle) * spacing * 2;
+    category.y = Math.sin(angle) * spacing * 2;
+  });
 
-    // Располагаем сотрудников вокруг каждой категории
-    graphData.nodes.forEach((node) => {
-      if (!node.isCategory) {
-        const category = graphData.nodes.find(n => n.id === node.groupId && n.isCategory);
-        if (category) {
-          const numEmployees = graphData.nodes.filter(n => n.groupId === category.id && !n.isCategory).length;
-          const radius = 200; // Расстояние сотрудников от категории
-          const angleIncrement = (2 * Math.PI) / numEmployees; // Угол для равномерного распределения
-
-           // Вычисляем позицию для сотрудника вокруг категории
-          const index = graphData.nodes.indexOf(node);
-          const angle = angleIncrement * index;
-
-          node.x = category.x + Math.cos(angle) * radius;
-          node.y = category.y + Math.sin(angle) * radius;
-        }
+  // Группируем сотрудников по категориям
+  const employeesByCategory = {};
+  updatedNodes.forEach(node => {
+    if (!node.isCategory) {
+      if (!employeesByCategory[node.groupId]) {
+        employeesByCategory[node.groupId] = [];
       }
-    });
+      employeesByCategory[node.groupId].push(node);
+    }
+  });
 
-    setGraphData(prev => ({ ...prev, nodes: [...prev.nodes] }));
+  // Позиционируем сотрудников
+  Object.entries(employeesByCategory).forEach(([groupId, employees]) => {
+    const category = updatedNodes.find(n => n.id === groupId && n.isCategory);
+    if (category) {
+      const numEmployees = employees.length;
+      const radius = 200;
+      const angleIncrement = numEmployees > 0 ? (2 * Math.PI) / numEmployees : 0;
+
+      employees.forEach((employee, j) => {
+        const angle = angleIncrement * j;
+        employee.x = category.x + Math.cos(angle) * radius;
+        employee.y = category.y + Math.sin(angle) * radius;
+      });
+    }
+  });
+
+  setGraphData(prev => ({ ...prev, nodes: updatedNodes }));
 }, [graphData.nodes.length]);
 
   const groupColorMap = useRef({});
@@ -196,8 +214,13 @@ const CompanyStructure = () => {
                 ctx.lineWidth = 4;
                 ctx.stroke();
               } else {
-                // Многоцветная обводка — градиент
-                const gradient = ctx.createRadialGradient(node.x, node.y, radius, node.x, node.y, radius + 6);
+              // Многоцветная обводка — градиент
+              // Добавляем проверку на валидность координат
+              if (isFinite(node.x) && isFinite(node.y)) {
+                const gradient = ctx.createRadialGradient(
+                  node.x, node.y, radius, 
+                  node.x, node.y, radius + 6
+                );
 
                 incomingLinks.forEach((link, index) => {
                   const sourceNode = typeof link.source === "object"
@@ -206,14 +229,16 @@ const CompanyStructure = () => {
                   const color = getGroupColor(sourceNode.groupId || sourceNode.id);
                   const stop = index / (incomingLinks.length - 1 || 1);
                   gradient.addColorStop(stop, color);
-              });
-            
-              ctx.beginPath();
-              ctx.arc(node.x, node.y, radius + 4, 0, 2 * Math.PI);
-              ctx.strokeStyle = gradient;
-              ctx.lineWidth = 4;
-              
-              ctx.stroke();
+                });
+
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, radius + 4, 0, 2 * Math.PI);
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 4;
+                ctx.stroke();
+              } else {
+                console.warn(`Invalid coordinates for node ${node.id}: x=${node.x}, y=${node.y}`);
+              }
             }
               ctx.font = `${fontSize}px Sans-Serif`;
               ctx.fillStyle = "white";
