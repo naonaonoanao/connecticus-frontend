@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { 
   FaCalendarAlt, 
   FaMapMarkerAlt, 
@@ -12,10 +12,13 @@ import {
   FaCheck
 } from "react-icons/fa";
 import Sidebar from "../components/Sidebar";
+import axios from "axios";
 import Header from "../components/Notification";
 import "../styles/events.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useNavigate } from "react-router-dom";
+
 
 const eventCategories = [
     { key: "all", label: "Все мероприятия" },
@@ -24,28 +27,10 @@ const eventCategories = [
     { key: "party", label: "Корпоративы" }
 ];
 
-const currentUser = "Иван Петров";
-
 const eventTypes = [
   { value: "training", label: "Тренинг" },
   { value: "meeting", label: "Совещание" },
   { value: "party", label: "Корпоратив" }
-];
-
-const allParticipants = [
-  "Иван Петров",
-  "Алексей Смирнов",
-  "Мария Иванова",
-  "Дмитрий Кузнецов",
-  "Ольга Сидорова",
-  "Анна Петрова",
-  "Петр Васильев",
-  "Сергей Иванов",
-  "Мария Кузнецова",
-  "Алексей Морозов",
-  "Дмитрий Соколов",
-  "Елена Ветрова",
-  "Алексей Безопасный"
 ];
 
 const Events = () => {
@@ -62,10 +47,60 @@ const Events = () => {
   const eventTypeButtonRef = useRef(null);
   const participantsDropdownRef = useRef(null);
   const participantInputRef = useRef(null);
+  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState(null);
+  const [allParticipants, setAllParticipants] = useState([]);
+  const [isJoined, setIsJoined] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editEventId, setEditEventId] = useState(null);
+  const [isOwner, setIsOwner] = useState(false);
+  
+
+  useEffect(() => {
+    const fetchCurrentUserProfile = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+          navigate("/login");
+          return;
+        }
+    
+        const { data } = await axios.get("http://localhost:8080/api/v1/user/me", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+    
+        if (!data?.employee) {
+          throw new Error("Данные пользователя не получены");
+        }
+    
+        const userProfile = {
+          id: data.employee.id_employee,
+          firstName: data.employee.first_name,
+          lastName: data.employee.last_name,
+          middleName: data.employee.middle_name || '',
+          fullName: `${data.employee.first_name} ${data.employee.last_name} ${data.employee.middle_name || ''}`.trim()
+        };
+    
+        setProfileData(userProfile);
+        setCurrentUser(userProfile.id); // Используем полное имя как идентификатор
+      } catch (error) {
+        console.error("Ошибка загрузки профиля:", error);
+        localStorage.removeItem("access_token");
+        navigate("/login");
+      }
+    };
+
+    fetchCurrentUserProfile();
+  }, []);
+
+  useEffect(() => {
+    console.log("👤 currentUser ID:", currentUser);
+    console.log("📋 profileData:", profileData);
+  }, [currentUser, profileData]);
 
     useEffect(() => {
       const handleClickOutside = (event) => {
-        // Для date picker
         if (datePickerOpen && !event.target.closest('.react-datepicker') && 
             !event.target.closest('.date-picker-container')) {
           setDatePickerOpen(false);
@@ -91,90 +126,247 @@ const Events = () => {
         document.removeEventListener('mousedown', handleClickOutside);
       };
     }, [datePickerOpen, showEventTypeDropdown, showParticipantsDropdown]);
+
+    useEffect(() => {
+      const fetchAllParticipants = async () => {
+        try {
+          const token = localStorage.getItem("access_token");
+          if (!token) return;
     
-    const [events, setEvents] = useState([
-      {
-          id: 1,
-          title: "React Advanced Training",
-          category: "training",
-          date: "2023-06-15T10:00:00",
-          location: "Конференц-зал 3",
-          organizer: "Иван Петров",
-          description: "Продвинутый курс по React с hooks и context API. На тренинге будут рассмотрены продвинутые техники работы с React, включая оптимизацию производительности, работу с контекстом и создание кастомных хуков.",
-          participants: ["Алексей Смирнов", "Мария Иванова", "Дмитрий Кузнецов"]
-      },
-      {
-          id: 2,
-          title: "Квартальное совещание",
-          category: "meeting",
-          date: "2023-06-20T14:00:00",
-          location: "Зал заседаний",
-          organizer: "Ольга Сидорова",
-          description: "Обсуждение результатов квартала и планов на следующий период. Будут представлены отчеты по ключевым показателям эффективности, обсуждены текущие проекты и поставлены задачи на следующий квартал.",
-          participants: ["Петр Иванов", "Иван Петров"]
-      },
-      {
-          id: 3,
-          title: "Летний корпоратив",
-          category: "party",
-          date: "2023-07-10T18:00:00",
-          location: "Ресторан 'У моря'",
-          organizer: "Анна Петрова",
-          description: "Ежегодное летнее мероприятие для всех сотрудников компании. В программе: ужин, развлекательная программа, награждение лучших сотрудников и танцы до утра!",
-          participants: ["Петр Иванов", "Иван Петров"]
-      },
-      {
-          id: 4,
-          title: "Введение в TypeScript",
-          category: "training",
-          date: "2023-07-05T11:00:00",
-          location: "Онлайн",
-          organizer: "Петр Васильев",
-          description: "Базовый курс по TypeScript для начинающих. Познакомимся с основными концепциями типизации и научимся применять их в реальных проектах.",
-          participants: ["Сергей Иванов", "Анна Петрова"]
-      },
-      // Новые мероприятия
-      {
-          id: 5,
-          title: "Годовой стратегический план",
-          category: "meeting",
-          date: "2023-08-01T09:00:00",
-          location: "Зал переговоров",
-          organizer: "Дмитрий Соколов",
-          description: "Совещание по утверждению годового стратегического плана развития компании с участием всех руководителей отделов.",
-          participants: ["Иван Петров", "Ольга Сидорова", "Анна Петрова", "Петр Васильев", "Сергей Иванов", "Мария Кузнецова", "Алексей Морозов"] // 7 участников
-      },
-      {
-          id: 6,
-          title: "Мастер-класс по презентациям",
-          category: "training",
-          date: "2023-07-15T13:00:00",
-          location: "Конференц-зал 1",
-          organizer: "Елена Ветрова",
-          description: "Практический мастер-класс по созданию эффективных презентаций и публичным выступлениям.",
-          participants: ["Иван Петров", "Анна Петрова", "Дмитрий Кузнецов"]
-      },
-      {
-          id: 7,
-          title: "Новогодний корпоратив",
-          category: "party",
-          date: "2023-12-28T19:00:00",
-          location: "Банкетный зал 'Зимний сад'",
-          organizer: "Анна Петрова",
-          description: "Традиционное новогоднее мероприятие с конкурсами, подарками и праздничным ужином.",
-          participants: ["Иван Петров", "Ольга Сидорова", "Петр Васильев"]
-      },
-      {
-          id: 8,
-          title: "Обучение безопасности",
-          category: "training",
-          date: "2023-09-10T10:00:00",
-          location: "Комната 405",
-          organizer: "Алексей Безопасный",
-          description: "Обязательный тренинг по информационной безопасности и защите персональных данных.",
-          participants: ["Иван Петров", "Дмитрий Кузнецов", "Мария Иванова", "Сергей Иванов"]
+          const response = await axios.get("http://localhost:8080/api/v1/employee/employees?limit=200", {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+    
+          setAllParticipants(response.data.data.map(p => ({
+            id: p.id_employee,
+            name: `${p.first_name} ${p.last_name}`
+          })));
+        } catch (error) {
+          console.error("Ошибка загрузки участников:", error);
+        }
+      };
+    
+      fetchAllParticipants();
+    }, []);
+    
+    
+
+    const [meta, setMeta] = useState({ 
+      total_count: 1, 
+      total_pages: 1, 
+      skip: 0, 
+      limit: 6 
+    });
+    
+    const [events, setEvents] = useState([]);
+
+    useEffect(() => {
+      const fetchEvents = async () => {
+        try {
+          const token = localStorage.getItem("access_token");
+          if (!token) {
+            setEvents([]);
+            return;
+          }
+    
+          // Формируем URL в зависимости от showMyEvents
+          const baseUrl = showMyEvents 
+            ? `http://localhost:8080/api/v1/events/my`
+            : `http://localhost:8080/api/v1/events`;
+    
+          // Параметры запроса: skip, limit, search
+          const params = new URLSearchParams();
+          params.append("skip", meta.skip);
+          params.append("limit", meta.limit);
+          if (searchQuery.trim() !== "") {
+            params.append("search", searchQuery.trim());
+          }
+    
+          const response = await fetch(`${baseUrl}?${params.toString()}`, {
+            headers: {
+              "Authorization": `Bearer ${token}`
+            }
+          });
+    
+          if (!response.ok) {
+            throw new Error("Ошибка при загрузке мероприятий");
+          }
+    
+          const data = await response.json();
+    
+          const mappedEvents = data.events.map(event => ({
+            id: event.id_event,
+            title: event.name_event,
+            category: mapEventTypeToCategory(event.event_type.name_type),
+            date: event.date,
+            location: event.place,
+            organizer: `${event.owner.first_name} ${event.owner.last_name}`,
+            organizerId: event.owner.id_employee, // Убедитесь, что используете правильное поле для ID
+            description: event.description || "Нет описания",
+            attendees: event.attendees || [], 
+            isOwner: event.owner.id_employee === profileData?.id,
+            isJoined: event.attendees?.some(attendee => attendee.id_employee === profileData?.id) || false
+          }));
+          
+          setEvents(mappedEvents);
+          setMeta(data.meta || meta);
+        } catch (error) {
+          console.error("Ошибка загрузки мероприятий:", error);
+          setEvents([]);
+        }
+      };
+    
+      fetchEvents();
+    }, [meta.skip, meta.limit, searchQuery, showMyEvents]);
+
+    const handleJoinEvent = async (eventId) => {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        alert("Пожалуйста, войдите в систему");
+        return;
       }
-  ]);
+      try {
+        const response = await fetch(`http://localhost:8080/api/v1/events/${eventId}/join`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+  
+        if (!response.ok) {
+          const errorData = await response.json();
+          alert("Ошибка при регистрации: " + (errorData.detail || response.statusText));
+          return;
+        }
+  
+        const data = await response.json();
+        alert(data.message);
+  
+        // Обновим список мероприятий, чтобы отобразить изменения (например, добавить текущего пользователя в participants)
+        refreshEvents();
+      } catch (error) {
+        alert("Ошибка при отправке запроса: " + error.message);
+      }
+    };
+  
+    const handleLeaveEvent = async (eventId) => {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        alert("Пожалуйста, войдите в систему");
+        return;
+      }
+      try {
+        const response = await fetch(`http://localhost:8080/api/v1/events/${eventId}/leave`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+  
+        if (!response.ok) {
+          const errorData = await response.json();
+          alert("Ошибка при отказе от участия: " + (errorData.detail || response.statusText));
+          return;
+        }
+  
+        const data = await response.json();
+        alert(data.message);
+  
+        // Обновим список мероприятий, чтобы убрать пользователя из участников
+        refreshEvents();
+      } catch (error) {
+        alert("Ошибка при отправке запроса: " + error.message);
+      }
+    };
+  
+    // Вынесем в функцию для обновления списка событий
+    const refreshEvents = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+          setEvents([]);
+          return;
+        }
+    
+        const baseUrl = showMyEvents 
+          ? `http://localhost:8080/api/v1/events/my`
+          : `http://localhost:8080/api/v1/events`;
+    
+        const params = new URLSearchParams();
+        params.append("skip", meta.skip);
+        params.append("limit", meta.limit);
+        if (searchQuery.trim() !== "") {
+          params.append("search", searchQuery.trim());
+        }
+    
+        const response = await fetch(`${baseUrl}?${params.toString()}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+    
+        if (!response.ok) {
+          throw new Error("Ошибка при загрузке мероприятий");
+        }
+    
+        const data = await response.json();
+    
+        const mappedEvents = data.events.map(event => ({
+          id: event.id_event,
+          title: event.name_event,
+          category: mapEventTypeToCategory(event.event_type.name_type),
+          date: event.date,
+          location: event.place,
+          organizer: `${event.owner.first_name} ${event.owner.last_name}`,
+          organizerId: event.owner.id,
+          description: event.description || "Нет описания",
+          attendees: event.attendees || [],
+          isOwner: event.owner.id === profileData?.id,
+          isJoined: event.attendees?.some(attendee => attendee.id === profileData?.id) || false
+        }));
+    
+        setEvents(mappedEvents);
+        if (selectedEvent) {
+          const updatedEvent = mappedEvents.find(e => e.id === selectedEvent.id);
+          if (updatedEvent) setSelectedEvent(updatedEvent);
+        }
+        setMeta(data.meta || meta);
+      } catch (error) {
+        console.error("Ошибка загрузки мероприятий:", error);
+        setEvents([]);
+      }
+    };  
+
+    const refreshSelectedEvent = () => {
+      if (!selectedEvent) return;
+    
+      const updatedEvent = events.find(e => e.id === selectedEvent.id);
+      if (updatedEvent) {
+        setSelectedEvent(updatedEvent);
+      }
+    };
+    
+  
+    // Подгружаем события изначально и при изменениях зависимостей
+    useEffect(() => {
+      refreshEvents();
+    }, [meta.skip, meta.limit, searchQuery, showMyEvents]);
+    
+
+    const mapEventTypeToCategory = (type) => {
+      switch (type) {
+        case "Тренинг":
+          return "training";
+        case "Совещание":
+        case "Внутреннее совещание":
+          return "meeting";
+        case "Корпоратив":
+          return "party";
+        default:
+          return "all";
+      }
+    };
+    
+    
+
     const [newEvent, setNewEvent] = useState({
         title: "",
         category: "training",
@@ -186,20 +378,28 @@ const Events = () => {
     });
     const [newParticipant, setNewParticipant] = useState("");
 
-    const filteredParticipants = allParticipants.filter(participant => 
-      participant.toLowerCase().includes(participantSearch.toLowerCase()) &&
-      !newEvent.participants.includes(participant)
-    );
+    const filteredParticipants = allParticipants.filter(participantObj =>
+      participantObj.name.toLowerCase().includes(participantSearch.toLowerCase()) &&
+      !newEvent.participants.some(p => p.id === participantObj.id)
+    ); 
 
-    const filteredEvents = events.filter(event => {
-        const matchesCategory = activeCategory === "all" || event.category === activeCategory;
-        const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            event.description.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesMyEvents = !showMyEvents || 
-                              event.organizer === currentUser || 
-                              event.participants.includes(currentUser);
-        return matchesCategory && matchesSearch && matchesMyEvents;
-    });
+    const filteredEvents = events
+  .filter(event => {
+    if (!event) return false;
+    
+    const matchesCategory = activeCategory === "all" || event.category === activeCategory;
+    
+    const title = event.title || "";
+    const description = event.description || "";
+    
+    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          description.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesCategory && matchesSearch;
+  })
+  .slice(0, meta.limit);
+
+
 
     const handleDateChange = (date) => {
         const formattedDate = date.toISOString().split('T')[0];
@@ -223,41 +423,120 @@ const Events = () => {
       setShowEventTypeDropdown(false);
   };
 
-    const handleDetailsClick = (event) => {
-        setSelectedEvent(event);
-    };
+  const handleDetailsClick = (event) => {
+    const isOwner = event.organizerId === profileData?.id;
+    const isJoined = (event.attendees || []).some(attendee => attendee.id === profileData?.id);
+    
+    setSelectedEvent({
+      ...event,
+      isOwner,
+      isJoined
+    });
+  };
 
     const closeModal = () => {
         setSelectedEvent(null);
     };
 
-    const handleCreateEvent = () => {
-        const fullDate = `${newEvent.date}T${newEvent.time}:00`;
-        const eventId = Math.max(...events.map(e => e.id)) + 1;
-        
-        setEvents([...events, {
-            ...newEvent,
-            id: eventId,
-            date: fullDate,
-            organizer: currentUser
-        }]);
-        
+    const mapEventTypeToId = {
+      training: "b3a02072-6df9-402e-a9c1-0cc03c7c2f17",// НАДО БУДЕТ ПОПРАВИТЬ UUID
+      meeting: "5ae06ca5-eff6-4341-a870-749e48da9cd4",
+      party:   "b3a02072-6df9-402e-a9c1-0cc03c7c2f17"
+    };
+    
+
+    const handleCreateEvent = async () => {
+      if (!newEvent.title || !newEvent.date || !newEvent.location) {
+        alert("Заполните обязательные поля");
+        return;
+      }
+    
+      const dateOnly = newEvent.date;
+    
+      const eventTypeId = mapEventTypeToId[newEvent.category];
+    
+      if (!eventTypeId) {
+        alert("Выберите корректный тип события");
+        return;
+      }
+    
+      const attendeeIds = []; // сюда надо будет добавить логику для участников, если нужно
+    
+      const payload = {
+        name_event: newEvent.title,
+        date: dateOnly,
+        place: newEvent.location,
+        id_event_type: eventTypeId,
+        attendee_ids: attendeeIds
+      };
+    
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        alert("Пожалуйста, войдите в систему");
+        return;
+      }
+    
+      try {
+        let response;
+        if (isEditMode && editEventId) {
+          // PUT запрос для редактирования
+          response = await fetch(`http://localhost:8080/api/v1/events/${editEventId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+          });
+        } else {
+          // POST запрос для создания
+          response = await fetch("http://localhost:8080/api/v1/events", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+          });
+        }
+    
+        if (!response.ok) {
+          const errorData = await response.json();
+          alert((isEditMode ? "Ошибка при редактировании мероприятия: " : "Ошибка при создании мероприятия: ") + (errorData.detail || response.statusText));
+          return;
+        }
+    
+        const createdOrUpdatedEvent = await response.json();
+    
+        // Обновляем список мероприятий
+        refreshEvents();
+    
+        // Закрываем модалку и сбрасываем форму
         setShowCreateModal(false);
         resetForm();
+        setIsEditMode(false);
+        setEditEventId(null);
+      } catch (error) {
+        alert("Ошибка при отправке запроса: " + error.message);
+      }
     };
-
+    
+    
     const resetForm = () => {
-        setNewEvent({
-            title: "",
-            category: "training",
-            date: "",
-            time: "",
-            location: "",
-            description: "",
-            participants: []
-        });
-        setNewParticipant("");
+      setNewEvent({
+        title: "",
+        category: "training",
+        date: "",
+        time: "",
+        location: "",
+        description: "",
+        participants: []
+      });
+      setNewParticipant("");
+      setIsEditMode(false);
+      setEditEventId(null);
     };
+    
 
     const handleNewEventChange = (e) => {
         const { name, value } = e.target;
@@ -278,7 +557,7 @@ const Events = () => {
     };
 
     const handleParticipantSelect = (participant) => {
-      if (!newEvent.participants.includes(participant)) {
+      if (!newEvent.participants.some(p => p.id === participant.id)) {
         setNewEvent(prev => ({
           ...prev,
           participants: [...prev.participants, participant]
@@ -298,12 +577,102 @@ const Events = () => {
       }
     };
 
-    const handleRemoveParticipant = (participant) => {
-        setNewEvent(prev => ({
-            ...prev,
-            participants: prev.participants.filter(p => p !== participant)
-        }));
+    const handleRemoveParticipant = (participantId) => {
+      setNewEvent(prev => ({
+        ...prev,
+        participants: prev.participants.filter(p => p.id !== participantId)
+      }));
     };
+
+    const changePage = (newSkip) => {
+      if (newSkip < 0) return;
+      if (newSkip >= meta.total_count) return;
+    
+      setMeta(prev => ({
+        ...prev,
+        skip: newSkip
+      }));
+    };
+
+    const isUserOrganizer = selectedEvent && currentUser && 
+      selectedEvent.organizerId === currentUser;
+
+  const isUserParticipant = (event) => {
+    if (!currentUser || !event?.attendees) return false;
+    return (event.attendees || []).some(attendee => attendee.id === currentUser);
+  };
+      
+
+    const isCurrentUserOrganizer = selectedEvent?.organizerId === currentUser;
+    const isCurrentUserParticipant = (selectedEvent?.attendees || []).some(attendee => attendee.id === currentUser);
+    
+    const isUserAttending = (event) => {
+      return (event.attendees || []).some(attendee => attendee.id === currentUser);
+    };
+
+    const fillEditForm = (event) => {
+      const eventDate = new Date(event.date);
+      const formattedDate = eventDate.toISOString().split('T')[0];
+      const formattedTime = eventDate.toLocaleTimeString('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).replace(':', '');
+    
+      setNewEvent({
+        title: event.title,
+        category: event.category,
+        date: formattedDate,
+        time: formattedTime,
+        location: event.location,
+        description: event.description || "",
+        participants: event.attendees.map(attendee => ({
+          id: attendee.id_employee,
+          name: `${attendee.first_name} ${attendee.last_name}`
+        })) || []
+      });
+      
+      setEditEventId(event.id);
+      setIsEditMode(true);
+      setShowCreateModal(true);
+    };
+
+    const handleDeleteEvent = async (eventId) => {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        alert("Пожалуйста, войдите в систему");
+        return;
+      }
+    
+      if (!window.confirm("Вы уверены, что хотите удалить это мероприятие?")) {
+        return;
+      }
+    
+      try {
+        const response = await fetch(`http://localhost:8080/api/v1/events/${eventId}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+    
+        if (!response.ok) {
+          const errorData = await response.json();
+          alert("Ошибка при удалении мероприятия: " + (errorData.detail || response.statusText));
+          return;
+        }
+    
+        const data = await response.json();
+        alert(data.message || "Мероприятие успешно удалено");
+    
+        refreshEvents();
+        setShowCreateModal(false);
+        resetForm();
+      } catch (error) {
+        alert("Ошибка при отправке запроса: " + error.message);
+      }
+    };
+    
 
     return (
         <div className="events-page">
@@ -314,21 +683,33 @@ const Events = () => {
             <div className="events-header">
               <h1 className="events-title">Мероприятия</h1>
               <div className="header-buttons">
-                <button 
+                {/* Кнопка переключения "Мои мероприятия" */}
+                <button
+                  type="button"
                   className={`my-events-btn ${showMyEvents ? "active" : ""}`}
-                  onClick={() => setShowMyEvents(!showMyEvents)}
+                  onClick={() => {
+                    setShowMyEvents(prev => !prev);
+                    setMeta(prev => ({ ...prev, skip: 0 }));  // сброс пагинации
+                  }}
+                  aria-pressed={showMyEvents}  // для доступности — показывает состояние кнопки
+                  title={showMyEvents ? "Показать все мероприятия" : "Показать только мои мероприятия"}
                 >
-                  <FaUserCircle /> Мои мероприятия
+                  <FaUserCircle style={{ marginRight: 6 }} />
+                  Мои мероприятия
                 </button>
-                <button 
+
+                {/* Кнопка создания мероприятия */}
+                <button
+                  type="button"
                   className="create-event-btn"
                   onClick={() => setShowCreateModal(true)}
+                  title="Создать новое мероприятие"
                 >
-                  <FaPlus /> Создать мероприятие
+                  <FaPlus style={{ marginRight: 6 }} />
+                  Создать мероприятие
                 </button>
               </div>
             </div>
-            
             {/* Обернули фильтры и поиск в общий контейнер */}
             <div className="filters-search-container">
             <div className="filter-panel">
@@ -360,62 +741,67 @@ const Events = () => {
             
             <div className="events-grid">
               {filteredEvents.length > 0 ? (
-                filteredEvents.map(event => (
-                  <div key={event.id} className="event-card">
-                    <div className="event-header">
-                      <h3 className="event-title">{event.title}</h3>
-                      <span className={`event-category ${event.category}`}>
-                        {eventCategories.find(c => c.key === event.category)?.label}
-                      </span>
+                filteredEvents.map(event => {
+                  const isOrganizer = currentUser === event.organizer;
+                  const isParticipant = (event.attendees || []).some(participant => participant.id === currentUser);
+
+                  return (
+                    <div key={event.id} className="event-card">
+                      <div className="event-header">
+                        <h3 className="event-title">{event.title}</h3>
+                        <span className={`event-category ${event.category}`}>
+                          {eventCategories.find(c => c.key === event.category)?.label}
+                        </span>
+                      </div>
+
+                      <div className="event-details">
+                        <div className="event-detail">
+                          <FaCalendarAlt className="event-icon" />
+                          <span>{formatDate(event.date)}</span>
+                        </div>
+                        <div className="event-detail">
+                          <FaMapMarkerAlt className="event-icon" />
+                          <span>{event.location}</span>
+                        </div>
+                        <div className="event-detail">
+                          <FaUser className="event-icon" />
+                          <span>{event.organizer}</span>
+                          {isOrganizer && (
+                            <span className="organizer-badge">(Вы)</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <p className="event-description">{event.description}</p>
+
+                      <div className="event-participants">
+                        <div className="participants-title">
+                          <FaUsers /> Участники:
+                        </div>
+                        <div className="participants-list">
+                          {(event.attendees || []).map((attendee, index) => (
+                            <span 
+                              key={index} 
+                              className={`participant ${attendee.id === currentUser ? "current-user" : ""}`}
+                            >
+                              {`${attendee.first_name} ${attendee.last_name}`}
+                              {attendee.id === currentUser && " (Вы)"}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="event-actions">
+                        <button 
+                          className="action-btn" 
+                          onClick={() => handleDetailsClick(event)}
+                        >
+                          Подробнее
+                        </button>
+                      </div>
                     </div>
-                    
-                    <div className="event-details">
-                      <div className="event-detail">
-                        <FaCalendarAlt className="event-icon" />
-                        <span>{formatDate(event.date)}</span>
-                      </div>
-                      <div className="event-detail">
-                        <FaMapMarkerAlt className="event-icon" />
-                        <span>{event.location}</span>
-                      </div>
-                      <div className="event-detail">
-                        <FaUser className="event-icon" />
-                        <span>{event.organizer}</span>
-                        {event.organizer === currentUser && (
-                          <span className="organizer-badge">(Вы)</span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <p className="event-description">{event.description}</p>
-                    
-                    <div className="event-participants">
-                      <div className="participants-title">
-                        <FaUsers /> Участники:
-                      </div>
-                      <div className="participants-list">
-                        {event.participants.map((participant, index) => (
-                          <span 
-                            key={index} 
-                            className={`participant ${participant === currentUser ? "current-user" : ""}`}
-                          >
-                            {participant}
-                            {participant === currentUser && " (Вы)"}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div className="event-actions">
-                      <button 
-                        className="action-btn" 
-                        onClick={() => handleDetailsClick(event)}
-                      >
-                        Подробнее
-                      </button>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="no-events">
                   <h3>Мероприятия не найдены</h3>
@@ -423,6 +809,25 @@ const Events = () => {
                 </div>
               )}
             </div>
+
+            {/* Pagination */}
+      <div className="pagination">
+            <button 
+              disabled={meta.skip === 0} 
+              onClick={() => changePage(meta.skip - meta.limit)}
+            >
+              ← Назад
+            </button>
+
+            <span>Страница {meta.skip / meta.limit + 1} из {meta.total_pages}</span>
+
+            <button 
+              disabled={meta.skip + meta.limit >= meta.total_count} 
+              onClick={() => changePage(meta.skip + meta.limit)}
+            >
+              Вперед →
+            </button>
+          </div>
           </div>
       
           {/* Модальное окно просмотра мероприятия */}
@@ -463,32 +868,54 @@ const Events = () => {
                     </div>
                     
                     <div className="modal-section">
-                    <h3>Участники ({selectedEvent.participants.length})</h3>
+                    <h3>Участники ({selectedEvent.attendees .length})</h3>
                     <div className="modal-participants">
-                        {selectedEvent.participants.map((participant, index) => (
-                        <div 
+                        {(selectedEvent.attendees || []).map((attendee, index) => (
+                          <div 
                             key={index} 
-                            className={`participant ${participant === currentUser ? "current-user" : ""}`}
-                        >
-                            {participant}
-                            {participant === currentUser && " (Вы)"}
-                        </div>
+                            className={`participant ${attendee.id === currentUser ? "current-user" : ""}`}
+                          >
+                            {`${attendee.first_name} ${attendee.last_name}`}
+                            {attendee.id === currentUser && " (Вы)"}
+                          </div>
                         ))}
-                    </div>
+                      </div>
                     </div>
                 </div>
                 
                 <div className="modal-actions">
-                    <div className="primary-action">
-                    {!selectedEvent.participants.includes(currentUser) ? (
-                        <button className="action-btn primary">Записаться</button>
+                  <div className="primary-action">
+                    {selectedEvent?.isOwner ? (
+                      <button 
+                        className="action-btn primary"
+                        onClick={() => {
+                          setIsEditMode(true);
+                          setEditEventId(selectedEvent.id);
+                          setShowCreateModal(true);
+                          setSelectedEvent(null);
+                        }}
+                      >
+                        Редактировать
+                      </button>
+                    ) : selectedEvent?.isJoined ? (
+                      <button 
+                        className="cancel-btn"
+                        onClick={() => handleLeaveEvent(selectedEvent.id)}
+                      >
+                        Отписаться
+                      </button>
                     ) : (
-                        <button className="cancel-btn">Отменить запись</button>
+                      <button 
+                        className="action-btn primary"
+                        onClick={() => handleJoinEvent(selectedEvent.id)}
+                      >
+                        Записаться
+                      </button>
                     )}
-                    </div>
-                    <button className="cancel-btn" onClick={closeModal}>
+                  </div>
+                  <button className="cancel-btn" onClick={closeModal}>
                     Вернуться
-                    </button>
+                  </button>
                 </div>
                 </div>
             </div>
@@ -499,7 +926,7 @@ const Events = () => {
                 <div className="event-modal-overlay">
                     <div className="event-modal">
                         <div className="modal-header">
-                            <h2>Создать мероприятие</h2>
+                        <h2>{isEditMode ? "Редактировать мероприятие" : "Создать мероприятие"}</h2>
                         </div>
                         
                         <div className="modal-content">
@@ -620,76 +1047,85 @@ const Events = () => {
                     </div>
                     
                     <div className="modal-section">
-                <h3>Участники</h3>
-                <div className="form-group">
-                  <div className="participant-search-container">
-                    <input
-                      ref={participantInputRef}
-                      type="text"
-                      className="participant-search-input"
-                      placeholder="Добавить участника..."
-                      value={participantSearch}
-                      onChange={handleParticipantSearchChange}
-                      onFocus={() => {
-                        if (participantSearch.length > 0) {
-                          setShowParticipantsDropdown(true);
-                        }
-                      }}
-                    />
-                    {showParticipantsDropdown && (
-                      <div 
-                        ref={participantsDropdownRef}
-                        className="participants-dropdown"
-                      >
-                        {filteredParticipants.length > 0 ? (
-                          filteredParticipants.map(participant => (
+                      <h3>Участники</h3>
+                      <div className="form-group">
+                        <div className="participant-search-container">
+                          <input
+                            ref={participantInputRef}
+                            type="text"
+                            className="participant-search-input"
+                            placeholder="Добавить участника..."
+                            value={participantSearch}
+                            onChange={handleParticipantSearchChange}
+                            onFocus={() => {
+                              if (participantSearch.length > 0) {
+                                setShowParticipantsDropdown(true);
+                              }
+                            }}
+                          />
+                          {showParticipantsDropdown && (
                             <div 
-                              key={participant}
-                              className="participant-option"
-                              onClick={() => handleParticipantSelect(participant)}
+                              ref={participantsDropdownRef}
+                              className="participants-dropdown"
                             >
-                              <div className="participant-checkbox">
-                                <FaCheck className="check-icon" />
-                              </div>
-                              <span>{participant}</span>
+                              {filteredParticipants.length > 0 ? (
+                                filteredParticipants.map(participant => (
+                                  <div 
+                                    key={participant.id}  // Используем id как ключ
+                                    className="participant-option"
+                                    onClick={() => handleParticipantSelect(participant)}
+                                  >
+                                    <div className="participant-checkbox">
+                                      <FaCheck className="check-icon" />
+                                    </div>
+                                    <span>{participant.name}</span>  {/* Отображаем имя участника */}
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="no-participants">
+                                  {participantSearch.length > 0 ? "Сотрудники не найдены" : "Начните вводить имя"}
+                                </div>
+                              )}
                             </div>
-                          ))
-                        ) : (
-                          <div className="no-participants">
-                            Участники не найдены
-                          </div>
-                        )}
+                          )}
+                        </div>
+                        
+                        <div className="selected-participants">
+                          {newEvent.participants.map(participant => (
+                            <div key={participant.id} className="selected-participant-tag">
+                              {participant.name}  {/* Отображаем имя участника */}
+                              <button 
+                                type="button"
+                                className="remove-participant"
+                                onClick={() => handleRemoveParticipant(participant.id)}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                  
-                  <div className="selected-participants">
-                    {newEvent.participants.map(participant => (
-                      <div key={participant} className="selected-participant-tag">
-                        {participant}
-                        <button 
-                          type="button"
-                          className="remove-participant"
-                          onClick={() => handleRemoveParticipant(participant)}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
             
             <div className="modal-actions">
               <div className="primary-action">
+                {isEditMode && (
+                  <button 
+                    type="button" 
+                    className="delete-btn"
+                    onClick={() => handleDeleteEvent(editEventId)}
+                  >
+                    Удалить
+                  </button>
+                )}
                 <button 
                   type="button" 
                   className="action-btn primary"
                   onClick={handleCreateEvent}
                   disabled={!newEvent.title || !newEvent.date || !newEvent.time || !newEvent.location}
                 >
-                  Создать
+                  {isEditMode ? "Сохранить изменения" : "Создать"}
                 </button>
               </div>
               <button 
@@ -706,6 +1142,7 @@ const Events = () => {
           </div>
         </div>
       )}
+      
     </div>
   );
 };

@@ -31,16 +31,21 @@ const Profile = () => {
   const [techLevels, setTechLevels] = useState({});
   const [showTechLevelDropdown, setShowTechLevelDropdown] = useState(null);
   const dropdownRefs = useRef([]);
+  const [allInterests, setAllInterests] = useState([]);
+  const [allTechnologies, setAllTechnologies] = useState([]);
+  const [ranksLoaded, setRanksLoaded] = useState(false);
+  const [allRanks, setAllRanks] = useState([]);
 
+  const defaultRanks = [
+    { id_rank: "uuid-1", name_rank: "Junior" },
+    { id_rank: "uuid-2", name_rank: "Middle" },
+    { id_rank: "uuid-3", name_rank: "Senior" }
+  ];
+  
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setSidebarWidth(0);
-      } else {
-        setSidebarWidth(70);
-      }
+      setSidebarWidth(window.innerWidth < 768 ? 0 : 70);
     };
-    
     window.addEventListener('resize', handleResize);
     handleResize();
     return () => window.removeEventListener('resize', handleResize);
@@ -55,12 +60,11 @@ const Profile = () => {
         }
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showTechLevelDropdown]);
+
+  
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -69,23 +73,28 @@ const Profile = () => {
         navigate("/login", { replace: true });
         return;
       }
-
       try {
         const { data } = await axios.get("http://localhost:8080/api/v1/user/me", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token}` }
         });
-        
+
         const date = new Date(data.employee.date_of_birth);
         setBirthDate(date);
-        
-        // Инициализируем techLevels
         const levels = {};
+        const uniqueRanks = [];
         data.employee.technologies.forEach((tech, index) => {
           levels[index] = tech.rank.name_rank;
+          if (!uniqueRanks.find(r => r.name_rank === tech.rank.name_rank)) {
+            uniqueRanks.push({
+              id_rank: tech.rank.id_rank,
+              name_rank: tech.rank.name_rank
+            });
+          }
         });
         setTechLevels(levels);
-        
+        setAllRanks(uniqueRanks);
         setProfileData({
+          id: data.employee.id_employee,
           firstName: data.employee.first_name,
           lastName: data.employee.last_name,
           middleName: data.employee.middle_name || '',
@@ -97,18 +106,16 @@ const Profile = () => {
           phone: data.employee.phone_number,
           telegram: data.employee.telegram_name,
           technologies: data.employee.technologies.map(t => t.name_technology),
-          interests: data.employee.interests.map((i) => i.name_interest),
-          projects: data.employee.projects.map((p) => ({
+          interests: data.employee.interests.map(i => i.name_interest),
+          projects: data.employee.projects.map(p => ({
             name: p.name_project,
-            role: p.role.name_role,
-          })),
+            role: p.role.name_role
+          }))
         });
       } catch (error) {
         if (error.response && [401, 403].includes(error.response.status)) {
           localStorage.removeItem("access_token");
           navigate("/login", { replace: true });
-        } else {
-          console.error("Error fetching profile:", error);
         }
       }
     };
@@ -129,10 +136,7 @@ const Profile = () => {
   const handleDateChange = (date) => {
     setBirthDate(date);
     const formattedDate = date ? formatDate(date.toISOString().split('T')[0]) : "";
-    setProfileData(prev => ({
-      ...prev,
-      birthDate: formattedDate
-    }));
+    setProfileData(prev => ({ ...prev, birthDate: formattedDate }));
   };
 
   const handleArrayChange = (field, index, value) => {
@@ -144,10 +148,7 @@ const Profile = () => {
   };
 
   const handleTechLevelChange = (index, level) => {
-    setTechLevels(prev => ({
-      ...prev,
-      [index]: level
-    }));
+    setTechLevels(prev => ({ ...prev, [index]: level }));
     setShowTechLevelDropdown(null);
   };
 
@@ -157,40 +158,116 @@ const Profile = () => {
       [field]: [...prev[field], ""],
     }));
     if (field === 'technologies') {
-      setTechLevels(prev => ({
+      setTechLevels((prev) => ({
         ...prev,
-        [profileData.technologies.length]: 'Junior' // Устанавливаем уровень по умолчанию
+        [Object.keys(prev).length]: 'Junior'
       }));
     }
   };
 
   const removeArrayItem = (field, index) => {
     if (profileData[field].length <= 1) return;
-    setProfileData((prev) => ({
-      ...prev,
-      [field]: prev[field].filter((_, i) => i !== index),
-    }));
-    if (field === 'technologies') {
-      const newTechLevels = {...techLevels};
-      delete newTechLevels[index];
-      setTechLevels(newTechLevels);
+    setProfileData((prev) => {
+      const newArray = prev[field].filter((_, i) => i !== index);
+      if (field === 'technologies') {
+        const newTechLevels = {};
+        newArray.forEach((_, i) => {
+          newTechLevels[i] = techLevels[i >= index ? i + 1 : i] || 'Junior';
+        });
+        setTechLevels(newTechLevels);
+      }
+      return { ...prev, [field]: newArray };
+    });
+  };
+
+  const validateEmail = (email) => email.includes('@') && email.includes('.');
+  const validatePhone = (phone) => /^[\d\s+\-()]{10,20}$/.test(phone);
+
+  if (!profileData) return <div className="loader"></div>;
+
+  const handleSaveProfile = async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    try {
+      const updatedProfile = {
+        first_name: profileData.firstName,
+        last_name: profileData.lastName,
+        middle_name: profileData.middleName,
+        email: profileData.email,
+        phone_number: profileData.phone,
+        telegram_name: profileData.telegram,
+        city: profileData.city,
+        date_of_birth: birthDate?.toISOString().split("T")[0],
+        department_name: profileData.department,
+        position_name: profileData.position
+      };
+
+      await axios.put(`http://localhost:8080/api/v1/employee/${profileData.id}`, updatedProfile, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const interestsPayload = {
+        interests: profileData.interests.map((name) => {
+          const existing = allInterests.find(i => i.name_interest === name);
+          return existing ? { id: existing.id_interest } : { name_interest: name };
+        })
+      };
+
+      await axios.put(
+        `http://localhost:8080/api/v1/employee/${profileData.id}/interests`,
+        interestsPayload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const technologiesForRequest = profileData.technologies.map((name, index) => {
+        const existingTech = allTechnologies.find(t => t.name_technology === name);
+        const rankName = techLevels[index];
+        const rankId = allRanks.find(r => r.name_rank === rankName)?.id_rank;
+        if (existingTech) {
+          return {
+            id_technology: existingTech.id_technology,
+            id_rank: rankId,
+          };
+        } else {
+          return {
+            name_technology: name,
+            id_rank: rankId
+          };
+        }
+      });
+
+      const technologiesPayload = {
+        technologies: technologiesForRequest
+      };
+
+      await axios.put(
+        `http://localhost:8080/api/v1/employee/${profileData.id}/technologies`,
+        technologiesPayload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setIsEditing(false);
+    } catch (error) {
+      if (error.response) {
+        if (error.response.status === 401 && error.response.data.detail === "Token expired") {
+          localStorage.removeItem("access_token");
+          navigate("/login", { replace: true });
+        }
+      }
     }
   };
 
-  const validateEmail = (email) => {
-    return email.includes('@') && email.includes('.');
+  const rankNameToId = (name) => {
+    const found = allRanks.find(r => r.name_rank === name);
+    return found ? found.id_rank : null;
   };
-
-  const validatePhone = (phone) => {
-    return /^[\d\s+\-()]{10,20}$/.test(phone);
-  };
-
-  if (!profileData) {
-    return <div className="loader"></div>;
-  }
 
   const fullName = `${profileData.lastName} ${profileData.firstName} ${profileData.middleName}`.trim();
-
+  
   return (
     <div className="profile-page">
       <Sidebar />
@@ -521,7 +598,7 @@ const Profile = () => {
               </div>
               
               <div className="modal-actions">
-                <button className="save-btn" onClick={() => setIsEditing(false)}>
+                <button className="save-btn" onClick={handleSaveProfile}>
                   Сохранить
                 </button>
                 <button className="cancel-btn" onClick={() => setIsEditing(false)}>
