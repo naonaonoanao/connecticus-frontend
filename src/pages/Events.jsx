@@ -451,24 +451,12 @@ const Events = () => {
         return;
       }
     
-      const dateOnly = newEvent.date;
-    
       const eventTypeId = mapEventTypeToId[newEvent.category];
-    
+      
       if (!eventTypeId) {
         alert("Выберите корректный тип события");
         return;
       }
-    
-      const attendeeIds = []; // сюда надо будет добавить логику для участников, если нужно
-    
-      const payload = {
-        name_event: newEvent.title,
-        date: dateOnly,
-        place: newEvent.location,
-        id_event_type: eventTypeId,
-        attendee_ids: attendeeIds
-      };
     
       const token = localStorage.getItem("access_token");
       if (!token) {
@@ -477,9 +465,17 @@ const Events = () => {
       }
     
       try {
+        // Сначала создаем/редактируем мероприятие
         let response;
+        const payload = {
+          name_event: newEvent.title,
+          date: newEvent.date,
+          place: newEvent.location,
+          id_event_type: eventTypeId
+        };
+    
         if (isEditMode && editEventId) {
-          // PUT запрос для редактирования
+          // Редактирование существующего мероприятия
           response = await fetch(`http://localhost:8080/api/v1/events/${editEventId}`, {
             method: "PUT",
             headers: {
@@ -489,7 +485,7 @@ const Events = () => {
             body: JSON.stringify(payload)
           });
         } else {
-          // POST запрос для создания
+          // Создание нового мероприятия
           response = await fetch("http://localhost:8080/api/v1/events", {
             method: "POST",
             headers: {
@@ -502,20 +498,48 @@ const Events = () => {
     
         if (!response.ok) {
           const errorData = await response.json();
-          alert((isEditMode ? "Ошибка при редактировании мероприятия: " : "Ошибка при создании мероприятия: ") + (errorData.detail || response.statusText));
+          alert((isEditMode ? "Ошибка при редактировании мероприятия: " : "Ошибка при создании мероприятия: ") + 
+            (errorData.detail || response.statusText));
           return;
         }
     
-        const createdOrUpdatedEvent = await response.json();
+        const eventData = await response.json();
+        const eventId = eventData.id_event || editEventId;
+    
+        // Добавляем участников к мероприятию
+        if (newEvent.participants.length > 0) {
+          for (const participant of newEvent.participants) {
+            try {
+              const attendeeResponse = await fetch(
+                `http://localhost:8080/api/v1/events/${eventId}/attendees?employee_id=${participant.id}`, 
+                {
+                  method: "POST",
+                  headers: {
+                    "Authorization": `Bearer ${token}`
+                  }
+                }
+              );
+    
+              if (!attendeeResponse.ok) {
+                const errorData = await attendeeResponse.json();
+                console.error(`Ошибка при добавлении участника ${participant.name}:`, errorData);
+              }
+            } catch (error) {
+              console.error(`Ошибка при добавлении участника ${participant.name}:`, error);
+            }
+          }
+        }
     
         // Обновляем список мероприятий
         refreshEvents();
-    
+        
         // Закрываем модалку и сбрасываем форму
         setShowCreateModal(false);
         resetForm();
         setIsEditMode(false);
         setEditEventId(null);
+        
+        alert(isEditMode ? "Мероприятие успешно обновлено" : "Мероприятие успешно создано");
       } catch (error) {
         alert("Ошибка при отправке запроса: " + error.message);
       }
