@@ -1,7 +1,7 @@
 /* /styles/sidebar.css */
 
 .sidebar {
-  position: fixed; /* фиксируем */
+  position: fixed;
   top: 0;
   left: 0;
   width: 70px;
@@ -15,6 +15,7 @@
   transition: width 0.3s ease;
   overflow: hidden;
   z-index: 1000; /* чтобы быть поверх */
+  justify-content: space-between;
 }
   
   .menu-item-text {
@@ -55,4 +56,26 @@
   .menu-icon {
     font-size: 30px;
   }
+
+  .logout-container {
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: white !important;
+  padding: 15px 20px;
+  cursor: pointer;
+  transition: background 0.3s;
+  background: transparent;
+  border-radius: 10px;
+
+}
+
+.logout-button:hover {
+  background: rgba(100, 30, 40, 0.4) !important;
+}
   
