@@ -6,6 +6,11 @@ import Header from "../components/Notification";
 import "../styles/companyStructure.css";
 import * as d3 from "d3";
 
+import {
+  FaMapMarkerAlt, FaCode, FaProjectDiagram,
+  FaEnvelope, FaPhone, FaTelegram, FaTimes
+} from "react-icons/fa";
+
 const categories = [
   { key: "departments", label: "По отделам", color: "#00f5ff" },
   { key: "roles", label: "По ролям", color: "#ff00ff" },
@@ -21,6 +26,11 @@ const CompanyStructure = () => {
   const [search, setSearch] = useState("");
   const graphRef = useRef();
   const [dimensions, setDimensions] = useState({ width: 800, height: 900 });
+
+  // Новые состояния для карточки сотрудника
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [showEmployeeModal, setShowEmployeeModal] = useState(false);
+  const [loadingEmployee, setLoadingEmployee] = useState(false);
 
   const fetchGraph = async (category) => {
   try {
@@ -46,6 +56,102 @@ const CompanyStructure = () => {
     console.error("Ошибка загрузки графа:", e);
   }
 };
+
+const fetchEmployee = async (id) => {
+    setLoadingEmployee(true);
+    try {
+      const res = await fetch(`http://localhost:8080/api/v1/employee/${id}`);
+      if (!res.ok) throw new Error("Сотрудник не найден");
+      const data = await res.json();
+      setSelectedEmployee(data);
+      setShowEmployeeModal(true);
+    } catch (error) {
+      console.error("Ошибка загрузки сотрудника:", error);
+      alert("Не удалось загрузить данные сотрудника");
+    } finally {
+      setLoadingEmployee(false);
+    }
+  };
+
+const EmployeeCard = ({ employee, onClose }) => {
+    if (!employee) return null;
+    
+    return (
+      <div className="employee-modal">
+        <div className="modal-content">
+          <div className="employee-card">
+            <button className="close-button" onClick={onClose}>
+              <FaTimes />
+            </button>
+            
+            <div className="employee-header">
+              <h3>{`${employee.last_name} ${employee.first_name} ${employee.middle_name || ''}`}</h3>
+              <p className="position">{employee.position?.position_name}</p>
+            </div>
+            
+            <div className="employee-info">
+              <div className="info-item">
+                <FaMapMarkerAlt className="icon" />
+                <span>{employee.city}</span>
+              </div>
+              <div className="info-item">
+                <span>Отдел:</span> {employee.department?.name_department}
+              </div>
+              <div className="info-item">
+                <span>Команда:</span> {employee.projects[0]?.name_project}
+              </div>
+            </div>
+            
+            <div className="employee-contacts">
+              <h4><FaEnvelope /> Контакты</h4>
+              <div className="contact-item">
+                <FaEnvelope className="icon" />
+                <a href={`mailto:${employee.email}`}>{employee.email}</a>
+              </div>
+              <div className="contact-item">
+                <FaPhone className="icon" />
+                <a href={`tel:${employee.phone_number.replace(/\D/g, '')}`}>
+                  {employee.phone_number}
+                </a>
+              </div>
+              <div className="contact-item">
+                <FaTelegram className="icon" />
+                <a 
+                  href={`https://t.me/${employee.telegram_name.replace('@', '')}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  {employee.telegram_name}
+                </a>
+              </div>
+            </div>
+            
+            <div className="employee-skills">
+              <h4><FaCode /> Технологии</h4>
+              <div className="tags">
+                {employee.technologies.map(t => (
+                  <span key={t.id_technology} className="tag">
+                    {t.name_technology}
+                  </span>
+                ))}
+              </div>
+            </div>
+            
+            <div className="employee-interests">
+              <h4><FaProjectDiagram /> Интересы</h4>
+              <div className="tags">
+                {employee.interests.map(i => (
+                  <span key={i.id_interest} className="tag">
+                    {i.name_interest}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
   
   useEffect(() => {
     fetchGraph(activeFilter);
@@ -134,6 +240,15 @@ const CompanyStructure = () => {
       <Sidebar />
       <div className="main-content">
         <Header />
+
+        {/* Модальное окно с карточкой сотрудника */}
+        {showEmployeeModal && (
+          <EmployeeCard 
+            employee={selectedEmployee} 
+            onClose={() => setShowEmployeeModal(false)} 
+          />
+        )}
+        
         <motion.div
           className="graph-header"
           initial={{ y: -20, opacity: 0 }}
@@ -175,8 +290,11 @@ const CompanyStructure = () => {
               const sourceNode = typeof link.source === "object" ? link.source : graphData.nodes.find(n => n.id === link.source);
               return getGroupColor(sourceNode.groupId || sourceNode.id);
             }}
-            onNodeClick={(node) =>
-              alert(`Сотрудник: ${node.name}\nРоль: ${node.role || node.group}`)
+            onNodeClick={(node) => {
+              if (!node.isCategory) {
+                fetchEmployee(node.id);
+              }
+            }
             }
             nodeCanvasObject={(node, ctx, globalScale) => {
               const label = `${node.name}`;
