@@ -74,84 +74,93 @@ const fetchEmployee = async (id) => {
   };
 
 const EmployeeCard = ({ employee, onClose }) => {
-    if (!employee) return null;
-    
-    return (
-      <div className="employee-modal">
-        <div className="modal-content">
-          <div className="employee-card">
-            <button className="close-button" onClick={onClose}>
-              <FaTimes />
-            </button>
-            
-            <div className="employee-header">
-              <h3>{`${employee.last_name} ${employee.first_name} ${employee.middle_name || ''}`}</h3>
-              <p className="position">{employee.position?.position_name}</p>
-            </div>
-            
-            <div className="employee-info">
-              <div className="info-item">
-                <FaMapMarkerAlt className="icon" />
-                <span>{employee.city}</span>
-              </div>
-              <div className="info-item">
-                <span>Отдел:</span> {employee.department?.name_department}
-              </div>
-              <div className="info-item">
-                <span>Команда:</span> {employee.projects[0]?.name_project}
-              </div>
-            </div>
-            
-            <div className="employee-contacts">
-              <h4><FaEnvelope /> Контакты</h4>
-              <div className="contact-item">
-                <FaEnvelope className="icon" />
-                <a href={`mailto:${employee.email}`}>{employee.email}</a>
-              </div>
-              <div className="contact-item">
-                <FaPhone className="icon" />
-                <a href={`tel:${employee.phone_number.replace(/\D/g, '')}`}>
-                  {employee.phone_number}
-                </a>
-              </div>
-              <div className="contact-item">
-                <FaTelegram className="icon" />
-                <a 
-                  href={`https://t.me/${employee.telegram_name.replace('@', '')}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  {employee.telegram_name}
-                </a>
-              </div>
-            </div>
-            
-            <div className="employee-skills">
-              <h4><FaCode /> Технологии</h4>
-              <div className="tags">
-                {employee.technologies.map(t => (
-                  <span key={t.id_technology} className="tag">
-                    {t.name_technology}
-                  </span>
-                ))}
-              </div>
-            </div>
-            
-            <div className="employee-interests">
-              <h4><FaProjectDiagram /> Интересы</h4>
-              <div className="tags">
-                {employee.interests.map(i => (
-                  <span key={i.id_interest} className="tag">
-                    {i.name_interest}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
+  if (!employee) return null;
+  
+  return (
+    <div className="employee-card-popup">
+      <button className="close-button-popup" onClick={onClose}>
+        <FaTimes />
+      </button>
+      
+      <div className="name-section-popup">
+        <h2>{`${employee.last_name} ${employee.first_name} ${employee.middle_name || ''}`}</h2>
+      </div>
+      
+      <div className="position-popup">
+        {employee.position?.position_name || "Должность не указана"}
+      </div>
+      
+      <div className="city-popup">
+        <FaMapMarkerAlt className="icon-popup" />
+        <span>{employee.city || "Город не указан"}</span>
+      </div>
+      
+      <div className="info-popup">
+        <div className="info-item-popup">
+          <span>Отдел:</span> {employee.department?.name_department || "Не указан"}
+        </div>
+        <div className="info-item-popup">
+          <span>Команда:</span> {employee.projects[0]?.name_project || "Не указана"}
         </div>
       </div>
-    );
-  };
+      
+      <div className="divider-popup"></div>
+      
+      <div className="contacts-popup">
+        <div className="contact-item-popup">
+          <FaEnvelope className="icon-popup" />
+          <a href={`mailto:${employee.email}`}>{employee.email}</a>
+        </div>
+        <div className="contact-item-popup">
+          <FaPhone className="icon-popup" />
+          <a href={`tel:${employee.phone_number.replace(/\D/g, '')}`}>
+            {employee.phone_number}
+          </a>
+        </div>
+        <div className="contact-item-popup">
+          <FaTelegram className="icon-popup" />
+          <a 
+            href={`https://t.me/${employee.telegram_name.replace('@', '')}`} 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            {employee.telegram_name}
+          </a>
+        </div>
+      </div>
+      
+      <div className="divider-popup"></div>
+      
+      <div className="skills-section-popup">
+        <div className="section-header-popup">
+          <FaCode className="icon-popup" />
+          <h4>Технологии</h4>
+        </div>
+        <div className="tags-popup">
+          {employee.technologies.map(t => (
+            <span key={t.id_technology} className="tag-popup">
+              {t.name_technology}
+            </span>
+          ))}
+        </div>
+      </div>
+      
+      <div className="interests-section-popup">
+        <div className="section-header-popup">
+          <FaProjectDiagram className="icon-popup" />
+          <h4>Интересы</h4>
+        </div>
+        <div className="tags-popup">
+          {employee.interests.map(i => (
+            <span key={i.id_interest} className="tag-popup">
+              {i.name_interest}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
   
   useEffect(() => {
     fetchGraph(activeFilter);
