@@ -56,6 +56,7 @@ const Events = () => {
   const [editEventId, setEditEventId] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
   
+  
 
   useEffect(() => {
     const fetchCurrentUserProfile = async () => {
@@ -243,7 +244,7 @@ const Events = () => {
         alert(data.message);
   
         // Обновим список мероприятий, чтобы отобразить изменения (например, добавить текущего пользователя в participants)
-        refreshEvents();
+        refreshEvents(profileData);
       } catch (error) {
         alert("Ошибка при отправке запроса: " + error.message);
       }
@@ -273,14 +274,14 @@ const Events = () => {
         alert(data.message);
   
         // Обновим список мероприятий, чтобы убрать пользователя из участников
-        refreshEvents();
+        refreshEvents(profileData);
       } catch (error) {
         alert("Ошибка при отправке запроса: " + error.message);
       }
     };
   
     // Вынесем в функцию для обновления списка событий
-    const refreshEvents = async () => {
+    const refreshEvents = async (userProfile) => {
       try {
         const token = localStorage.getItem("access_token");
         if (!token) {
@@ -316,11 +317,11 @@ const Events = () => {
           date: event.date,
           location: event.place,
           organizer: `${event.owner.first_name} ${event.owner.last_name}`,
-          organizerId: event.owner.id,
+          organizerId: event.owner.id_employee,
           description: event.description || "Нет описания",
           attendees: event.attendees || [],
-          isOwner: event.owner.id === profileData?.id,
-          isJoined: event.attendees?.some(attendee => attendee.id === profileData?.id) || false
+          isOwner: event.owner.id_employee === profileData?.id,
+          isJoined: event.attendees?.some(attendee => attendee.id_employee === profileData?.id) || false
         }));
     
         setEvents(mappedEvents);
@@ -347,7 +348,7 @@ const Events = () => {
   
     // Подгружаем события изначально и при изменениях зависимостей
     useEffect(() => {
-      refreshEvents();
+      refreshEvents(profileData);
     }, [meta.skip, meta.limit, searchQuery, showMyEvents]);
     
 
@@ -424,19 +425,35 @@ const Events = () => {
   };
 
   const handleDetailsClick = (event) => {
-    const isOwner = event.organizerId === profileData?.id;
-    const isJoined = (event.attendees || []).some(attendee => attendee.id === profileData?.id);
+    if (!profileData) return;
     
+    const isOwner = event.organizerId === profileData.id;
+    const isJoined = event.attendees?.some(attendee => attendee.id_employee === profileData.id);
+  
     setSelectedEvent({
       ...event,
       isOwner,
       isJoined
     });
   };
+  
 
-    const closeModal = () => {
-        setSelectedEvent(null);
-    };
+  const closeModal = () => {
+    setSelectedEvent(null);
+    setShowCreateModal(false);
+    setIsEditMode(false);
+    setEditEventId(null);
+    setNewEvent({
+      title: "",
+      category: "training",
+      date: "",
+      time: "",
+      location: "",
+      description: "",
+      participants: []
+    });
+  };
+  
 
     const mapEventTypeToId = {
       training: "b3a02072-6df9-402e-a9c1-0cc03c7c2f17",// НАДО БУДЕТ ПОПРАВИТЬ UUID
@@ -531,7 +548,7 @@ const Events = () => {
         }
     
         // Обновляем список мероприятий
-        refreshEvents();
+        refreshEvents(profileData);
         
         // Закрываем модалку и сбрасываем форму
         setShowCreateModal(false);
@@ -623,15 +640,15 @@ const Events = () => {
 
   const isUserParticipant = (event) => {
     if (!currentUser || !event?.attendees) return false;
-    return (event.attendees || []).some(attendee => attendee.id === currentUser);
+    return (event.attendees || []).some(attendee => attendee.id_employee === currentUser);
   };
       
 
     const isCurrentUserOrganizer = selectedEvent?.organizerId === currentUser;
-    const isCurrentUserParticipant = (selectedEvent?.attendees || []).some(attendee => attendee.id === currentUser);
+    const isCurrentUserParticipant = (selectedEvent?.attendees || []).some(attendee => attendee.id_employee === currentUser);
     
     const isUserAttending = (event) => {
-      return (event.attendees || []).some(attendee => attendee.id === currentUser);
+      return (event.attendees || []).some(attendee => attendee.id_employee === currentUser);
     };
 
     const fillEditForm = (event) => {
@@ -689,14 +706,34 @@ const Events = () => {
         const data = await response.json();
         alert(data.message || "Мероприятие успешно удалено");
     
-        refreshEvents();
+        refreshEvents(profileData);
         setShowCreateModal(false);
         resetForm();
       } catch (error) {
         alert("Ошибка при отправке запроса: " + error.message);
       }
     };
-    
+
+    const handleEditEvent = (event) => {
+      setIsEditMode(true);
+      setEditEventId(event.id);
+      setShowCreateModal(true);
+      
+      // Устанавливаем значения из существующего события
+      setNewEvent({
+        title: event.title || "",
+        category: event.category || "training",
+        date: event.date?.split("T")[0] || "", // Обрезаем время, если есть
+        time: "", // если будешь поддерживать время, можно парсить отдельно
+        location: event.location || "",
+        description: event.description || "",
+        participants: event.attendees?.map(att => ({
+          id: att.id_employee,
+          name: `${att.first_name} ${att.last_name}`
+        })) || []
+      });
+    };
+
 
     return (
         <div className="events-page">
@@ -806,10 +843,10 @@ const Events = () => {
                           {(event.attendees || []).map((attendee, index) => (
                             <span 
                               key={index} 
-                              className={`participant ${attendee.id === currentUser ? "current-user" : ""}`}
+                              className={`participant ${attendee.id_employee === currentUser ? "current-user" : ""}`}
                             >
                               {`${attendee.first_name} ${attendee.last_name}`}
-                              {attendee.id === currentUser && " (Вы)"}
+                              {attendee.id_employee === currentUser && " (Вы)"}
                             </span>
                           ))}
                         </div>
@@ -897,10 +934,10 @@ const Events = () => {
                         {(selectedEvent.attendees || []).map((attendee, index) => (
                           <div 
                             key={index} 
-                            className={`participant ${attendee.id === currentUser ? "current-user" : ""}`}
+                            className={`participant ${attendee.id_employee === currentUser ? "current-user" : ""}`}
                           >
                             {`${attendee.first_name} ${attendee.last_name}`}
-                            {attendee.id === currentUser && " (Вы)"}
+                            {attendee.id_employee === currentUser && " (Вы)"}
                           </div>
                         ))}
                       </div>
@@ -912,12 +949,8 @@ const Events = () => {
                     {selectedEvent?.isOwner ? (
                       <button 
                         className="action-btn primary"
-                        onClick={() => {
-                          setIsEditMode(true);
-                          setEditEventId(selectedEvent.id);
-                          setShowCreateModal(true);
-                          setSelectedEvent(null);
-                        }}
+                        onClick={() => handleEditEvent(selectedEvent)}
+
                       >
                         Редактировать
                       </button>

@@ -35,11 +35,13 @@ const Profile = () => {
   const [allTechnologies, setAllTechnologies] = useState([]);
   const [ranksLoaded, setRanksLoaded] = useState(false);
   const [allRanks, setAllRanks] = useState([]);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
 
   const defaultRanks = [
-    { id_rank: "uuid-1", name_rank: "Junior" },
-    { id_rank: "uuid-2", name_rank: "Middle" },
-    { id_rank: "uuid-3", name_rank: "Senior" }
+    { id_rank: "9b51cafd-209e-4c8d-9a68-44e8837e55dc", name_rank: "Junior" },
+    { id_rank: "51d35915-bf8d-4159-8153-2427692fe66f", name_rank: "Middle" },
+    { id_rank: "3cb8c1a9-7d1e-4989-9393-71a15d3b3075", name_rank: "Senior" }
   ];
   
   useEffect(() => {
@@ -191,8 +193,9 @@ const Profile = () => {
       navigate("/login", { replace: true });
       return;
     }
-
+  
     try {
+      // Update basic profile info
       const updatedProfile = {
         first_name: profileData.firstName,
         last_name: profileData.lastName,
@@ -205,58 +208,91 @@ const Profile = () => {
         department_name: profileData.department,
         position_name: profileData.position
       };
-
+  
       await axios.put(`http://localhost:8080/api/v1/employee/${profileData.id}`, updatedProfile, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
+  
+      // Update interests
       const interestsPayload = {
         interests: profileData.interests.map((name) => {
           const existing = allInterests.find(i => i.name_interest === name);
           return existing ? { id: existing.id_interest } : { name_interest: name };
         })
       };
-
+  
       await axios.put(
         `http://localhost:8080/api/v1/employee/${profileData.id}/interests`,
         interestsPayload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      const technologiesForRequest = profileData.technologies.map((name, index) => {
-        const existingTech = allTechnologies.find(t => t.name_technology === name);
-        const rankName = techLevels[index];
-        const rankId = allRanks.find(r => r.name_rank === rankName)?.id_rank;
-        if (existingTech) {
-          return {
-            id_technology: existingTech.id_technology,
-            id_rank: rankId,
-          };
-        } else {
-          return {
-            name_technology: name,
-            id_rank: rankId
-          };
+  
+      // Prepare technologies payload
+      const technologiesForRequest = [];
+      
+      for (const [index, name] of profileData.technologies.entries()) {
+        const rankName = techLevels[index] || 'Junior';
+        const rankId = allRanks.find(r => r.name_rank === rankName)?.id_rank || 
+                     defaultRanks.find(r => r.name_rank === rankName)?.id_rank;
+        
+        if (!rankId) {
+          throw new Error(`Missing rank ID for technology: ${name}`);
         }
-      });
-
+  
+        try {
+          // Check if technology exists
+          const response = await axios.get(
+            `http://localhost:8080/api/v1/technologies?name=${encodeURIComponent(name)}`,
+            { headers: { Authorization: `Bearer ${token}` }
+          });
+  
+          if (response.data.length > 0) {
+            // Existing technology
+            technologiesForRequest.push({
+              id_technology: response.data[0].id_technology,
+              id_rank: rankId
+            });
+          } else {
+            // New technology
+            technologiesForRequest.push({
+              name_technology: name,
+              id_rank: rankId,
+              description: name // Using name as default description
+            });
+          }
+        } catch (error) {
+          console.error(`Error checking technology ${name}:`, error);
+          // Fallback to new technology
+          technologiesForRequest.push({
+            name_technology: name,
+            id_rank: rankId,
+            description: name
+          });
+        }
+      }
+  
       const technologiesPayload = {
         technologies: technologiesForRequest
       };
-
+  
       await axios.put(
-        `http://localhost:8080/api/v1/employee/${profileData.id}/technologies`,
+        `http://localhost:8080/api/v1/employee/me/technologies`,
         technologiesPayload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
+  
       setIsEditing(false);
     } catch (error) {
+      console.error("Error saving profile:", error);
       if (error.response) {
-        if (error.response.status === 401 && error.response.data.detail === "Token expired") {
+        if (error.response.status === 401) {
           localStorage.removeItem("access_token");
           navigate("/login", { replace: true });
+        } else {
+          alert(`Ошибка при сохранении: ${error.response.data.detail || error.message}`);
         }
+      } else {
+        alert(`Ошибка при сохранении: ${error.message}`);
       }
     }
   };
@@ -390,7 +426,12 @@ const Profile = () => {
               transition={{ duration: 0.2 }}
             >
               <h3>Редактирование профиля</h3>
-              
+
+              <div className="form-group warning-message">
+                <p className="readonly-note">
+                  🔒 Редактирование ФИО, должности и отдела доступно только HR-специалистам.
+                </p>
+              </div>
               <div className="form-columns">
                 <div className="form-group">
                   <label>Фамилия</label>
@@ -398,7 +439,7 @@ const Profile = () => {
                     type="text" 
                     name="lastName" 
                     value={profileData.lastName}
-                    onChange={handleInputChange}
+                    readOnly
                   />
                 </div>
                 
@@ -408,7 +449,7 @@ const Profile = () => {
                     type="text" 
                     name="firstName" 
                     value={profileData.firstName}
-                    onChange={handleInputChange}
+                    readOnly
                   />
                 </div>
                 
@@ -418,7 +459,7 @@ const Profile = () => {
                     type="text" 
                     name="middleName" 
                     value={profileData.middleName}
-                    onChange={handleInputChange}
+                    readOnly
                   />
                 </div>
               </div>
@@ -429,7 +470,7 @@ const Profile = () => {
                   type="text" 
                   name="position" 
                   value={profileData.position}
-                  onChange={handleInputChange}
+                  readOnly
                 />
               </div>
               
@@ -465,7 +506,7 @@ const Profile = () => {
                   type="text" 
                   name="department" 
                   value={profileData.department}
-                  onChange={handleInputChange}
+                  readOnly
                 />
               </div>
               
@@ -598,10 +639,40 @@ const Profile = () => {
               </div>
               
               <div className="modal-actions">
-                <button className="save-btn" onClick={handleSaveProfile}>
-                  Сохранить
-                </button>
+              <button className="save-btn" onClick={() => setIsConfirmModalOpen(true)}>
+                Сохранить
+              </button>
                 <button className="cancel-btn" onClick={() => setIsEditing(false)}>
+                  Отмена
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+        {isConfirmModalOpen && (
+          <div className="modal-overlay">
+            <motion.div
+              className="confirmation-modal"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              <h3>Подтвердите изменения</h3>
+              <p>Вы уверены, что хотите сохранить изменения профиля?</p>
+              <div className="modal-actions">
+                <button
+                  className="save-btn"
+                  onClick={() => {
+                    setIsConfirmModalOpen(false);
+                    handleSaveProfile();
+                  }}
+                >
+                  Да, сохранить
+                </button>
+                <button
+                  className="cancel-btn"
+                  onClick={() => setIsConfirmModalOpen(false)}
+                >
                   Отмена
                 </button>
               </div>
