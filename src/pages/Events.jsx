@@ -55,8 +55,13 @@ const Events = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editEventId, setEditEventId] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
-  
-  
+  const [isLoading, setIsLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({
+    title: false,
+    date: false,
+    time: false,
+    location: false
+  });
 
   useEffect(() => {
     const fetchCurrentUserProfile = async () => {
@@ -163,6 +168,7 @@ const Events = () => {
 
     useEffect(() => {
       const fetchEvents = async () => {
+        setIsLoading(true);
         try {
           const token = localStorage.getItem("access_token");
           if (!token) {
@@ -214,6 +220,8 @@ const Events = () => {
         } catch (error) {
           console.error("Ошибка загрузки мероприятий:", error);
           setEvents([]);
+        } finally {
+          setIsLoading(false);
         }
       };
     
@@ -282,6 +290,7 @@ const Events = () => {
   
     // Вынесем в функцию для обновления списка событий
     const refreshEvents = async (userProfile) => {
+      setIsLoading(true);
       try {
         const token = localStorage.getItem("access_token");
         if (!token) {
@@ -333,6 +342,8 @@ const Events = () => {
       } catch (error) {
         console.error("Ошибка загрузки мероприятий:", error);
         setEvents([]);
+      }finally {
+        setIsLoading(false);
       }
     };  
 
@@ -397,8 +408,7 @@ const Events = () => {
                           description.toLowerCase().includes(searchQuery.toLowerCase());
     
     return matchesCategory && matchesSearch;
-  })
-  .slice(0, meta.limit);
+  });
 
 
 
@@ -463,23 +473,38 @@ const Events = () => {
     
 
     const handleCreateEvent = async () => {
-      if (!newEvent.title || !newEvent.date || !newEvent.location) {
-        alert("Заполните обязательные поля");
-        return;
-      }
-    
-      const eventTypeId = mapEventTypeToId[newEvent.category];
-      
-      if (!eventTypeId) {
-        alert("Выберите корректный тип события");
-        return;
-      }
-    
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        alert("Пожалуйста, войдите в систему");
-        return;
-      }
+        // Валидация полей
+  const errors = {
+    title: !newEvent.title,
+    date: !newEvent.date,
+    time: !newEvent.time,
+    location: !newEvent.location
+  };
+
+  setValidationErrors(errors);
+
+  // Проверяем, есть ли ошибки
+  const hasErrors = Object.values(errors).some(error => error);
+  if (hasErrors) {
+    return;
+  }
+
+  setIsLoading(true);
+  
+  const eventTypeId = mapEventTypeToId[newEvent.category];
+  
+  if (!eventTypeId) {
+    alert("Выберите корректный тип события");
+    setIsLoading(false);
+    return;
+  }
+
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    alert("Пожалуйста, войдите в систему");
+    setIsLoading(false);
+    return;
+  }
     
       try {
         // Сначала создаем/редактируем мероприятие
@@ -559,6 +584,8 @@ const Events = () => {
         alert(isEditMode ? "Мероприятие успешно обновлено" : "Мероприятие успешно создано");
       } catch (error) {
         alert("Ошибка при отправке запроса: " + error.message);
+      }finally {
+        setIsLoading(false);
       }
     };
     
@@ -576,6 +603,12 @@ const Events = () => {
       setNewParticipant("");
       setIsEditMode(false);
       setEditEventId(null);
+      setValidationErrors({
+        title: false,
+        date: false,
+        time: false,
+        location: false
+      });
     };
     
 
@@ -625,15 +658,13 @@ const Events = () => {
       }));
     };
 
-    const changePage = (newSkip) => {
-      if (newSkip < 0) return;
-      if (newSkip >= meta.total_count) return;
+    const changePage = useCallback(newSkip => {
+      setMeta(prev => prev.skip === newSkip ? prev : { 
+        ...prev, 
+        skip: newSkip 
+      });
+    }, []);
     
-      setMeta(prev => ({
-        ...prev,
-        skip: newSkip
-      }));
-    };
 
     const isUserOrganizer = selectedEvent && currentUser && 
       selectedEvent.organizerId === currentUser;
@@ -679,6 +710,7 @@ const Events = () => {
     };
 
     const handleDeleteEvent = async (eventId) => {
+      setIsLoading(true);
       const token = localStorage.getItem("access_token");
       if (!token) {
         alert("Пожалуйста, войдите в систему");
@@ -706,11 +738,17 @@ const Events = () => {
         const data = await response.json();
         alert(data.message || "Мероприятие успешно удалено");
     
-        refreshEvents(profileData);
-        setShowCreateModal(false);
+        // Закрываем все модальные окна
+        setSelectedEvent(null); // Закрываем модальное окно просмотра
+        setShowCreateModal(false); // Закрываем модальное окно создания/редактирования
+        setIsEditMode(false);
         resetForm();
+    
+        refreshEvents(profileData);
       } catch (error) {
         alert("Ошибка при отправке запроса: " + error.message);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -872,23 +910,27 @@ const Events = () => {
             </div>
 
             {/* Pagination */}
-      <div className="pagination">
-            <button 
-              disabled={meta.skip === 0} 
-              onClick={() => changePage(meta.skip - meta.limit)}
-            >
-              ← Назад
-            </button>
+            <div className="pagination flex justify-center items-center gap-4 mt-6">
+              <button 
+                disabled={meta.skip === 0 || isLoading} 
+                onClick={() => changePage(meta.skip - meta.limit)} 
+                className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+              >
+                ← Назад
+              </button>
 
-            <span>Страница {meta.skip / meta.limit + 1} из {meta.total_pages}</span>
+              <span className="text-sm text-gray-700">
+                Страница {Math.floor(meta.skip / meta.limit) + 1}
+              </span>
 
-            <button 
-              disabled={meta.skip + meta.limit >= meta.total_count} 
-              onClick={() => changePage(meta.skip + meta.limit)}
-            >
-              Вперед →
-            </button>
-          </div>
+              <button 
+                disabled={events.length < meta.limit || isLoading} 
+                onClick={() => changePage(meta.skip + meta.limit)} 
+                className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+              >
+                Вперед →
+              </button>
+            </div>
           </div>
       
           {/* Модальное окно просмотра мероприятия */}
@@ -988,16 +1030,18 @@ const Events = () => {
                         
                         <div className="modal-content">
                             <div className="modal-section">
-                                <div className="form-group">
-                                    <label>Название мероприятия</label>
-                                    <input
-                                        type="text"
-                                        name="title"
-                                        value={newEvent.title}
-                                        onChange={handleNewEventChange}
-                                        required
-                                    />
-                                </div>
+                            <div className="form-group">
+                              <label>Название мероприятия</label>
+                              <input
+                                type="text"
+                                name="title"
+                                value={newEvent.title}
+                                onChange={handleNewEventChange}
+                                required
+                                className={validationErrors.title ? "error" : ""}
+                              />
+                              {validationErrors.title && <span className="error-message">Это поле обязательно</span>}
+                            </div>
                                 
                                 <div className="form-group">
                                     <label>Тип мероприятия</label>
@@ -1035,7 +1079,7 @@ const Events = () => {
                                 <div className="form-row">
                                     <div className="form-group">
                                         <label>Дата</label>
-                                        <div className="date-picker-container">
+                                        <div className={`date-picker-container ${validationErrors.date ? "error" : ""}`}>
                                             <input
                                                 type="text"
                                                 className="date-picker-input"
@@ -1060,10 +1104,11 @@ const Events = () => {
                                                 />
                                             )}
                                         </div>
+                                        {validationErrors.date && <span className="error-message">Это поле обязательно</span>}
                                     </div>
                                     <div className="form-group">
                                         <label>Время</label>
-                                        <div className="time-picker-container">
+                                        <div className={`time-picker-container ${validationErrors.time ? "error" : ""}`}>
                                             <input
                                                 type="time"
                                                 name="time"
@@ -1074,20 +1119,23 @@ const Events = () => {
                                             />
                                             <FaClock className="time-picker-icon" />
                                         </div>
+                                        {validationErrors.time && <span className="error-message">Это поле обязательно</span>}
                                     </div>
                                 </div>
                             </div>
                     
                     <div className="modal-section">
                     <div className="form-group">
-                        <label>Место проведения</label>
-                        <input
+                      <label>Место проведения</label>
+                      <input
                         type="text"
                         name="location"
                         value={newEvent.location}
                         onChange={handleNewEventChange}
                         required
-                        />
+                        className={validationErrors.location ? "error" : ""}
+                      />
+                      {validationErrors.location && <span className="error-message">Это поле обязательно</span>}
                     </div>
                     </div>
                     
@@ -1172,6 +1220,7 @@ const Events = () => {
                     type="button" 
                     className="delete-btn"
                     onClick={() => handleDeleteEvent(editEventId)}
+                    disabled={isLoading}
                   >
                     Удалить
                   </button>
@@ -1180,7 +1229,7 @@ const Events = () => {
                   type="button" 
                   className="action-btn primary"
                   onClick={handleCreateEvent}
-                  disabled={!newEvent.title || !newEvent.date || !newEvent.time || !newEvent.location}
+                  disabled={isLoading}
                 >
                   {isEditMode ? "Сохранить изменения" : "Создать"}
                 </button>
@@ -1192,10 +1241,12 @@ const Events = () => {
                   setShowCreateModal(false);
                   resetForm();
                 }}
+                disabled={isLoading}
               >
                 Отмена
               </button>
             </div>
+
           </div>
         </div>
       )}
