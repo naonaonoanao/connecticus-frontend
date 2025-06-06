@@ -56,12 +56,31 @@ const Events = () => {
   const [editEventId, setEditEventId] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [userTypedSearch, setUserTypedSearch] = useState("");
   const [validationErrors, setValidationErrors] = useState({
     title: false,
     date: false,
     time: false,
     location: false
   });
+  
+  useEffect(() => {
+    const categoryToType = {
+      training: "Тренинг",
+      meeting: "Совещание",
+      party: "Корпоратив"
+    };
+  
+    const categoryPart = activeCategory !== "all" ? categoryToType[activeCategory] : "";
+    const searchParts = [];
+  
+    if (categoryPart) searchParts.push(categoryPart);
+    if (userTypedSearch.trim()) searchParts.push(userTypedSearch.trim());
+  
+    setSearchQuery(searchParts.join(" "));
+  }, [activeCategory, userTypedSearch]);
+  
+  
 
   useEffect(() => {
     const fetchCurrentUserProfile = async () => {
@@ -394,21 +413,6 @@ const Events = () => {
       participantObj.name.toLowerCase().includes(participantSearch.toLowerCase()) &&
       !newEvent.participants.some(p => p.id === participantObj.id)
     ); 
-
-    const filteredEvents = events
-  .filter(event => {
-    if (!event) return false;
-    
-    const matchesCategory = activeCategory === "all" || event.category === activeCategory;
-    
-    const title = event.title || "";
-    const description = event.description || "";
-    
-    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          description.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return matchesCategory && matchesSearch;
-  });
 
 
 
@@ -829,18 +833,17 @@ const Events = () => {
                   <FaSearch className="search-icon" />
                   <input
                     type="text"
-                    className="search-input"
-                    placeholder="Поиск мероприятий..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    value={userTypedSearch}
+                    onChange={(e) => setUserTypedSearch(e.target.value)}
+                    placeholder="Поиск по названию или месту"
                   />
                 </div>
               </div>
             </div>
             
             <div className="events-grid">
-              {filteredEvents.length > 0 ? (
-                filteredEvents.map(event => {
+              {events.length > 0 ? (
+                events.map(event => {
                   const isOrganizer = currentUser === event.organizer;
                   const isParticipant = (event.attendees || []).some(participant => participant.id === currentUser);
 
