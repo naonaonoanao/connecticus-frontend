@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { 
   FaCalendarAlt, 
   FaMapMarkerAlt, 
@@ -57,6 +57,7 @@ const Events = () => {
   const [isOwner, setIsOwner] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [userTypedSearch, setUserTypedSearch] = useState("");
+  const [searchTimeout, setSearchTimeout] = useState(null);
   const [validationErrors, setValidationErrors] = useState({
     title: false,
     date: false,
@@ -71,6 +72,12 @@ const Events = () => {
       party: "Корпоратив"
     };
   
+    // Если поле поиска пустое, не добавляем его в запрос
+    if (userTypedSearch.trim() === '') {
+      setSearchQuery(activeCategory !== "all" ? categoryToType[activeCategory] : "");
+      return;
+    }
+  
     const categoryPart = activeCategory !== "all" ? categoryToType[activeCategory] : "";
     const searchParts = [];
   
@@ -80,8 +87,22 @@ const Events = () => {
     setSearchQuery(searchParts.join(" "));
   }, [activeCategory, userTypedSearch]);
   
+  useEffect(() => {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    
+    setSearchTimeout(setTimeout(() => {
+      setMeta(prev => ({ ...prev, skip: 0 })); // Сбрасываем пагинацию при изменении поиска
+    }, 500));
+    
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [userTypedSearch, activeCategory]);
   
-
   useEffect(() => {
     const fetchCurrentUserProfile = async () => {
       try {
@@ -187,6 +208,7 @@ const Events = () => {
 
     useEffect(() => {
       const fetchEvents = async () => {
+        if (isLoading) return;
         setIsLoading(true);
         try {
           const token = localStorage.getItem("access_token");
@@ -194,32 +216,33 @@ const Events = () => {
             setEvents([]);
             return;
           }
-    
-          // Формируем URL в зависимости от showMyEvents
+      
           const baseUrl = showMyEvents 
             ? `http://localhost:8080/api/v1/events/my`
             : `http://localhost:8080/api/v1/events`;
-    
-          // Параметры запроса: skip, limit, search
+      
           const params = new URLSearchParams();
           params.append("skip", meta.skip);
           params.append("limit", meta.limit);
           if (searchQuery.trim() !== "") {
             params.append("search", searchQuery.trim());
           }
-    
+      
+          console.log("Fetching events with params:", params.toString()); // Логируем параметры запроса
+      
           const response = await fetch(`${baseUrl}?${params.toString()}`, {
             headers: {
               "Authorization": `Bearer ${token}`
             }
           });
-    
+      
           if (!response.ok) {
             throw new Error("Ошибка при загрузке мероприятий");
           }
-    
+      
           const data = await response.json();
-    
+          console.log("Received data:", data); // Логируем полученные данные
+      
           const mappedEvents = data.events.map(event => ({
             id: event.id_event,
             title: event.name_event,
@@ -227,7 +250,7 @@ const Events = () => {
             date: event.date,
             location: event.place,
             organizer: `${event.owner.first_name} ${event.owner.last_name}`,
-            organizerId: event.owner.id_employee, // Убедитесь, что используете правильное поле для ID
+            organizerId: event.owner.id_employee,
             description: event.description || "Нет описания",
             attendees: event.attendees || [], 
             isOwner: event.owner.id_employee === profileData?.id,
@@ -235,7 +258,12 @@ const Events = () => {
           }));
           
           setEvents(mappedEvents);
-          setMeta(data.meta || meta);
+          
+          setMeta(prev => ({
+            ...prev,
+            ...data.meta 
+          }));
+          
         } catch (error) {
           console.error("Ошибка загрузки мероприятий:", error);
           setEvents([]);
@@ -592,7 +620,13 @@ const Events = () => {
         setIsLoading(false);
       }
     };
-    
+
+    useEffect(() => {
+      // Добавляем проверку на допустимость skip
+      if (meta.skip >= 0 && meta.skip < meta.total_count) {
+        refreshEvents(profileData);
+      }
+    }, [meta.skip, meta.limit, searchQuery, showMyEvents]);
     
     const resetForm = () => {
       setNewEvent({
@@ -662,12 +696,16 @@ const Events = () => {
       }));
     };
 
-    const changePage = useCallback(newSkip => {
-      setMeta(prev => prev.skip === newSkip ? prev : { 
-        ...prev, 
-        skip: newSkip 
+    const changePage = useCallback((direction) => {
+      setMeta(prev => {
+        const newSkip = direction === 'next' 
+          ? prev.skip + prev.limit 
+          : Math.max(0, prev.skip - prev.limit);
+        
+        // Всегда возвращаем новое состояние, даже если skip не изменился
+        return { ...prev, skip: newSkip };
       });
-    }, []);
+    }, []); // Убрали зависимости, так как используем функциональное обновление
     
 
     const isUserOrganizer = selectedEvent && currentUser && 
@@ -776,6 +814,21 @@ const Events = () => {
       });
     };
 
+    const currentPage = Math.floor(meta.skip / meta.limit) + 1;
+    const totalPages = meta.total_pages;
+
+    const hasNextPage = useMemo(() => {
+      if (isLoading || events.length === 0) return false;
+      
+      // Для "моих мероприятий" используем total_count из meta
+      if (showMyEvents) {
+        return meta.skip + meta.limit < meta.total_count;
+      }
+      
+      // Для всех мероприятий - если получили полную страницу событий
+      return events.length === meta.limit;
+    }, [events.length, meta, showMyEvents, isLoading]);
+
 
     return (
         <div className="events-page">
@@ -828,17 +881,36 @@ const Events = () => {
               ))}
             </div>
               
-              <div className="search-bar">
-                <div className="search-input-container">
-                  <FaSearch className="search-icon" />
-                  <input
-                    type="text"
-                    value={userTypedSearch}
-                    onChange={(e) => setUserTypedSearch(e.target.value)}
-                    placeholder="Поиск по названию или месту"
-                  />
-                </div>
+            <div className="search-bar">
+              <div className="search-input-container">
+                <FaSearch className="search-icon" />
+                <input
+                  type="text"
+                  value={userTypedSearch}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setUserTypedSearch(value);
+                    if (value.trim() === '') {
+                      setSearchQuery('');
+                      setMeta(prev => ({ ...prev, skip: 0 }));
+                    }
+                  }}
+                  placeholder="Поиск по названию или месту"
+                />
+                {userTypedSearch && (
+                  <button 
+                    className="clear-search-btn"
+                    onClick={() => {
+                      setUserTypedSearch('');
+                      setSearchQuery('');
+                      setMeta(prev => ({ ...prev, skip: 0 }));
+                    }}
+                  >
+                    ×
+                  </button>
+                )}
               </div>
+            </div>
             </div>
             
             <div className="events-grid">
@@ -916,24 +988,28 @@ const Events = () => {
             <div className="pagination flex justify-center items-center gap-4 mt-6">
               <button 
                 disabled={meta.skip === 0 || isLoading} 
-                onClick={() => changePage(meta.skip - meta.limit)} 
+                onClick={() => changePage('prev')} 
                 className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
               >
                 ← Назад
               </button>
 
               <span className="text-sm text-gray-700">
-                Страница {Math.floor(meta.skip / meta.limit) + 1}
+                Страница {currentPage}
               </span>
 
               <button 
-                disabled={events.length < meta.limit || isLoading} 
-                onClick={() => changePage(meta.skip + meta.limit)} 
+                disabled={isLoading || !hasNextPage}
+                onClick={() => {
+                  console.log('Next button clicked, current meta:', meta);
+                  changePage('next');
+                }}
                 className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
               >
                 Вперед →
               </button>
             </div>
+
           </div>
       
           {/* Модальное окно просмотра мероприятия */}
