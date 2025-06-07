@@ -58,10 +58,12 @@ const Events = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userTypedSearch, setUserTypedSearch] = useState("");
   const [searchTimeout, setSearchTimeout] = useState(null);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [confirmationAction, setConfirmationAction] = useState(null);
+  const [confirmationData, setConfirmationData] = useState(null);
   const [validationErrors, setValidationErrors] = useState({
     title: false,
     date: false,
-    time: false,
     location: false
   });
   
@@ -505,22 +507,6 @@ const Events = () => {
     
 
     const handleCreateEvent = async () => {
-        // Валидация полей
-  const errors = {
-    title: !newEvent.title,
-    date: !newEvent.date,
-    time: !newEvent.time,
-    location: !newEvent.location
-  };
-
-  setValidationErrors(errors);
-
-  // Проверяем, есть ли ошибки
-  const hasErrors = Object.values(errors).some(error => error);
-  if (hasErrors) {
-    return;
-  }
-
   setIsLoading(true);
   
   const eventTypeId = mapEventTypeToId[newEvent.category];
@@ -613,7 +599,7 @@ const Events = () => {
         setIsEditMode(false);
         setEditEventId(null);
         
-        alert(isEditMode ? "Мероприятие успешно обновлено" : "Мероприятие успешно создано");
+        refreshEvents(profileData);
       } catch (error) {
         alert("Ошибка при отправке запроса: " + error.message);
       }finally {
@@ -759,10 +745,6 @@ const Events = () => {
         return;
       }
     
-      if (!window.confirm("Вы уверены, что хотите удалить это мероприятие?")) {
-        return;
-      }
-    
       try {
         const response = await fetch(`http://localhost:8080/api/v1/events/${eventId}`, {
           method: "DELETE",
@@ -778,7 +760,6 @@ const Events = () => {
         }
     
         const data = await response.json();
-        alert(data.message || "Мероприятие успешно удалено");
     
         // Закрываем все модальные окна
         setSelectedEvent(null); // Закрываем модальное окно просмотра
@@ -828,6 +809,40 @@ const Events = () => {
       // Для всех мероприятий - если получили полную страницу событий
       return events.length === meta.limit;
     }, [events.length, meta, showMyEvents, isLoading]);
+
+    const handleActionConfirmation = (action, data) => {
+      // Валидация полей
+      const errors = {
+        title: !newEvent.title,
+        date: !newEvent.date,
+        location: !newEvent.location
+      };
+    
+      setValidationErrors(errors);
+    
+      // Проверяем, есть ли ошибки
+      const hasErrors = Object.values(errors).some(error => error);
+      if (hasErrors) {
+        return;
+      }
+    
+      // Если ошибок нет, показываем модальное окно подтверждения
+      setConfirmationAction(action);
+      setConfirmationData(data);
+      setShowConfirmationModal(true);
+    };
+
+  const executeConfirmedAction = async () => {
+    setShowConfirmationModal(false);
+    
+    if (confirmationAction === 'create') {
+      await handleCreateEvent();
+    } else if (confirmationAction === 'edit') {
+      await handleCreateEvent(); // Используем ту же функцию, так как редактирование уже обрабатывается внутри
+    } else if (confirmationAction === 'delete') {
+      await handleDeleteEvent(confirmationData);
+    }
+  };
 
 
     return (
@@ -1294,20 +1309,23 @@ const Events = () => {
             
             <div className="modal-actions">
               <div className="primary-action">
-                {isEditMode && (
-                  <button 
-                    type="button" 
-                    className="delete-btn"
-                    onClick={() => handleDeleteEvent(editEventId)}
-                    disabled={isLoading}
-                  >
-                    Удалить
-                  </button>
-                )}
+              {isEditMode && (
+                <button 
+                  type="button" 
+                  className="delete-btn"
+                  onClick={() => handleActionConfirmation('delete', editEventId)}
+                  disabled={isLoading}
+                >
+                  Удалить
+                </button>
+              )}
                 <button 
                   type="button" 
                   className="action-btn primary"
-                  onClick={handleCreateEvent}
+                  onClick={() => handleActionConfirmation(
+                    isEditMode ? 'edit' : 'create', 
+                    null
+                  )}
                   disabled={isLoading}
                 >
                   {isEditMode ? "Сохранить изменения" : "Создать"}
@@ -1327,6 +1345,33 @@ const Events = () => {
             </div>
 
           </div>
+          {/* Модальное окно подтверждения */}
+          {showConfirmationModal && (
+            <div className="confirmation-modal-overlay">
+              <div className="confirmation-modal">
+                <h3>Подтверждение</h3>
+                <p>
+                  {confirmationAction === 'delete' && "Вы уверены, что хотите удалить это мероприятие?"}
+                  {confirmationAction === 'create' && "Вы уверены, что хотите создать новое мероприятие?"}
+                  {confirmationAction === 'edit' && "Вы уверены, что хотите сохранить изменения?"}
+                </p>
+                <div className="confirmation-actions">
+                  <button 
+                    className="confirm-btn"
+                    onClick={executeConfirmedAction}
+                  >
+                    Да
+                  </button>
+                  <button 
+                    className="cancel-btn"
+                    onClick={() => setShowConfirmationModal(false)}
+                  >
+                    Отмена
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
       
