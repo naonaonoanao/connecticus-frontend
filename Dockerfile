@@ -1,6 +1,7 @@
 FROM node:16.13.2 AS builder
 WORKDIR /app
 COPY package.json package-lock.json ./
+RUN npm cache clean --force
 RUN npm install
 COPY . .
 EXPOSE 3000
