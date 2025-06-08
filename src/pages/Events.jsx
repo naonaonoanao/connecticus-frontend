@@ -114,7 +114,7 @@ const Events = () => {
           return;
         }
     
-        const { data } = await axios.get("http://localhost:8080/api/v1/user/me", {
+        const { data } = await axios.get("https://api.connecticus.deadfairy.space/api/v1/user/me", {
           headers: { Authorization: `Bearer ${token}` }
         });
     
@@ -181,7 +181,7 @@ const Events = () => {
           const token = localStorage.getItem("access_token");
           if (!token) return;
     
-          const response = await axios.get("http://localhost:8080/api/v1/employee/employees?limit=200", {
+          const response = await axios.get("https://api.connecticus.deadfairy.space/api/v1/employee/employees?limit=200", {
             headers: { Authorization: `Bearer ${token}` }
           });
     
@@ -220,8 +220,8 @@ const Events = () => {
           }
       
           const baseUrl = showMyEvents 
-            ? `http://localhost:8080/api/v1/events/my`
-            : `http://localhost:8080/api/v1/events`;
+            ? `https://api.connecticus.deadfairy.space/api/v1/events/my`
+            : `https://api.connecticus.deadfairy.space/api/v1/events`;
       
           const params = new URLSearchParams();
           params.append("skip", meta.skip);
@@ -284,7 +284,7 @@ const Events = () => {
         return;
       }
       try {
-        const response = await fetch(`http://localhost:8080/api/v1/events/${eventId}/join`, {
+        const response = await fetch(`https://api.connecticus.deadfairy.space/api/v1/events/${eventId}/join`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`
@@ -314,7 +314,7 @@ const Events = () => {
         return;
       }
       try {
-        const response = await fetch(`http://localhost:8080/api/v1/events/${eventId}/leave`, {
+        const response = await fetch(`https://api.connecticus.deadfairy.space/api/v1/events/${eventId}/leave`, {
           method: "DELETE",
           headers: {
             "Authorization": `Bearer ${token}`
@@ -348,8 +348,8 @@ const Events = () => {
         }
     
         const baseUrl = showMyEvents 
-          ? `http://localhost:8080/api/v1/events/my`
-          : `http://localhost:8080/api/v1/events`;
+          ? `https://api.connecticus.deadfairy.space/api/v1/events/my`
+          : `https://api.connecticus.deadfairy.space/api/v1/events`;
     
         const params = new URLSearchParams();
         params.append("skip", meta.skip);
@@ -536,7 +536,7 @@ const Events = () => {
     
         if (isEditMode && editEventId) {
           // Редактирование существующего мероприятия
-          response = await fetch(`http://localhost:8080/api/v1/events/${editEventId}`, {
+          response = await fetch(`https://api.connecticus.deadfairy.space/api/v1/events/${editEventId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -546,7 +546,7 @@ const Events = () => {
           });
         } else {
           // Создание нового мероприятия
-          response = await fetch("http://localhost:8080/api/v1/events", {
+          response = await fetch("https://api.connecticus.deadfairy.space/api/v1/events", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -571,7 +571,7 @@ const Events = () => {
           for (const participant of newEvent.participants) {
             try {
               const attendeeResponse = await fetch(
-                `http://localhost:8080/api/v1/events/${eventId}/attendees?employee_id=${participant.id}`, 
+                `https://api.connecticus.deadfairy.space/api/v1/events/${eventId}/attendees?employee_id=${participant.id}`, 
                 {
                   method: "POST",
                   headers: {
@@ -746,7 +746,7 @@ const Events = () => {
       }
     
       try {
-        const response = await fetch(`http://localhost:8080/api/v1/events/${eventId}`, {
+        const response = await fetch(`https://api.connecticus.deadfairy.space/api/v1/events/${eventId}`, {
           method: "DELETE",
           headers: {
             "Authorization": `Bearer ${token}`

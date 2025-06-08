@@ -3,7 +3,7 @@ import { FaBell } from "react-icons/fa";
 import axios from "axios";
 import "../styles/notification.css";
 
-const BASE = "http://localhost:8080/api/v1/common";
+const BASE = "https://api.connecticus.deadfairy.space/api/v1/common";
 
 const NotificationIcon = () => {
   const [notifications, setNotifications] = useState([]);

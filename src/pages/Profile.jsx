@@ -76,7 +76,7 @@ const Profile = () => {
         return;
       }
       try {
-        const { data } = await axios.get("http://localhost:8080/api/v1/user/me", {
+        const { data } = await axios.get("https://api.connecticus.deadfairy.space/api/v1/user/me", {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -209,7 +209,7 @@ const Profile = () => {
         position_name: profileData.position
       };
   
-      await axios.put(`http://localhost:8080/api/v1/employee/${profileData.id}`, updatedProfile, {
+      await axios.put(`https://api.connecticus.deadfairy.space/api/v1/employee/${profileData.id}`, updatedProfile, {
         headers: { Authorization: `Bearer ${token}` }
       });
   
@@ -222,7 +222,7 @@ const Profile = () => {
       };
   
       await axios.put(
-        `http://localhost:8080/api/v1/employee/${profileData.id}/interests`,
+        `https://api.connecticus.deadfairy.space/api/v1/employee/${profileData.id}/interests`,
         interestsPayload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -242,7 +242,7 @@ const Profile = () => {
         try {
           // Check if technology exists
           const response = await axios.get(
-            `http://localhost:8080/api/v1/technologies?name=${encodeURIComponent(name)}`,
+            `https://api.connecticus.deadfairy.space/api/v1/technologies?name=${encodeURIComponent(name)}`,
             { headers: { Authorization: `Bearer ${token}` }
           });
   
@@ -276,7 +276,7 @@ const Profile = () => {
       };
   
       await axios.put(
-        `http://localhost:8080/api/v1/employee/me/technologies`,
+        `https://api.connecticus.deadfairy.space/api/v1/employee/me/technologies`,
         technologiesPayload,
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -7,7 +7,7 @@ import Sidebar from "../components/Sidebar";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-const BASE = 'http://localhost:8080/api/v1';
+const BASE = 'https://api.connecticus.deadfairy.space/api/v1';
 
 const EmployeeSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');

@@ -34,7 +34,7 @@ const CompanyStructure = () => {
 
   const fetchGraph = async (category) => {
   try {
-    const res = await fetch(`http://localhost:8080/api/v1/graph/${category}`);
+    const res = await fetch(`https://api.connecticus.deadfairy.space/api/v1/graph/${category}`);
     const data = await res.json();
 
     const uniqueNodes = Array.from(
@@ -60,7 +60,7 @@ const CompanyStructure = () => {
 const fetchEmployee = async (id) => {
     setLoadingEmployee(true);
     try {
-      const res = await fetch(`http://localhost:8080/api/v1/employee/${id}`);
+      const res = await fetch(`https://api.connecticus.deadfairy.space/api/v1/employee/${id}`);
       if (!res.ok) throw new Error("Сотрудник не найден");
       const data = await res.json();
       setSelectedEmployee(data);
