@@ -1,7 +1,7 @@
 FROM node:16.13.2 AS builder
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install
 COPY . .
 RUN npm run build
 FROM nginx:stable-alpine
