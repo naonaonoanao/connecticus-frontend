@@ -1,4 +1,4 @@
-FROM node:20 AS builder
+FROM node:16.13.2 AS builder
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
