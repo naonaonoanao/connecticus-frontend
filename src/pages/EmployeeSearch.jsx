@@ -1,13 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { FaSearch, FaFilter, FaTimes, FaMapMarkerAlt, FaCode, FaProjectDiagram, FaEnvelope, FaPhone, FaChevronDown, FaTelegram, FaUserPlus, FaInfoCircle } from 'react-icons/fa';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import {
-  FaSearch, FaFilter, FaTimes,
-  FaMapMarkerAlt, FaCode, FaProjectDiagram,
-  FaEnvelope, FaPhone, FaTelegram
-} from 'react-icons/fa';
 import '../styles/EmployeeSearch.css';
 import Sidebar from "../components/Sidebar";
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const BASE = 'http://localhost:8080/api/v1';
 
@@ -22,11 +20,15 @@ const EmployeeSearch = () => {
     technologies:{ selected: [], searchQuery: '' },
     interests:   { selected: [], searchQuery: '' }
   });
+  const [showTechLevelDropdown, setShowTechLevelDropdown] = useState(null);
+  const dropdownRefs = useRef([]);
 
   const [options, setOptions] = useState({
     cities: [], positions: [], departments: [],
     projects: [], technologies: [], interests: []
   });
+  const [isEditEmployeeModalOpen, setIsEditEmployeeModalOpen] = useState(false);
+  const [currentEmployeeData, setCurrentEmployeeData] = useState(null);
 
   const [employees, setEmployees] = useState([]);
   const [meta, setMeta] = useState({ 
@@ -38,6 +40,25 @@ const EmployeeSearch = () => {
 
   const [loading, setLoading] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+
+  const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState(false);
+  const [newEmployeeData, setNewEmployeeData] = useState({
+    firstName: '',
+    lastName: '',
+    middleName: '',
+    position: '',
+    city: '',
+    birthDate: null,
+    joinDate: new Date(),
+    department: '',
+    email: '',
+    phone: '',
+    telegram: '',
+    technologies: [''],
+    interests: [''],
+    projects: [{ name: '', role: '' }]
+  });
+  const [techLevels, setTechLevels] = useState({ 0: 'Junior' });
 
   // Маппинг ключей фильтров → ключи options и поля для id/label
   const OPTION_KEY = {
@@ -237,6 +258,83 @@ const EmployeeSearch = () => {
       skip: newSkip 
     });
   }, []);
+  const handleEditEmployee = (employee) => {
+    setCurrentEmployeeData({
+      id_employee: employee.id_employee,
+      firstName: employee.first_name,
+      lastName: employee.last_name,
+      middleName: employee.middle_name || '',
+      position: employee.position?.position_name || '',
+      city: employee.city || '',
+      birthDate: employee.date_of_birth ? new Date(employee.date_of_birth) : null,
+      joinDate: employee.join_date ? new Date(employee.join_date) : new Date(),
+      department: employee.department?.name_department || '',
+      email: employee.email || '',
+      phone: employee.phone_number || '',
+      telegram: employee.telegram_name || '',
+      technologies: employee.technologies?.map(t => t.name_technology) || [''],
+      interests: employee.interests?.map(i => i.name_interest) || [''],
+      projects: employee.projects?.map(p => ({ name: p.name_project, role: p.role })) || [{ name: '', role: '' }]
+    });
+    
+    // Устанавливаем уровни технологий
+    const levels = {};
+    employee.technologies?.forEach((tech, index) => {
+      levels[index] = tech.id_rank === '51d35915-bf8d-4159-8153-2427692fe66f' ? 'Middle' : 
+                     tech.id_rank === '3cb8c1a9-7d1e-4989-9393-71a15d3b3075' ? 'Senior' : 'Junior';
+    });
+    setTechLevels(levels);
+    
+    setIsEditEmployeeModalOpen(true);
+  };
+
+  const handleSaveEmployee = async () => {
+    try {
+      // Подготовка данных для обновления
+      const updateData = {
+        full_name: `${currentEmployeeData.lastName} ${currentEmployeeData.firstName} ${currentEmployeeData.middleName}`,
+        telegram_name: currentEmployeeData.telegram,
+        email: currentEmployeeData.email,
+        phone_number: currentEmployeeData.phone,
+        city: currentEmployeeData.city,
+        date_of_birth: currentEmployeeData.birthDate?.toISOString().split('T')[0],
+        department_name: currentEmployeeData.department,
+        position_name: currentEmployeeData.position
+      };
+
+      // Отправка обновленных данных
+      await axios.put(`${BASE}/employee/${currentEmployeeData.id_employee}`, updateData);
+
+      // Обновление интересов
+      if (currentEmployeeData.interests.length > 0 && currentEmployeeData.interests[0] !== '') {
+        await axios.put(`${BASE}/employee/${currentEmployeeData.id_employee}/interests`, {
+          interests: currentEmployeeData.interests.map(name => ({ name_interest: name }))
+        });
+      }
+
+      // Обновление технологий
+      if (currentEmployeeData.technologies.length > 0 && currentEmployeeData.technologies[0] !== '') {
+        await axios.put(`${BASE}/employee/${currentEmployeeData.id_employee}/technologies`, {
+          technologies: currentEmployeeData.technologies.map((name, index) => ({
+            name_technology: name,
+            id_rank: techLevels[index] === 'Middle' ? '51d35915-bf8d-4159-8153-2427692fe66f' : 
+                    techLevels[index] === 'Senior' ? '3cb8c1a9-7d1e-4989-9393-71a15d3b3075' : 
+                    '9b51cafd-209e-4c8d-9a68-44e8837e55dc'
+          }))
+        });
+      }
+
+      // Закрытие модального окна и обновление списка сотрудников
+      setIsEditEmployeeModalOpen(false);
+      const params = buildParams();
+      const { data } = await axios.get(`${BASE}/employee/employees`, { params });
+      setEmployees(data.data || []);
+      
+    } catch (error) {
+      console.error('Ошибка при обновлении сотрудника:', error);
+      alert('Произошла ошибка при обновлении данных сотрудника');
+    }
+  };
 
 
   // Filter options helper
@@ -277,8 +375,16 @@ const EmployeeSearch = () => {
         <h4><FaProjectDiagram /> Интересы</h4>
         <div className="tags">{emp.interests.map(i => <span key={i.id_interest} className="tag">{i.name_interest}</span>)}</div>
       </div>
+      <button 
+        className="info-button"
+        onClick={() => handleEditEmployee(emp)}
+      >
+        <FaInfoCircle />
+      </button>
     </motion.div>
   );
+
+  
 
   return (
     <div className="employee-search-page">
@@ -306,6 +412,12 @@ const EmployeeSearch = () => {
                   {Object.values(filters).reduce((acc, f) => acc + f.selected.length, 0)}
                 </span>
               )}
+            </button>
+            <button
+              className="add-employee-button"
+              onClick={() => setIsAddEmployeeModalOpen(true)}
+            >
+              <FaUserPlus /> Добавить сотрудника
             </button>
           </motion.div>
           {/* Filters Modal */}
@@ -400,10 +512,343 @@ const EmployeeSearch = () => {
           </motion.div>
         )}
       </div>
+      {isAddEmployeeModalOpen && (
+        <div className="modal-overlay">
+          <motion.div 
+            className="edit-modal"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.2 }}
+          >
+            <h3>Добавление нового сотрудника</h3>
 
+            <div className="form-columns">
+              <div className="form-group">
+                <label>Фамилия</label>
+                <input 
+                  type="text" 
+                  name="lastName" 
+                  value={newEmployeeData.lastName}
+                  onChange={(e) => setNewEmployeeData({...newEmployeeData, lastName: e.target.value})}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Имя</label>
+                <input 
+                  type="text" 
+                  name="firstName" 
+                  value={newEmployeeData.firstName}
+                  onChange={(e) => setNewEmployeeData({...newEmployeeData, firstName: e.target.value})}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Отчество</label>
+                <input 
+                  type="text" 
+                  name="middleName" 
+                  value={newEmployeeData.middleName}
+                  onChange={(e) => setNewEmployeeData({...newEmployeeData, middleName: e.target.value})}
+                />
+              </div>
+            </div>
+            
+            <div className="form-group">
+              <label>Должность</label>
+              <input 
+                type="text" 
+                name="position" 
+                value={newEmployeeData.position}
+                onChange={(e) => setNewEmployeeData({...newEmployeeData, position: e.target.value})}
+              />
+            </div>
+            
+            <div className="form-columns">
+              <div className="form-group">
+                <label>Город</label>
+                <input 
+                  type="text" 
+                  name="city" 
+                  value={newEmployeeData.city}
+                  onChange={(e) => setNewEmployeeData({...newEmployeeData, city: e.target.value})}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Дата рождения</label>
+                <DatePicker
+                  selected={newEmployeeData.birthDate}
+                  onChange={(date) => setNewEmployeeData({...newEmployeeData, birthDate: date})}
+                  dateFormat="dd-MM-yyyy"
+                  className="date-picker-input"
+                  placeholderText="Выберите дату"
+                  showYearDropdown
+                  dropdownMode="select"
+                  maxDate={new Date()}
+                />
+              </div>
+            </div>
 
+              {/* Добавляем поле для даты приема на работу */}
+            <div className="form-group">
+              <label>Дата приема на работу</label>
+              <DatePicker
+                selected={newEmployeeData.joinDate}
+                onChange={(date) => setNewEmployeeData({...newEmployeeData, joinDate: date})}
+                dateFormat="dd-MM-yyyy"
+                className="date-picker-input"
+                placeholderText="Выберите дату"
+                showYearDropdown
+                dropdownMode="select"
+                maxDate={new Date()}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label>Отдел</label>
+              <input 
+                type="text" 
+                name="department" 
+                value={newEmployeeData.department}
+                onChange={(e) => setNewEmployeeData({...newEmployeeData, department: e.target.value})}
+              />
+            </div>
+            
+            <div className="form-section">
+              <div className="section-header">
+                <h4>Технологии</h4>
+                <button 
+                  type="button" 
+                  className="add-btn"
+                  onClick={() => {
+                    setNewEmployeeData({
+                      ...newEmployeeData,
+                      technologies: [...newEmployeeData.technologies, '']
+                    });
+                    setTechLevels({
+                      ...techLevels,
+                      [newEmployeeData.technologies.length]: 'Junior'
+                    });
+                  }}
+                >
+                  +
+                </button>
+              </div>
+              {newEmployeeData.technologies.map((tech, index) => (
+                <div key={index} className="array-item">
+                  <div className="tech-input-wrapper">
+                    <input
+                      type="text"
+                      value={tech}
+                      onChange={(e) => {
+                        const newTechs = [...newEmployeeData.technologies];
+                        newTechs[index] = e.target.value;
+                        setNewEmployeeData({...newEmployeeData, technologies: newTechs});
+                      }}
+                      placeholder="Введите технологию"
+                    />
+                    <div className="tech-level-dropdown">
+                      <button 
+                        className="tech-level-toggle"
+                        onClick={() => setShowTechLevelDropdown(showTechLevelDropdown === index ? null : index)}
+                      >
+                        {techLevels[index] || 'Junior'} <FaChevronDown />
+                      </button>
+                      {showTechLevelDropdown === index && (
+                        <div className="tech-level-options">
+                          {['Junior', 'Middle', 'Senior'].map(level => (
+                            <div 
+                              key={level}
+                              className="tech-level-option"
+                              onClick={() => {
+                                setTechLevels({...techLevels, [index]: level});
+                                setShowTechLevelDropdown(null);
+                              }}
+                            >
+                              {level}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {newEmployeeData.technologies.length > 1 && (
+                    <button
+                      type="button"
+                      className="remove-btn"
+                      onClick={() => {
+                        const newTechs = newEmployeeData.technologies.filter((_, i) => i !== index);
+                        setNewEmployeeData({...newEmployeeData, technologies: newTechs});
+                        
+                        const newLevels = {...techLevels};
+                        delete newLevels[index];
+                        // Перенумеруем оставшиеся уровни
+                        const updatedLevels = {};
+                        newTechs.forEach((_, i) => {
+                          updatedLevels[i] = newLevels[i >= index ? i + 1 : i] || 'Junior';
+                        });
+                        setTechLevels(updatedLevels);
+                      }}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            
+            <div className="form-section">
+              <div className="section-header">
+                <h4>Интересы</h4>
+                <button 
+                  type="button" 
+                  className="add-btn"
+                  onClick={() => setNewEmployeeData({
+                    ...newEmployeeData,
+                    interests: [...newEmployeeData.interests, '']
+                  })}
+                >
+                  +
+                </button>
+              </div>
+              {newEmployeeData.interests.map((interest, index) => (
+                <div key={index} className="array-item">
+                  <input
+                    type="text"
+                    value={interest}
+                    onChange={(e) => {
+                      const newInterests = [...newEmployeeData.interests];
+                      newInterests[index] = e.target.value;
+                      setNewEmployeeData({...newEmployeeData, interests: newInterests});
+                    }}
+                    placeholder="Введите интерес"
+                  />
+                  {newEmployeeData.interests.length > 1 && (
+                    <button
+                      type="button"
+                      className="remove-btn"
+                      onClick={() => {
+                        const newInterests = newEmployeeData.interests.filter((_, i) => i !== index);
+                        setNewEmployeeData({...newEmployeeData, interests: newInterests});
+                      }}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            
+            <div className="form-group">
+              <label>Email</label>
+              <input 
+                type="email" 
+                name="email" 
+                value={newEmployeeData.email}
+                onChange={(e) => setNewEmployeeData({...newEmployeeData, email: e.target.value})}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label>Телефон</label>
+              <input 
+                type="tel" 
+                name="phone" 
+                value={newEmployeeData.phone}
+                onChange={(e) => setNewEmployeeData({...newEmployeeData, phone: e.target.value})}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label>Telegram</label>
+              <input 
+                type="text" 
+                name="telegram" 
+                value={newEmployeeData.telegram}
+                onChange={(e) => setNewEmployeeData({...newEmployeeData, telegram: e.target.value})}
+              />
+            </div>
+            
+            <div className="modal-actions">
+              <button 
+                className="save-btn" 
+                onClick={async () => {
+                  try {
+                    // Создаем базовые данные сотрудника
+                    const employeeData = {
+                      full_name: `${newEmployeeData.lastName} ${newEmployeeData.firstName} ${newEmployeeData.middleName}`,
+                      telegram_name: newEmployeeData.telegram,
+                      email: newEmployeeData.email,
+                      phone_number: newEmployeeData.phone,
+                      city: newEmployeeData.city,
+                      date_of_birth: newEmployeeData.birthDate?.toISOString().split('T')[0],
+                      join_date: newEmployeeData.joinDate?.toISOString().split('T')[0], // Добавляем дату приема
+                      department_name: newEmployeeData.department,
+                      position_name: newEmployeeData.position
+                    };
 
+                    // Отправляем запрос на создание сотрудника
+                    const { data: employee } = await axios.post(`${BASE}/employee`, employeeData);
+                    
+                    // Отправляем интересы
+                    if (newEmployeeData.interests.length > 0 && newEmployeeData.interests[0] !== '') {
+                      await axios.put(`${BASE}/employee/${employee.id_employee}/interests`, {
+                        interests: newEmployeeData.interests.map(name => ({ name_interest: name }))
+                      });
+                    }
 
+                    // Отправляем технологии
+                    if (newEmployeeData.technologies.length > 0 && newEmployeeData.technologies[0] !== '') {
+                      await axios.put(`${BASE}/employee/${employee.id_employee}/technologies`, {
+                        technologies: newEmployeeData.technologies.map((name, index) => ({
+                          name_technology: name,
+                          id_rank: techLevels[index] === 'Middle' ? '51d35915-bf8d-4159-8153-2427692fe66f' : 
+                                  techLevels[index] === 'Senior' ? '3cb8c1a9-7d1e-4989-9393-71a15d3b3075' : 
+                                  '9b51cafd-209e-4c8d-9a68-44e8837e55dc'
+                        }))
+                      });
+                    }
+
+                    // Закрываем модальное окно и обновляем список сотрудников
+                    setIsAddEmployeeModalOpen(false);
+                    setEmployees([employee, ...employees]);
+                    setNewEmployeeData({
+                      firstName: '',
+                      lastName: '',
+                      middleName: '',
+                      position: '',
+                      city: '',
+                      birthDate: null,
+                      joinDate: new Date(), // Сбрасываем с текущей датой
+                      department: '',
+                      email: '',
+                      phone: '',
+                      telegram: '',
+                      technologies: [''],
+                      interests: [''],
+                      projects: [{ name: '', role: '' }]
+                    });
+                    setTechLevels({ 0: 'Junior' });
+
+                  } catch (error) {
+                    console.error('Ошибка при создании сотрудника:', error);
+                    alert('Произошла ошибка при создании сотрудника');
+                  }
+                }}
+              >
+                Сохранить
+              </button>
+              <button 
+                className="cancel-btn" 
+                onClick={() => setIsAddEmployeeModalOpen(false)}
+              >
+                Отмена
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
         {/* Pagination */}
         <div className="pagination">
           <button 
@@ -422,6 +867,272 @@ const EmployeeSearch = () => {
             Вперед →
           </button>
         </div>
+
+        {isEditEmployeeModalOpen && currentEmployeeData && (
+          <div className="modal-overlay">
+            <motion.div 
+              className="edit-modal"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              <h3>Редактирование сотрудника</h3>
+
+              <div className="form-columns">
+                <div className="form-group">
+                  <label>Фамилия</label>
+                  <input 
+                    type="text" 
+                    value={currentEmployeeData.lastName}
+                    onChange={(e) => setCurrentEmployeeData({...currentEmployeeData, lastName: e.target.value})}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Имя</label>
+                  <input 
+                    type="text" 
+                    value={currentEmployeeData.firstName}
+                    onChange={(e) => setCurrentEmployeeData({...currentEmployeeData, firstName: e.target.value})}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Отчество</label>
+                  <input 
+                    type="text" 
+                    value={currentEmployeeData.middleName}
+                    onChange={(e) => setCurrentEmployeeData({...currentEmployeeData, middleName: e.target.value})}
+                  />
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label>Должность</label>
+                <input 
+                  type="text" 
+                  value={currentEmployeeData.position}
+                  onChange={(e) => setCurrentEmployeeData({...currentEmployeeData, position: e.target.value})}
+                />
+              </div>
+              
+              <div className="form-columns">
+                <div className="form-group">
+                  <label>Город</label>
+                  <input 
+                    type="text" 
+                    value={currentEmployeeData.city}
+                    onChange={(e) => setCurrentEmployeeData({...currentEmployeeData, city: e.target.value})}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Дата рождения</label>
+                  <DatePicker
+                    selected={currentEmployeeData.birthDate}
+                    onChange={(date) => setCurrentEmployeeData({...currentEmployeeData, birthDate: date})}
+                    dateFormat="dd-MM-yyyy"
+                    className="date-picker-input"
+                    placeholderText="Выберите дату"
+                    showYearDropdown
+                    dropdownMode="select"
+                    maxDate={new Date()}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Дата приема на работу</label>
+                <DatePicker
+                  selected={currentEmployeeData.joinDate}
+                  onChange={(date) => setCurrentEmployeeData({...currentEmployeeData, joinDate: date})}
+                  dateFormat="dd-MM-yyyy"
+                  className="date-picker-input"
+                  placeholderText="Выберите дату"
+                  showYearDropdown
+                  dropdownMode="select"
+                  maxDate={new Date()}
+                  disabled
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Отдел</label>
+                <input 
+                  type="text" 
+                  value={currentEmployeeData.department}
+                  onChange={(e) => setCurrentEmployeeData({...currentEmployeeData, department: e.target.value})}
+                />
+              </div>
+              
+              <div className="form-section">
+                <div className="section-header">
+                  <h4>Технологии</h4>
+                  <button 
+                    type="button" 
+                    className="add-btn"
+                    onClick={() => {
+                      setCurrentEmployeeData({
+                        ...currentEmployeeData,
+                        technologies: [...currentEmployeeData.technologies, '']
+                      });
+                      setTechLevels({
+                        ...techLevels,
+                        [currentEmployeeData.technologies.length]: 'Junior'
+                      });
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
+                {currentEmployeeData.technologies.map((tech, index) => (
+                  <div key={index} className="array-item">
+                    <div className="tech-input-wrapper">
+                      <input
+                        type="text"
+                        value={tech}
+                        onChange={(e) => {
+                          const newTechs = [...currentEmployeeData.technologies];
+                          newTechs[index] = e.target.value;
+                          setCurrentEmployeeData({...currentEmployeeData, technologies: newTechs});
+                        }}
+                        placeholder="Введите технологию"
+                      />
+                      <div className="tech-level-dropdown">
+                        <button 
+                          className="tech-level-toggle"
+                          onClick={() => setShowTechLevelDropdown(showTechLevelDropdown === index ? null : index)}
+                        >
+                          {techLevels[index] || 'Junior'} <FaChevronDown />
+                        </button>
+                        {showTechLevelDropdown === index && (
+                          <div className="tech-level-options">
+                            {['Junior', 'Middle', 'Senior'].map(level => (
+                              <div 
+                                key={level}
+                                className="tech-level-option"
+                                onClick={() => {
+                                  setTechLevels({...techLevels, [index]: level});
+                                  setShowTechLevelDropdown(null);
+                                }}
+                              >
+                                {level}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {currentEmployeeData.technologies.length > 1 && (
+                      <button
+                        type="button"
+                        className="remove-btn"
+                        onClick={() => {
+                          const newTechs = currentEmployeeData.technologies.filter((_, i) => i !== index);
+                          setCurrentEmployeeData({...currentEmployeeData, technologies: newTechs});
+                          
+                          const newLevels = {...techLevels};
+                          delete newLevels[index];
+                          const updatedLevels = {};
+                          newTechs.forEach((_, i) => {
+                            updatedLevels[i] = newLevels[i >= index ? i + 1 : i] || 'Junior';
+                          });
+                          setTechLevels(updatedLevels);
+                        }}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="form-section">
+                <div className="section-header">
+                  <h4>Интересы</h4>
+                  <button 
+                    type="button" 
+                    className="add-btn"
+                    onClick={() => setCurrentEmployeeData({
+                      ...currentEmployeeData,
+                      interests: [...currentEmployeeData.interests, '']
+                    })}
+                  >
+                    +
+                  </button>
+                </div>
+                {currentEmployeeData.interests.map((interest, index) => (
+                  <div key={index} className="array-item">
+                    <input
+                      type="text"
+                      value={interest}
+                      onChange={(e) => {
+                        const newInterests = [...currentEmployeeData.interests];
+                        newInterests[index] = e.target.value;
+                        setCurrentEmployeeData({...currentEmployeeData, interests: newInterests});
+                      }}
+                      placeholder="Введите интерес"
+                    />
+                    {currentEmployeeData.interests.length > 1 && (
+                      <button
+                        type="button"
+                        className="remove-btn"
+                        onClick={() => {
+                          const newInterests = currentEmployeeData.interests.filter((_, i) => i !== index);
+                          setCurrentEmployeeData({...currentEmployeeData, interests: newInterests});
+                        }}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="form-group">
+                <label>Email</label>
+                <input 
+                  type="email" 
+                  value={currentEmployeeData.email}
+                  onChange={(e) => setCurrentEmployeeData({...currentEmployeeData, email: e.target.value})}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Телефон</label>
+                <input 
+                  type="tel" 
+                  value={currentEmployeeData.phone}
+                  onChange={(e) => setCurrentEmployeeData({...currentEmployeeData, phone: e.target.value})}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Telegram</label>
+                <input 
+                  type="text" 
+                  value={currentEmployeeData.telegram}
+                  onChange={(e) => setCurrentEmployeeData({...currentEmployeeData, telegram: e.target.value})}
+                />
+              </div>
+              
+              <div className="modal-actions">
+                <button 
+                  className="save-btn" 
+                  onClick={handleSaveEmployee}
+                >
+                  Сохранить
+                </button>
+                <button 
+                  className="cancel-btn" 
+                  onClick={() => setIsEditEmployeeModalOpen(false)}
+                >
+                  Отмена
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
 
       </div>
     </div>

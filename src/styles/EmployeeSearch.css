@@ -647,4 +647,269 @@
   font-weight: bold;
 }
 
+/* Добавить в EmployeeSearch.css */
+.search-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.add-employee-button {
+  background: #00e5ff;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.add-employee-button:hover {
+  background: #00bcd4;
+}
+
+/* Стили для модального окна (можно скопировать из профиля) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.edit-modal {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border-radius: 15px;
+  padding: 25px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+}
+
+.edit-modal h3 {
+  margin-top: 0;
+  color: #00e5ff;
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 25px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #cfd8dc;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-size: 14px;
+}
+
+.form-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-section {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(0, 229, 255, 0.2);
+}
+
+.form-section h4 {
+  color: #00e5ff;
+  margin-bottom: 10px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.modal-actions button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.save-btn {
+  background: #00e5ff;
+  color: #000;
+  border: none;
+}
+
+.save-btn:hover {
+  background: #00bcd4;
+}
+
+.cancel-btn {
+  background: transparent;
+  color: #ff5252;
+  border: 1px solid #ff5252;
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 82, 82, 0.1);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.add-btn {
+  background: #00e5ff;
+  color: #000;
+  border: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.add-btn:hover {
+  background: #00bcd4;
+}
+
+.array-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.array-item input {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.remove-btn {
+  background: #ff5252;
+  color: white;
+  border: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.remove-btn:hover {
+  background: #ff0000;
+}
+
+.tech-input-wrapper {
+  display: flex;
+  flex: 1;
+  position: relative;
+}
+
+.tech-level-dropdown {
+  position: relative;
+  margin-left: 8px;
+  min-width: 120px;
+}
+
+.tech-level-toggle {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  font-size: 14px;
+}
+
+.tech-level-toggle:hover {
+  border-color: #00e5ff;
+}
+
+.tech-level-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #1a1a2e;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 8px;
+  z-index: 10;
+  margin-top: 5px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.tech-level-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tech-level-option:hover {
+  background: rgba(0, 229, 255, 0.2);
+}
+
+.employee-card {
+  position: relative;
+  /* остальные стили карточки */
+}
+
+.info-button {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: color 0.2s;
+}
+
+.info-button:hover {
+  color: #ffffff;
+}
+
 
