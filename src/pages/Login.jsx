@@ -26,7 +26,14 @@ const Login = () => {
       
       const data = await response.json();
       // Сохраняем token для дальнейших запросов
-      localStorage.setItem("access_token", data.access_token);
+      if (data?.token?.access_token) {
+        localStorage.setItem("access_token", data.token.access_token);
+        localStorage.setItem("role_id", data.role_id);
+        navigate("/profile");
+        } else {
+          throw new Error("Неверный формат ответа от сервера");
+        }
+
       navigate("/profile"); // Редирект на страницу профиля
 
     } catch (err) {
