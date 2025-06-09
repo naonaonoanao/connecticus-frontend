@@ -22,6 +22,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import "../styles/profile.css";
 
 const Profile = () => {
+  const HR_ROLE_ID = "20eb025d-da7f-480e-8de0-d6e35dca6641";
+  const [roleId, setRoleId] = useState(null)
   const navigate = useNavigate();
   const [hoveredProject, setHoveredProject] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -72,6 +74,7 @@ const Profile = () => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("access_token");
       const roleId = localStorage.getItem("role_id");
+      setRoleId(storedRoleId);
       if (!token) {
         navigate("/login", { replace: true });
         return;
@@ -420,7 +423,7 @@ const Profile = () => {
             </div>
           </div>
         </motion.div>
-
+        
         {/* Модальное окно редактирования */}
         {isEditing && (
           <div className="modal-overlay">
@@ -434,7 +437,10 @@ const Profile = () => {
 
               <div className="form-group warning-message">
                 <p className="readonly-note">
-                  🔒 Редактирование ФИО, должности и отдела доступно только HR-специалистам.
+                  {roleId === HR_ROLE_ID 
+                    ? "🔒 Редактирование ФИО, должности и отдела доступно администратору."
+                    : "🔒 Редактирование ФИО, должности и отдела доступно только HR-специалистам."
+                  }
                 </p>
               </div>
               <div className="form-columns">
