@@ -71,6 +71,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("access_token");
+      const roleId = localStorage.getItem("role_id");
       if (!token) {
         navigate("/login", { replace: true });
         return;
@@ -79,6 +80,10 @@ const Profile = () => {
         const { data } = await axios.get("https://api.connecticus.deadfairy.space/api/v1/user/me", {
           headers: { Authorization: `Bearer ${token}` }
         });
+
+        if (roleId && window.location.pathname !== "/profile") {
+        navigate("/profile");
+      }
 
         const date = new Date(data.employee.date_of_birth);
         setBirthDate(date);
