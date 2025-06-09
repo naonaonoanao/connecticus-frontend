@@ -73,7 +73,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("access_token");
-      const roleId = localStorage.getItem("role_id");
+      const storedRoleId = localStorage.getItem("role_id");
       setRoleId(storedRoleId);
       if (!token) {
         navigate("/login", { replace: true });
