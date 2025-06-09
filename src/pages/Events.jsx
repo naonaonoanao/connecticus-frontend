@@ -500,7 +500,7 @@ const Events = () => {
   
 
     const mapEventTypeToId = {
-      training: "b3a02072-6df9-402e-a9c1-0cc03c7c2f17",// НАДО БУДЕТ ПОПРАВИТЬ UUID
+      training: "e2aa6731-14fd-4530-a985-9d72de829e8a",
       meeting: "5ae06ca5-eff6-4341-a870-749e48da9cd4",
       party:   "b3a02072-6df9-402e-a9c1-0cc03c7c2f17"
     };
