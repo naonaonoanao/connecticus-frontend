@@ -121,6 +121,7 @@ const EmployeeSearch = () => {
     
     loadOptions();
   }, []);
+  
 
   // Построение параметров запроса
   // Исправленные параметры запроса
@@ -290,9 +291,12 @@ const EmployeeSearch = () => {
 
   const handleSaveEmployee = async () => {
     try {
+      // Получаем токен из localStorage (предполагается, что он там сохранен после входа)
+      const token = localStorage.getItem("access_token");
+  
       // Подготовка данных для обновления
       const updateData = {
-        full_name: `${currentEmployeeData.lastName} ${currentEmployeeData.firstName} ${currentEmployeeData.middleName}`,
+        full_name: `${currentEmployeeData.lastName} ${currentEmployeeData.firstName} ${currentEmployeeData.middleName}`.trim(),
         telegram_name: currentEmployeeData.telegram,
         email: currentEmployeeData.email,
         phone_number: currentEmployeeData.phone,
@@ -301,38 +305,77 @@ const EmployeeSearch = () => {
         department_name: currentEmployeeData.department,
         position_name: currentEmployeeData.position
       };
-
+  
+      // Конфигурация axios с заголовком авторизации
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      };
+  
       // Отправка обновленных данных
-      await axios.put(`${BASE}/employee/${currentEmployeeData.id_employee}`, updateData);
-
+      await axios.put(
+        `${BASE}/employee/${currentEmployeeData.id_employee}`, 
+        updateData, 
+        config
+      );
+  
       // Обновление интересов
-      if (currentEmployeeData.interests.length > 0 && currentEmployeeData.interests[0] !== '') {
-        await axios.put(`${BASE}/employee/${currentEmployeeData.id_employee}/interests`, {
-          interests: currentEmployeeData.interests.map(name => ({ name_interest: name }))
-        });
+      if (currentEmployeeData.interests.some(i => i.trim() !== '')) {
+        const interestsPayload = {
+          interests: currentEmployeeData.interests
+            .filter(i => i.trim() !== '')
+            .map(name => ({
+              name_interest: name.trim()
+            }))
+        };
+        await axios.put(
+          `${BASE}/employee/${currentEmployeeData.id_employee}/interests`, 
+          interestsPayload, 
+          config
+        );
       }
-
+  
       // Обновление технологий
-      if (currentEmployeeData.technologies.length > 0 && currentEmployeeData.technologies[0] !== '') {
-        await axios.put(`${BASE}/employee/${currentEmployeeData.id_employee}/technologies`, {
-          technologies: currentEmployeeData.technologies.map((name, index) => ({
-            name_technology: name,
-            id_rank: techLevels[index] === 'Middle' ? '51d35915-bf8d-4159-8153-2427692fe66f' : 
-                    techLevels[index] === 'Senior' ? '3cb8c1a9-7d1e-4989-9393-71a15d3b3075' : 
-                    '9b51cafd-209e-4c8d-9a68-44e8837e55dc'
-          }))
-        });
+      if (currentEmployeeData.technologies.some(t => t.trim() !== '')) {
+        const technologiesPayload = {
+          technologies: currentEmployeeData.technologies
+            .filter((t, i) => t.trim() !== '' && techLevels[i])
+            .map((name, index) => ({
+              name_technology: name.trim(),
+              id_rank: techLevels[index] === 'Middle' ? '51d35915-bf8d-4159-8153-2427692fe66f' : 
+                      techLevels[index] === 'Senior' ? '3cb8c1a9-7d1e-4989-9393-71a15d3b3075' : 
+                      '9b51cafd-209e-4c8d-9a68-44e8837e55dc'
+            }))
+        };
+        await axios.put(
+          `${BASE}/employee/${currentEmployeeData.id_employee}/technologies`, 
+          technologiesPayload, 
+          config
+        );
       }
-
+  
       // Закрытие модального окна и обновление списка сотрудников
       setIsEditEmployeeModalOpen(false);
       const params = buildParams();
-      const { data } = await axios.get(`${BASE}/employee/employees`, { params });
+      const { data } = await axios.get(`${BASE}/employee/employees`, { 
+        params,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       setEmployees(data.data || []);
       
     } catch (error) {
       console.error('Ошибка при обновлении сотрудника:', error);
-      alert('Произошла ошибка при обновлении данных сотрудника');
+      if (error.response?.status === 401) {
+        // Если токен недействителен, перенаправляем на страницу входа
+        localStorage.removeItem('authToken');
+        window.location.href = '/login';
+      } else {
+        alert(error.response?.data?.detail || 'Произошла ошибка при обновлении данных сотрудника');
+      }
     }
   };
 
@@ -777,19 +820,22 @@ const EmployeeSearch = () => {
                   try {
                     // Создаем базовые данные сотрудника
                     const employeeData = {
-                      full_name: `${newEmployeeData.lastName} ${newEmployeeData.firstName} ${newEmployeeData.middleName}`,
                       telegram_name: newEmployeeData.telegram,
-                      email: newEmployeeData.email,
-                      phone_number: newEmployeeData.phone,
-                      city: newEmployeeData.city,
-                      date_of_birth: newEmployeeData.birthDate?.toISOString().split('T')[0],
-                      join_date: newEmployeeData.joinDate?.toISOString().split('T')[0], // Добавляем дату приема
-                      department_name: newEmployeeData.department,
-                      position_name: newEmployeeData.position
+                      join_date: newEmployeeData.joinDate?.toISOString().split('T')[0],
+                      full_name: `${newEmployeeData.lastName} ${newEmployeeData.firstName} ${newEmployeeData.middleName}`
                     };
 
                     // Отправляем запрос на создание сотрудника
                     const { data: employee } = await axios.post(`${BASE}/employee`, employeeData);
+
+                    await axios.put(`${BASE}/employee/${employee.id_employee}`, {
+                      email: newEmployeeData.email,
+                      phone_number: newEmployeeData.phone,
+                      city: newEmployeeData.city,
+                      date_of_birth: newEmployeeData.birthDate?.toISOString().split('T')[0],
+                      department_name: newEmployeeData.department,
+                      position_name: newEmployeeData.position
+                    });
                     
                     // Отправляем интересы
                     if (newEmployeeData.interests.length > 0 && newEmployeeData.interests[0] !== '') {
