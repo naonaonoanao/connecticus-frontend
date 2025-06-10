@@ -9,6 +9,21 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 const BASE = 'https://api.connecticus.deadfairy.space/api/v1';
 
+const HARDCODED_POSITIONS = [
+  { id: "98f5f23a-d227-4239-9207-a2f36109208f", name: "Аналитик технологических процессов" },
+  { id: "3681f7b9-c9d4-4726-aa25-adafc2377d7d", name: "Специалист по ИБ" },
+  { id: "2ccc0c41-0cb5-4be7-b91d-7202cd6f6f82", name: "Менеджер по отделу кадров" },
+  { id: "a707d5f8-f775-4b14-8486-e6364ecffe2e", name: "Средний инженер-программист" },
+  { id: "68a2d30c-2d0b-4ebd-8d7a-849cf62f126f", name: "Старший инженер-программист" },
+  { id: "48f4ef51-7fb4-4428-9808-56e9b79f51fb", name: "Младший инженер-программист" }
+];
+
+const HARDCODED_DEPARTMENTS = [
+  { id: "fe43b605-9df0-4fae-a551-312a5a217e7b", name: "Разработка" },
+  { id: "d021ddce-d215-4169-b69b-068f205958f4", name: "Аналитика" },
+  { id: "3855eb25-e26d-4456-9198-cb964c66e71e", name: "Инфобез" }
+];
+
 const EmployeeSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -58,11 +73,10 @@ const EmployeeSearch = () => {
     firstName: '',
     lastName: '',
     middleName: '',
-    position: '',
+    position: HARDCODED_POSITIONS[0]?.id || '', // безопасный доступ
+    department: HARDCODED_DEPARTMENTS[0]?.id || '',
     city: '',
     birthDate: null,
-    joinDate: new Date(),
-    department: '',
     email: '',
     phone: '',
     telegram: '',
@@ -126,8 +140,39 @@ const EmployeeSearch = () => {
           interests: interests || []
         });
 
+        setNewEmployeeData({
+          firstName: '',
+          lastName: '',
+          middleName: '',
+          position: positions.data[0]?.id || '', // безопасный доступ
+          department: departments.data[0]?.id || '',
+          city: '',
+          birthDate: null,
+          email: '',
+          phone: '',
+          telegram: '',
+          technologies: [''],
+          interests: [''],
+          projects: [{ name: '', role: '' }]
+        });
+
       } catch (error) {
         console.error('Error loading options:', error);
+        setNewEmployeeData({
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        position: HARDCODED_POSITIONS[0]?.id || '',
+        department: HARDCODED_DEPARTMENTS[0]?.id || '',
+        city: '',
+        birthDate: null,
+        email: '',
+        phone: '',
+        telegram: '',
+        technologies: [''],
+        interests: [''],
+        projects: [{ name: '', role: '' }]
+      });
       }
     };
     
@@ -271,125 +316,82 @@ const EmployeeSearch = () => {
       skip: newSkip 
     });
   }, []);
+
   const handleEditEmployee = (employee) => {
     setCurrentEmployeeData({
       id_employee: employee.id_employee,
       firstName: employee.first_name,
       lastName: employee.last_name,
-      middleName: employee.middle_name || '',
-      position: employee.position?.position_name || '',
+      middleName: employee.middle_name || null,
+      position: employee.id_position || HARDCODED_POSITIONS[0].id,
+      department: employee.id_department || HARDCODED_DEPARTMENTS[0].id,
       city: employee.city || '',
       birthDate: employee.date_of_birth ? new Date(employee.date_of_birth) : null,
-      joinDate: employee.join_date ? new Date(employee.join_date) : new Date(),
-      department: employee.department?.name_department || '',
       email: employee.email || '',
       phone: employee.phone_number || '',
       telegram: employee.telegram_name || '',
-      technologies: employee.technologies?.map(t => t.name_technology) || [''],
-      interests: employee.interests?.map(i => i.name_interest) || [''],
-      projects: employee.projects?.map(p => ({ name: p.name_project, role: p.role })) || [{ name: '', role: '' }]
     });
-    
-    // Устанавливаем уровни технологий
-    const levels = {};
-    employee.technologies?.forEach((tech, index) => {
-      levels[index] = tech.id_rank === '51d35915-bf8d-4159-8153-2427692fe66f' ? 'Middle' : 
-                     tech.id_rank === '3cb8c1a9-7d1e-4989-9393-71a15d3b3075' ? 'Senior' : 'Junior';
-    });
-    setTechLevels(levels);
     
     setIsEditEmployeeModalOpen(true);
   };
 
   const handleSaveEmployee = async () => {
-    try {
-      // Получаем токен из localStorage (предполагается, что он там сохранен после входа)
-      const token = localStorage.getItem("access_token");
-  
-      // Подготовка данных для обновления
-      const updateData = {
-        full_name: `${currentEmployeeData.lastName} ${currentEmployeeData.firstName} ${currentEmployeeData.middleName}`.trim(),
-        telegram_name: currentEmployeeData.telegram,
-        email: currentEmployeeData.email,
-        phone_number: currentEmployeeData.phone,
-        city: currentEmployeeData.city,
-        date_of_birth: currentEmployeeData.birthDate?.toISOString().split('T')[0],
-        department_name: currentEmployeeData.department,
-        position_name: currentEmployeeData.position
-      };
-  
-      // Конфигурация axios с заголовком авторизации
-      const config = {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      };
-  
-      // Отправка обновленных данных
-      await axios.put(
-        `${BASE}/employee/${currentEmployeeData.id_employee}`, 
-        updateData, 
-        config
-      );
-  
-      // Обновление интересов
-      if (currentEmployeeData.interests.some(i => i.trim() !== '')) {
-        const interestsPayload = {
-          interests: currentEmployeeData.interests
-            .filter(i => i.trim() !== '')
-            .map(name => ({
-              name_interest: name.trim()
-            }))
-        };
-        await axios.put(
-          `${BASE}/employee/${currentEmployeeData.id_employee}/interests`, 
-          interestsPayload, 
-          config
-        );
+  const isConfirmed = window.confirm("Вы уверены, что хотите сохранить изменения?");
+  if (!isConfirmed) return;
+
+  try {
+    const token = localStorage.getItem("access_token");
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
-  
-      // Обновление технологий
-      if (currentEmployeeData.technologies.some(t => t.trim() !== '')) {
-        const technologiesPayload = {
-          technologies: currentEmployeeData.technologies
-            .filter((t, i) => t.trim() !== '' && techLevels[i])
-            .map((name, index) => ({
-              name_technology: name.trim(),
-              id_rank: techLevels[index] === 'Middle' ? '51d35915-bf8d-4159-8153-2427692fe66f' : 
-                      techLevels[index] === 'Senior' ? '3cb8c1a9-7d1e-4989-9393-71a15d3b3075' : 
-                      '9b51cafd-209e-4c8d-9a68-44e8837e55dc'
-            }))
-        };
-        await axios.put(
-          `${BASE}/employee/${currentEmployeeData.id_employee}/technologies`, 
-          technologiesPayload, 
-          config
-        );
-      }
-  
-      // Закрытие модального окна и обновление списка сотрудников
-      setIsEditEmployeeModalOpen(false);
-      const params = buildParams();
-      const { data } = await axios.get(`${BASE}/employee/employees`, { 
-        params,
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      setEmployees(data.data || []);
-      
-    } catch (error) {
-      console.error('Ошибка при обновлении сотрудника:', error);
-      if (error.response?.status === 401) {
-        // Если токен недействителен, перенаправляем на страницу входа
-        localStorage.removeItem('authToken');
-        window.location.href = '/login';
-      } else {
-        alert(error.response?.data?.detail || 'Произошла ошибка при обновлении данных сотрудника');
-      }
+    };
+
+    // Валидация
+    const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+    if (!phoneRegex.test(currentEmployeeData.phone)) {
+      alert("Некорректный формат телефона");
+      return;
     }
-  };
+
+    const telegramRegex = /^[a-zA-Z0-9_]{3,32}$/;
+    if (!telegramRegex.test(currentEmployeeData.telegram)) {
+      alert("Telegram должен быть 3–32 символов, только буквы, цифры и _");
+      return;
+    }
+
+    if (!currentEmployeeData.firstName || !currentEmployeeData.lastName) {
+      alert("Имя и фамилия обязательны");
+      return;
+    }
+
+    const updateData = {
+      first_name: currentEmployeeData.firstName,
+      last_name: currentEmployeeData.lastName,
+      middle_name: currentEmployeeData.middleName || '',
+      telegram_name: currentEmployeeData.telegram,
+      email: currentEmployeeData.email,
+      phone_number: currentEmployeeData.phone,
+      city: currentEmployeeData.city,
+      date_of_birth: currentEmployeeData.birthDate?.toISOString().split('T')[0] || '',
+      id_position: currentEmployeeData.position,
+      id_department: currentEmployeeData.department
+    };
+
+    await axios.put(`${BASE}/employee/hr/${currentEmployeeData.id_employee}`, updateData, config);
+    setIsEditEmployeeModalOpen(false);
+    const params = buildParams();
+    const { data } = await axios.get(`${BASE}/employee/employees`, {
+      params,
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    setEmployees(data.data || []);
+  } catch (error) {
+    console.error('Ошибка при обновлении сотрудника:', error);
+    alert(error.response?.data?.detail || 'Ошибка при обновлении данных сотрудника');
+  }
+};
 
 
   // Filter options helper
@@ -473,7 +475,13 @@ const EmployeeSearch = () => {
             {isHR && (
               <button
                 className="add-employee-button"
-                onClick={() => setIsAddEmployeeModalOpen(true)}
+                onClick={() => {
+                  if (!newEmployeeData) {
+                    alert("Данные должностей и отделов ещё не загружены. Подождите...");
+                    return;
+                  }
+                  setIsAddEmployeeModalOpen(true);
+                }}
               >
                 <FaUserPlus /> Добавить сотрудника
               </button>
@@ -571,7 +579,7 @@ const EmployeeSearch = () => {
           </motion.div>
         )}
       </div>
-      {isAddEmployeeModalOpen && (
+      {isAddEmployeeModalOpen && newEmployeeData !== null && (
         <div className="modal-overlay">
           <motion.div 
             className="edit-modal"
@@ -615,12 +623,19 @@ const EmployeeSearch = () => {
             
             <div className="form-group">
               <label>Должность</label>
-              <input 
-                type="text" 
-                name="position" 
-                value={newEmployeeData.position}
-                onChange={(e) => setNewEmployeeData({...newEmployeeData, position: e.target.value})}
-              />
+              <select
+                value={newEmployeeData?.position || ''}
+                onChange={(e) => setCurrentEmployeeData({
+                  ...currentEmployeeData,
+                  position: e.target.value
+                })}
+              >
+                {HARDCODED_POSITIONS.map(pos => (
+                  <option key={pos.id} value={pos.id}>
+                    {pos.name}
+                  </option>
+                ))}
+              </select>
             </div>
             
             <div className="form-columns">
@@ -652,138 +667,21 @@ const EmployeeSearch = () => {
             
             <div className="form-group">
               <label>Отдел</label>
-              <input 
-                type="text" 
-                name="department" 
-                value={newEmployeeData.department}
-                onChange={(e) => setNewEmployeeData({...newEmployeeData, department: e.target.value})}
-              />
+              <select
+                value={newEmployeeData?.department || ''}
+                onChange={(e) => setCurrentEmployeeData({
+                  ...currentEmployeeData,
+                  department: e.target.value
+                })}
+              >
+                {HARDCODED_DEPARTMENTS.map(dep => (
+                  <option key={dep.id} value={dep.id}>
+                    {dep.name}
+                  </option>
+                ))}
+              </select>
             </div>
             
-            <div className="form-section">
-              <div className="section-header">
-                <h4>Технологии</h4>
-                <button 
-                  type="button" 
-                  className="add-btn"
-                  onClick={() => {
-                    setNewEmployeeData({
-                      ...newEmployeeData,
-                      technologies: [...newEmployeeData.technologies, '']
-                    });
-                    setTechLevels({
-                      ...techLevels,
-                      [newEmployeeData.technologies.length]: 'Junior'
-                    });
-                  }}
-                >
-                  +
-                </button>
-              </div>
-              {newEmployeeData.technologies.map((tech, index) => (
-                <div key={index} className="array-item">
-                  <div className="tech-input-wrapper">
-                    <input
-                      type="text"
-                      value={tech}
-                      onChange={(e) => {
-                        const newTechs = [...newEmployeeData.technologies];
-                        newTechs[index] = e.target.value;
-                        setNewEmployeeData({...newEmployeeData, technologies: newTechs});
-                      }}
-                      placeholder="Введите технологию"
-                    />
-                    <div className="tech-level-dropdown">
-                      <button 
-                        className="tech-level-toggle"
-                        onClick={() => setShowTechLevelDropdown(showTechLevelDropdown === index ? null : index)}
-                      >
-                        {techLevels[index] || 'Junior'} <FaChevronDown />
-                      </button>
-                      {showTechLevelDropdown === index && (
-                        <div className="tech-level-options">
-                          {['Junior', 'Middle', 'Senior'].map(level => (
-                            <div 
-                              key={level}
-                              className="tech-level-option"
-                              onClick={() => {
-                                setTechLevels({...techLevels, [index]: level});
-                                setShowTechLevelDropdown(null);
-                              }}
-                            >
-                              {level}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {newEmployeeData.technologies.length > 1 && (
-                    <button
-                      type="button"
-                      className="remove-btn"
-                      onClick={() => {
-                        const newTechs = newEmployeeData.technologies.filter((_, i) => i !== index);
-                        setNewEmployeeData({...newEmployeeData, technologies: newTechs});
-                        
-                        const newLevels = {...techLevels};
-                        delete newLevels[index];
-                        // Перенумеруем оставшиеся уровни
-                        const updatedLevels = {};
-                        newTechs.forEach((_, i) => {
-                          updatedLevels[i] = newLevels[i >= index ? i + 1 : i] || 'Junior';
-                        });
-                        setTechLevels(updatedLevels);
-                      }}
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-            
-            <div className="form-section">
-              <div className="section-header">
-                <h4>Интересы</h4>
-                <button 
-                  type="button" 
-                  className="add-btn"
-                  onClick={() => setNewEmployeeData({
-                    ...newEmployeeData,
-                    interests: [...newEmployeeData.interests, '']
-                  })}
-                >
-                  +
-                </button>
-              </div>
-              {newEmployeeData.interests.map((interest, index) => (
-                <div key={index} className="array-item">
-                  <input
-                    type="text"
-                    value={interest}
-                    onChange={(e) => {
-                      const newInterests = [...newEmployeeData.interests];
-                      newInterests[index] = e.target.value;
-                      setNewEmployeeData({...newEmployeeData, interests: newInterests});
-                    }}
-                    placeholder="Введите интерес"
-                  />
-                  {newEmployeeData.interests.length > 1 && (
-                    <button
-                      type="button"
-                      className="remove-btn"
-                      onClick={() => {
-                        const newInterests = newEmployeeData.interests.filter((_, i) => i !== index);
-                        setNewEmployeeData({...newEmployeeData, interests: newInterests});
-                      }}
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
             
             <div className="form-group">
               <label>Email</label>
@@ -819,57 +717,42 @@ const EmployeeSearch = () => {
               <button 
                 className="save-btn" 
                 onClick={async () => {
+                  const isConfirmed = window.confirm("Вы уверены, что хотите создать нового сотрудника?");
+                  if (!isConfirmed) return;
+
                   try {
-                    // Создаем базовые данные сотрудника
-                    const employeeData = {
-                      telegram_name: newEmployeeData.telegram,
-                      join_date: newEmployeeData.joinDate?.toISOString().split('T')[0],
-                      full_name: `${newEmployeeData.lastName} ${newEmployeeData.firstName} ${newEmployeeData.middleName}`
+                    const token = localStorage.getItem("access_token");
+                    const config = {
+                      headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                      }
                     };
 
-                    // Отправляем запрос на создание сотрудника
-                    const { data: employee } = await axios.post(`${BASE}/employee`, employeeData);
-
-                    await axios.put(`${BASE}/employee/${employee.id_employee}`, {
+                    const employeeData = {
+                      first_name: newEmployeeData.firstName,
+                      last_name: newEmployeeData.lastName,
+                      middle_name: newEmployeeData.middleName || '',
+                      date_of_birth: newEmployeeData.birthDate?.toISOString().split('T')[0],
                       email: newEmployeeData.email,
                       phone_number: newEmployeeData.phone,
+                      telegram_name: newEmployeeData.telegram,
                       city: newEmployeeData.city,
-                      date_of_birth: newEmployeeData.birthDate?.toISOString().split('T')[0],
-                      department_name: newEmployeeData.department,
-                      position_name: newEmployeeData.position
-                    });
-                    
-                    // Отправляем интересы
-                    if (newEmployeeData.interests.length > 0 && newEmployeeData.interests[0] !== '') {
-                      await axios.put(`${BASE}/employee/${employee.id_employee}/interests`, {
-                        interests: newEmployeeData.interests.map(name => ({ name_interest: name }))
-                      });
-                    }
+                      id_position: newEmployeeData.position || HARDCODED_POSITIONS[0].id,
+                      id_department: newEmployeeData.department || HARDCODED_DEPARTMENTS[0].id
+                    };
 
-                    // Отправляем технологии
-                    if (newEmployeeData.technologies.length > 0 && newEmployeeData.technologies[0] !== '') {
-                      await axios.put(`${BASE}/employee/${employee.id_employee}/technologies`, {
-                        technologies: newEmployeeData.technologies.map((name, index) => ({
-                          name_technology: name,
-                          id_rank: techLevels[index] === 'Middle' ? '51d35915-bf8d-4159-8153-2427692fe66f' : 
-                                  techLevels[index] === 'Senior' ? '3cb8c1a9-7d1e-4989-9393-71a15d3b3075' : 
-                                  '9b51cafd-209e-4c8d-9a68-44e8837e55dc'
-                        }))
-                      });
-                    }
+                    const { data: employee } = await axios.post(`${BASE}/employee/hr`, employeeData, config);
 
-                    // Закрываем модальное окно и обновляем список сотрудников
                     setIsAddEmployeeModalOpen(false);
-                    setEmployees([employee, ...employees]);
                     setNewEmployeeData({
                       firstName: '',
                       lastName: '',
                       middleName: '',
-                      position: '',
+                      position: HARDCODED_POSITIONS[0].id,
+                      department: HARDCODED_DEPARTMENTS[0].id,
                       city: '',
                       birthDate: null,
-                      joinDate: new Date(), // Сбрасываем с текущей датой
-                      department: '',
                       email: '',
                       phone: '',
                       telegram: '',
@@ -879,9 +762,18 @@ const EmployeeSearch = () => {
                     });
                     setTechLevels({ 0: 'Junior' });
 
+                    const params = buildParams();
+                    const { data } = await axios.get(`${BASE}/employee/employees`, {
+                      params,
+                      headers: {
+                        'Authorization': `Bearer ${token}`
+                      }
+                    });
+                    setEmployees(data.data || []);
+
                   } catch (error) {
                     console.error('Ошибка при создании сотрудника:', error);
-                    alert('Произошла ошибка при создании сотрудника');
+                    alert("Не удалось создать сотрудника: " + (error.response?.data?.detail || "Неизвестная ошибка"));
                   }
                 }}
               >
@@ -957,11 +849,19 @@ const EmployeeSearch = () => {
               
               <div className="form-group">
                 <label>Должность</label>
-                <input 
-                  type="text" 
+                <select
                   value={currentEmployeeData.position}
-                  onChange={(e) => setCurrentEmployeeData({...currentEmployeeData, position: e.target.value})}
-                />
+                  onChange={(e) => setCurrentEmployeeData({
+                    ...currentEmployeeData,
+                    position: e.target.value
+                  })}
+                >
+                  {HARDCODED_POSITIONS.map(pos => (
+                    <option key={pos.id} value={pos.id}>
+                      {pos.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               
               <div className="form-columns">
@@ -991,137 +891,21 @@ const EmployeeSearch = () => {
               
               <div className="form-group">
                 <label>Отдел</label>
-                <input 
-                  type="text" 
+                <select
                   value={currentEmployeeData.department}
-                  onChange={(e) => setCurrentEmployeeData({...currentEmployeeData, department: e.target.value})}
-                />
+                  onChange={(e) => setCurrentEmployeeData({
+                    ...currentEmployeeData,
+                    department: e.target.value
+                  })}
+                >
+                  {HARDCODED_DEPARTMENTS.map(dep => (
+                    <option key={dep.id} value={dep.id}>
+                      {dep.name}
+                    </option>
+                  ))}
+                </select>
               </div>
-              
-              <div className="form-section">
-                <div className="section-header">
-                  <h4>Технологии</h4>
-                  <button 
-                    type="button" 
-                    className="add-btn"
-                    onClick={() => {
-                      setCurrentEmployeeData({
-                        ...currentEmployeeData,
-                        technologies: [...currentEmployeeData.technologies, '']
-                      });
-                      setTechLevels({
-                        ...techLevels,
-                        [currentEmployeeData.technologies.length]: 'Junior'
-                      });
-                    }}
-                  >
-                    +
-                  </button>
-                </div>
-                {currentEmployeeData.technologies.map((tech, index) => (
-                  <div key={index} className="array-item">
-                    <div className="tech-input-wrapper">
-                      <input
-                        type="text"
-                        value={tech}
-                        onChange={(e) => {
-                          const newTechs = [...currentEmployeeData.technologies];
-                          newTechs[index] = e.target.value;
-                          setCurrentEmployeeData({...currentEmployeeData, technologies: newTechs});
-                        }}
-                        placeholder="Введите технологию"
-                      />
-                      <div className="tech-level-dropdown">
-                        <button 
-                          className="tech-level-toggle"
-                          onClick={() => setShowTechLevelDropdown(showTechLevelDropdown === index ? null : index)}
-                        >
-                          {techLevels[index] || 'Junior'} <FaChevronDown />
-                        </button>
-                        {showTechLevelDropdown === index && (
-                          <div className="tech-level-options">
-                            {['Junior', 'Middle', 'Senior'].map(level => (
-                              <div 
-                                key={level}
-                                className="tech-level-option"
-                                onClick={() => {
-                                  setTechLevels({...techLevels, [index]: level});
-                                  setShowTechLevelDropdown(null);
-                                }}
-                              >
-                                {level}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    {currentEmployeeData.technologies.length > 1 && (
-                      <button
-                        type="button"
-                        className="remove-btn"
-                        onClick={() => {
-                          const newTechs = currentEmployeeData.technologies.filter((_, i) => i !== index);
-                          setCurrentEmployeeData({...currentEmployeeData, technologies: newTechs});
-                          
-                          const newLevels = {...techLevels};
-                          delete newLevels[index];
-                          const updatedLevels = {};
-                          newTechs.forEach((_, i) => {
-                            updatedLevels[i] = newLevels[i >= index ? i + 1 : i] || 'Junior';
-                          });
-                          setTechLevels(updatedLevels);
-                        }}
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-              
-              <div className="form-section">
-                <div className="section-header">
-                  <h4>Интересы</h4>
-                  <button 
-                    type="button" 
-                    className="add-btn"
-                    onClick={() => setCurrentEmployeeData({
-                      ...currentEmployeeData,
-                      interests: [...currentEmployeeData.interests, '']
-                    })}
-                  >
-                    +
-                  </button>
-                </div>
-                {currentEmployeeData.interests.map((interest, index) => (
-                  <div key={index} className="array-item">
-                    <input
-                      type="text"
-                      value={interest}
-                      onChange={(e) => {
-                        const newInterests = [...currentEmployeeData.interests];
-                        newInterests[index] = e.target.value;
-                        setCurrentEmployeeData({...currentEmployeeData, interests: newInterests});
-                      }}
-                      placeholder="Введите интерес"
-                    />
-                    {currentEmployeeData.interests.length > 1 && (
-                      <button
-                        type="button"
-                        className="remove-btn"
-                        onClick={() => {
-                          const newInterests = currentEmployeeData.interests.filter((_, i) => i !== index);
-                          setCurrentEmployeeData({...currentEmployeeData, interests: newInterests});
-                        }}
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-              
+            
               <div className="form-group">
                 <label>Email</label>
                 <input 
@@ -1156,7 +940,7 @@ const EmployeeSearch = () => {
                     if (window.confirm("Вы уверены, что хотите удалить этого сотрудника?")) {
                       try {
                         const token = localStorage.getItem("access_token");
-                        await axios.delete(`${BASE}/employee/${currentEmployeeData.id_employee}`, {
+                        await axios.delete(`${BASE}/employee/hr/${currentEmployeeData.id_employee}`, {
                           headers: {
                             Authorization: `Bearer ${token}`
                           }
