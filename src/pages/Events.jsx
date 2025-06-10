@@ -6,8 +6,7 @@ import {
   FaUsers, 
   FaSearch, 
   FaPlus, 
-  FaUserCircle, 
-  FaClock,
+  FaUserCircle,
   FaChevronDown,
   FaCheck
 } from "react-icons/fa";
@@ -74,7 +73,6 @@ const Events = () => {
       party: "Корпоратив"
     };
   
-    // Если поле поиска пустое, не добавляем его в запрос
     if (userTypedSearch.trim() === '') {
       setSearchQuery(activeCategory !== "all" ? categoryToType[activeCategory] : "");
       return;
@@ -95,7 +93,7 @@ const Events = () => {
     }
     
     setSearchTimeout(setTimeout(() => {
-      setMeta(prev => ({ ...prev, skip: 0 })); // Сбрасываем пагинацию при изменении поиска
+      setMeta(prev => ({ ...prev, skip: 0 }));
     }, 500));
     
     return () => {
@@ -131,7 +129,7 @@ const Events = () => {
         };
     
         setProfileData(userProfile);
-        setCurrentUser(userProfile.id); // Используем полное имя как идентификатор
+        setCurrentUser(userProfile.id);
       } catch (error) {
         console.error("Ошибка загрузки профиля:", error);
         localStorage.removeItem("access_token");
@@ -154,14 +152,12 @@ const Events = () => {
           setDatePickerOpen(false);
         }
         
-        // Для event type dropdown
         if (showEventTypeDropdown && 
             !event.target.closest('.event-type-dropdown') && 
             !event.target.closest('.event-type-toggle')) {
           setShowEventTypeDropdown(false);
         }
         
-        // Для participants dropdown
         if (showParticipantsDropdown && 
             !event.target.closest('.participants-dropdown') && 
             !event.target.closest('.participant-search-input')) {
@@ -197,8 +193,6 @@ const Events = () => {
       fetchAllParticipants();
     }, []);
     
-    
-
     const [meta, setMeta] = useState({ 
       total_count: 1, 
       total_pages: 1, 
@@ -230,7 +224,7 @@ const Events = () => {
             params.append("search", searchQuery.trim());
           }
       
-          console.log("Fetching events with params:", params.toString()); // Логируем параметры запроса
+          console.log("Fetching events with params:", params.toString());
       
           const response = await fetch(`${baseUrl}?${params.toString()}`, {
             headers: {
@@ -243,7 +237,7 @@ const Events = () => {
           }
       
           const data = await response.json();
-          console.log("Received data:", data); // Логируем полученные данные
+          console.log("Received data:", data);
       
           const mappedEvents = data.events.map(event => ({
             id: event.id_event,
@@ -300,7 +294,6 @@ const Events = () => {
         const data = await response.json();
         alert(data.message);
   
-        // Обновим список мероприятий, чтобы отобразить изменения (например, добавить текущего пользователя в participants)
         refreshEvents(profileData);
       } catch (error) {
         alert("Ошибка при отправке запроса: " + error.message);
@@ -330,14 +323,12 @@ const Events = () => {
         const data = await response.json();
         alert(data.message);
   
-        // Обновим список мероприятий, чтобы убрать пользователя из участников
         refreshEvents(profileData);
       } catch (error) {
         alert("Ошибка при отправке запроса: " + error.message);
       }
     };
   
-    // Вынесем в функцию для обновления списка событий
     const refreshEvents = async (userProfile) => {
       setIsLoading(true);
       try {
@@ -404,9 +395,7 @@ const Events = () => {
         setSelectedEvent(updatedEvent);
       }
     };
-    
   
-    // Подгружаем события изначально и при изменениях зависимостей
     useEffect(() => {
       refreshEvents(profileData);
     }, [meta.skip, meta.limit, searchQuery, showMyEvents]);
@@ -426,25 +415,14 @@ const Events = () => {
       }
     };
     
-    
-
     const [newEvent, setNewEvent] = useState({
         title: "",
         category: "training",
         date: "",
-        time: "",
         location: "",
         description: "",
         participants: []
     });
-    const [newParticipant, setNewParticipant] = useState("");
-
-    const filteredParticipants = allParticipants.filter(participantObj =>
-      participantObj.name.toLowerCase().includes(participantSearch.toLowerCase()) &&
-      !newEvent.participants.some(p => p.id === participantObj.id)
-    ); 
-
-
 
     const handleDateChange = (date) => {
         const formattedDate = date.toISOString().split('T')[0];
@@ -456,7 +434,7 @@ const Events = () => {
     };
 
     const formatDate = (dateString) => {
-        const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
         return new Date(dateString).toLocaleDateString('ru-RU', options);
     };
 
@@ -491,7 +469,6 @@ const Events = () => {
       title: "",
       category: "training",
       date: "",
-      time: "",
       location: "",
       description: "",
       participants: []
@@ -507,25 +484,24 @@ const Events = () => {
     
 
     const handleCreateEvent = async () => {
-  setIsLoading(true);
-  
-  const eventTypeId = mapEventTypeToId[newEvent.category];
-  
-  if (!eventTypeId) {
-    alert("Выберите корректный тип события");
-    setIsLoading(false);
-    return;
-  }
+      setIsLoading(true);
+      
+      const eventTypeId = mapEventTypeToId[newEvent.category];
+      
+      if (!eventTypeId) {
+        alert("Выберите корректный тип события");
+        setIsLoading(false);
+        return;
+      }
 
-  const token = localStorage.getItem("access_token");
-  if (!token) {
-    alert("Пожалуйста, войдите в систему");
-    setIsLoading(false);
-    return;
-  }
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        alert("Пожалуйста, войдите в систему");
+        setIsLoading(false);
+        return;
+      }
     
       try {
-        // Сначала создаем/редактируем мероприятие
         let response;
         const payload = {
           name_event: newEvent.title,
@@ -535,7 +511,6 @@ const Events = () => {
         };
     
         if (isEditMode && editEventId) {
-          // Редактирование существующего мероприятия
           response = await fetch(`https://api.connecticus.deadfairy.space/api/v1/events/${editEventId}`, {
             method: "PUT",
             headers: {
@@ -545,7 +520,6 @@ const Events = () => {
             body: JSON.stringify(payload)
           });
         } else {
-          // Создание нового мероприятия
           response = await fetch("https://api.connecticus.deadfairy.space/api/v1/events", {
             method: "POST",
             headers: {
@@ -566,7 +540,6 @@ const Events = () => {
         const eventData = await response.json();
         const eventId = eventData.id_event || editEventId;
     
-        // Добавляем участников к мероприятию
         if (newEvent.participants.length > 0) {
           for (const participant of newEvent.participants) {
             try {
@@ -590,25 +563,20 @@ const Events = () => {
           }
         }
     
-        // Обновляем список мероприятий
         refreshEvents(profileData);
-        
-        // Закрываем модалку и сбрасываем форму
         setShowCreateModal(false);
         resetForm();
         setIsEditMode(false);
         setEditEventId(null);
-        
         refreshEvents(profileData);
       } catch (error) {
         alert("Ошибка при отправке запроса: " + error.message);
-      }finally {
+      } finally {
         setIsLoading(false);
       }
     };
 
     useEffect(() => {
-      // Добавляем проверку на допустимость skip
       if (meta.skip >= 0 && meta.skip < meta.total_count) {
         refreshEvents(profileData);
       }
@@ -619,18 +587,13 @@ const Events = () => {
         title: "",
         category: "training",
         date: "",
-        time: "",
         location: "",
         description: "",
         participants: []
       });
-      setNewParticipant("");
-      setIsEditMode(false);
-      setEditEventId(null);
       setValidationErrors({
         title: false,
         date: false,
-        time: false,
         location: false
       });
     };
@@ -644,15 +607,10 @@ const Events = () => {
         }));
     };
 
-    const handleAddParticipant = () => {
-        if (newParticipant.trim() && !newEvent.participants.includes(newParticipant.trim())) {
-            setNewEvent(prev => ({
-                ...prev,
-                participants: [...prev.participants, newParticipant.trim()]
-            }));
-            setNewParticipant("");
-        }
-    };
+    const filteredParticipants = allParticipants.filter(participantObj =>
+      participantObj.name.toLowerCase().includes(participantSearch.toLowerCase()) &&
+      !newEvent.participants.some(p => p.id === participantObj.id)
+    ); 
 
     const handleParticipantSelect = (participant) => {
       if (!newEvent.participants.some(p => p.id === participant.id)) {
@@ -688,42 +646,18 @@ const Events = () => {
           ? prev.skip + prev.limit 
           : Math.max(0, prev.skip - prev.limit);
         
-        // Всегда возвращаем новое состояние, даже если skip не изменился
         return { ...prev, skip: newSkip };
       });
-    }, []); // Убрали зависимости, так как используем функциональное обновление
-    
-
-    const isUserOrganizer = selectedEvent && currentUser && 
-      selectedEvent.organizerId === currentUser;
-
-  const isUserParticipant = (event) => {
-    if (!currentUser || !event?.attendees) return false;
-    return (event.attendees || []).some(attendee => attendee.id_employee === currentUser);
-  };
-      
-
-    const isCurrentUserOrganizer = selectedEvent?.organizerId === currentUser;
-    const isCurrentUserParticipant = (selectedEvent?.attendees || []).some(attendee => attendee.id_employee === currentUser);
-    
-    const isUserAttending = (event) => {
-      return (event.attendees || []).some(attendee => attendee.id_employee === currentUser);
-    };
+    }, []);
 
     const fillEditForm = (event) => {
       const eventDate = new Date(event.date);
       const formattedDate = eventDate.toISOString().split('T')[0];
-      const formattedTime = eventDate.toLocaleTimeString('ru-RU', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      }).replace(':', '');
     
       setNewEvent({
         title: event.title,
         category: event.category,
         date: formattedDate,
-        time: formattedTime,
         location: event.location,
         description: event.description || "",
         participants: event.attendees.map(attendee => ({
@@ -761,9 +695,8 @@ const Events = () => {
     
         const data = await response.json();
     
-        // Закрываем все модальные окна
-        setSelectedEvent(null); // Закрываем модальное окно просмотра
-        setShowCreateModal(false); // Закрываем модальное окно создания/редактирования
+        setSelectedEvent(null);
+        setShowCreateModal(false);
         setIsEditMode(false);
         resetForm();
     
@@ -780,12 +713,10 @@ const Events = () => {
       setEditEventId(event.id);
       setShowCreateModal(true);
       
-      // Устанавливаем значения из существующего события
       setNewEvent({
         title: event.title || "",
         category: event.category || "training",
-        date: event.date?.split("T")[0] || "", // Обрезаем время, если есть
-        time: "", // если будешь поддерживать время, можно парсить отдельно
+        date: event.date?.split("T")[0] || "",
         location: event.location || "",
         description: event.description || "",
         participants: event.attendees?.map(att => ({
@@ -801,17 +732,14 @@ const Events = () => {
     const hasNextPage = useMemo(() => {
       if (isLoading || events.length === 0) return false;
       
-      // Для "моих мероприятий" используем total_count из meta
       if (showMyEvents) {
         return meta.skip + meta.limit < meta.total_count;
       }
       
-      // Для всех мероприятий - если получили полную страницу событий
       return events.length === meta.limit;
     }, [events.length, meta, showMyEvents, isLoading]);
 
     const handleActionConfirmation = (action, data) => {
-      // Валидация полей
       const errors = {
         title: !newEvent.title,
         date: !newEvent.date,
@@ -820,30 +748,27 @@ const Events = () => {
     
       setValidationErrors(errors);
     
-      // Проверяем, есть ли ошибки
       const hasErrors = Object.values(errors).some(error => error);
       if (hasErrors) {
         return;
       }
     
-      // Если ошибок нет, показываем модальное окно подтверждения
       setConfirmationAction(action);
       setConfirmationData(data);
       setShowConfirmationModal(true);
     };
 
-  const executeConfirmedAction = async () => {
-    setShowConfirmationModal(false);
-    
-    if (confirmationAction === 'create') {
-      await handleCreateEvent();
-    } else if (confirmationAction === 'edit') {
-      await handleCreateEvent(); // Используем ту же функцию, так как редактирование уже обрабатывается внутри
-    } else if (confirmationAction === 'delete') {
-      await handleDeleteEvent(confirmationData);
-    }
-  };
-
+    const executeConfirmedAction = async () => {
+      setShowConfirmationModal(false);
+      
+      if (confirmationAction === 'create') {
+        await handleCreateEvent();
+      } else if (confirmationAction === 'edit') {
+        await handleCreateEvent();
+      } else if (confirmationAction === 'delete') {
+        await handleDeleteEvent(confirmationData);
+      }
+    };
 
     return (
         <div className="events-page">
@@ -1199,21 +1124,6 @@ const Events = () => {
                                             )}
                                         </div>
                                         {validationErrors.date && <span className="error-message">Это поле обязательно</span>}
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Время</label>
-                                        <div className={`time-picker-container ${validationErrors.time ? "error" : ""}`}>
-                                            <input
-                                                type="time"
-                                                name="time"
-                                                value={newEvent.time}
-                                                onChange={handleNewEventChange}
-                                                required
-                                                className="time-picker-input"
-                                            />
-                                            <FaClock className="time-picker-icon" />
-                                        </div>
-                                        {validationErrors.time && <span className="error-message">Это поле обязательно</span>}
                                     </div>
                                 </div>
                             </div>
