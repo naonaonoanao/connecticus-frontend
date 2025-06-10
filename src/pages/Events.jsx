@@ -247,7 +247,6 @@ const Events = () => {
             location: event.place,
             organizer: `${event.owner.first_name} ${event.owner.last_name}`,
             organizerId: event.owner.id_employee,
-            description: event.description || "Нет описания",
             attendees: event.attendees || [], 
             isOwner: event.owner.id_employee === profileData?.id,
             isJoined: event.attendees?.some(attendee => attendee.id_employee === profileData?.id) || false
@@ -367,7 +366,6 @@ const Events = () => {
           location: event.place,
           organizer: `${event.owner.first_name} ${event.owner.last_name}`,
           organizerId: event.owner.id_employee,
-          description: event.description || "Нет описания",
           attendees: event.attendees || [],
           isOwner: event.owner.id_employee === profileData?.id,
           isJoined: event.attendees?.some(attendee => attendee.id_employee === profileData?.id) || false
@@ -420,7 +418,6 @@ const Events = () => {
         category: "training",
         date: "",
         location: "",
-        description: "",
         participants: []
     });
 
@@ -470,7 +467,6 @@ const Events = () => {
       category: "training",
       date: "",
       location: "",
-      description: "",
       participants: []
     });
   };
@@ -588,7 +584,6 @@ const Events = () => {
         category: "training",
         date: "",
         location: "",
-        description: "",
         participants: []
       });
       setValidationErrors({
@@ -659,7 +654,6 @@ const Events = () => {
         category: event.category,
         date: formattedDate,
         location: event.location,
-        description: event.description || "",
         participants: event.attendees.map(attendee => ({
           id: attendee.id_employee,
           name: `${attendee.first_name} ${attendee.last_name}`
@@ -718,7 +712,6 @@ const Events = () => {
         category: event.category || "training",
         date: event.date?.split("T")[0] || "",
         location: event.location || "",
-        description: event.description || "",
         participants: event.attendees?.map(att => ({
           id: att.id_employee,
           name: `${att.first_name} ${att.last_name}`
@@ -985,11 +978,6 @@ const Events = () => {
                     </div>
                     
                     <div className="modal-section">
-                    <h3>Описание</h3>
-                    <p className="modal-description">{selectedEvent.description}</p>
-                    </div>
-                    
-                    <div className="modal-section">
                     <h3>Участники ({selectedEvent.attendees .length})</h3>
                     <div className="modal-participants">
                         {(selectedEvent.attendees || []).map((attendee, index) => (
@@ -1140,18 +1128,6 @@ const Events = () => {
                         className={validationErrors.location ? "error" : ""}
                       />
                       {validationErrors.location && <span className="error-message">Это поле обязательно</span>}
-                    </div>
-                    </div>
-                    
-                    <div className="modal-section">
-                    <h3>Описание</h3>
-                    <div className="form-group">
-                        <textarea
-                        name="description"
-                        value={newEvent.description}
-                        onChange={handleNewEventChange}
-                        rows="4"
-                        />
                     </div>
                     </div>
                     
