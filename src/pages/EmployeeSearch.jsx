@@ -23,6 +23,18 @@ const EmployeeSearch = () => {
   const [showTechLevelDropdown, setShowTechLevelDropdown] = useState(null);
   const dropdownRefs = useRef([]);
 
+
+  const [roleId, setRoleId] = useState(null)
+  useEffect(() => {
+  const roleIdFromStorage = localStorage.getItem("role_id");
+  if (roleIdFromStorage) {
+    setRoleId(roleIdFromStorage);
+  }
+}, []);
+
+  const HR_ROLE_ID = "20eb025d-da7f-480e-8de0-d6e35dca6641";
+  const isHR = roleId === HR_ROLE_ID;
+
   const [options, setOptions] = useState({
     cities: [], positions: [], departments: [],
     projects: [], technologies: [], interests: []
@@ -418,12 +430,14 @@ const EmployeeSearch = () => {
         <h4><FaProjectDiagram /> Интересы</h4>
         <div className="tags">{emp.interests.map(i => <span key={i.id_interest} className="tag">{i.name_interest}</span>)}</div>
       </div>
-      <button 
-        className="info-button"
-        onClick={() => handleEditEmployee(emp)}
-      >
-        <FaInfoCircle />
-      </button>
+      {isHR && (
+        <button 
+          className="info-button"
+          onClick={() => handleEditEmployee(emp)}
+        >
+          <FaInfoCircle />
+        </button>
+      )}
     </motion.div>
   );
 
@@ -456,12 +470,14 @@ const EmployeeSearch = () => {
                 </span>
               )}
             </button>
-            <button
-              className="add-employee-button"
-              onClick={() => setIsAddEmployeeModalOpen(true)}
-            >
-              <FaUserPlus /> Добавить сотрудника
-            </button>
+            {isHR && (
+              <button
+                className="add-employee-button"
+                onClick={() => setIsAddEmployeeModalOpen(true)}
+              >
+                <FaUserPlus /> Добавить сотрудника
+              </button>
+            )}
           </motion.div>
           {/* Filters Modal */}
           {showFilters && (

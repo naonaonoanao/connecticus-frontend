@@ -507,6 +507,7 @@ const Events = () => {
         };
     
         if (isEditMode && editEventId) {
+          // Редактирование существующего мероприятия
           response = await fetch(`https://api.connecticus.deadfairy.space/api/v1/events/${editEventId}`, {
             method: "PUT",
             headers: {
@@ -516,6 +517,7 @@ const Events = () => {
             body: JSON.stringify(payload)
           });
         } else {
+          // Создание нового мероприятия
           response = await fetch("https://api.connecticus.deadfairy.space/api/v1/events", {
             method: "POST",
             headers: {
