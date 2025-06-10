@@ -649,20 +649,6 @@ const EmployeeSearch = () => {
               </div>
             </div>
 
-              {/* Добавляем поле для даты приема на работу */}
-            <div className="form-group">
-              <label>Дата приема на работу</label>
-              <DatePicker
-                selected={newEmployeeData.joinDate}
-                onChange={(date) => setNewEmployeeData({...newEmployeeData, joinDate: date})}
-                dateFormat="dd-MM-yyyy"
-                className="date-picker-input"
-                placeholderText="Выберите дату"
-                showYearDropdown
-                dropdownMode="select"
-                maxDate={new Date()}
-              />
-            </div>
             
             <div className="form-group">
               <label>Отдел</label>
@@ -1001,21 +987,6 @@ const EmployeeSearch = () => {
                     maxDate={new Date()}
                   />
                 </div>
-              </div>
-
-              <div className="form-group">
-                <label>Дата приема на работу</label>
-                <DatePicker
-                  selected={currentEmployeeData.joinDate}
-                  onChange={(date) => setCurrentEmployeeData({...currentEmployeeData, joinDate: date})}
-                  dateFormat="dd-MM-yyyy"
-                  className="date-picker-input"
-                  placeholderText="Выберите дату"
-                  showYearDropdown
-                  dropdownMode="select"
-                  maxDate={new Date()}
-                  disabled
-                />
               </div>
               
               <div className="form-group">
