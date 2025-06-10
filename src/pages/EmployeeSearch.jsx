@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { FaSearch, FaFilter, FaTimes, FaMapMarkerAlt, FaCode, FaProjectDiagram, FaEnvelope, FaPhone, FaChevronDown, FaTelegram, FaUserPlus, FaInfoCircle } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaTimes, FaMapMarkerAlt, FaCode, FaProjectDiagram, FaEnvelope, FaPhone, FaChevronDown, FaTelegram, FaUserPlus, FaInfoCircle, FaTrash } from 'react-icons/fa';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import '../styles/EmployeeSearch.css';
@@ -1151,11 +1151,43 @@ const EmployeeSearch = () => {
               
               <div className="modal-actions">
                 <button 
+                  className="delete-btn"
+                  onClick={async () => {
+                    if (window.confirm("Вы уверены, что хотите удалить этого сотрудника?")) {
+                      try {
+                        const token = localStorage.getItem("access_token");
+                        await axios.delete(`${BASE}/employee/${currentEmployeeData.id_employee}`, {
+                          headers: {
+                            Authorization: `Bearer ${token}`
+                          }
+                        });
+                        setIsEditEmployeeModalOpen(false);
+                        // Обновляем список сотрудников после удаления
+                        const params = buildParams();
+                        const { data } = await axios.get(`${BASE}/employee/employees`, { 
+                          params,
+                          headers: {
+                            'Authorization': `Bearer ${token}`
+                          }
+                        });
+                        setEmployees(data.data || []);
+                      } catch (error) {
+                        console.error('Ошибка при удалении сотрудника:', error);
+                        alert('Не удалось удалить сотрудника');
+                      }
+                    }
+                  }}
+                >
+                  <FaTrash /> Удалить
+                </button>
+                
+                <button 
                   className="save-btn" 
                   onClick={handleSaveEmployee}
                 >
                   Сохранить
                 </button>
+
                 <button 
                   className="cancel-btn" 
                   onClick={() => setIsEditEmployeeModalOpen(false)}
