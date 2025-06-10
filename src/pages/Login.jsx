@@ -34,8 +34,6 @@ const Login = () => {
           throw new Error("Неверный формат ответа от сервера");
         }
 
-      navigate("/profile"); // Редирект на страницу профиля
-
     } catch (err) {
       setError(err.message);
     }
